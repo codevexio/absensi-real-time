@@ -72,7 +72,7 @@ new #[Layout('layouts.guest')] class extends Component
 <body>
     <div class="background-wrapper">
         <div class="text-center">
-            <img src="images/logo.png" alt="Logo PTPN4" class="logo">
+            <img src="images/Logo_PTPN4.png" alt="Logo PTPN4" class="logo w-16 mx-auto">
             <h3 class="mt-2 fw-bold">Login</h3>
         </div>
         <form>
