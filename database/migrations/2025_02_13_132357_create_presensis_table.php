@@ -11,9 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('presensis', function (Blueprint $table) {
+        Schema::create('presensi', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('karyawan_id'); // kolom karyawan_id yang menjadi foreign key
+            $table->unsignedBigInteger('jadwal_kerja_id'); // kolom karyawan_id yang menjadi foreign key
+            $table->date('tanggalPresensi');
+            $table->time('waktuMasuk');
+            $table->enum('statusMasuk', ['Tepat Waktu', 'Terlambat','Cuti']);
+            $table->time('waktuPulang');
+            $table->enum('statusPulang', ['Tepat Waktu', 'Tidak Presensi Pulang','Cuti']);
+            $table->string('imageMasuk');
+            $table->string('imagePulang');
+            $table->string('lokasiMasuk');
+            $table->string('lokasiPulang');
             $table->timestamps();
+            $table->foreign('karyawan_id')->references('id')->on('karyawan')->onDelete('cascade');
+            $table->foreign('jadwal_kerja_id')->references('id')->on('jadwal_kerja')->onDelete('cascade');
         });
     }
 
@@ -22,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('presensis');
+        Schema::dropIfExists('presensi');
     }
 };
