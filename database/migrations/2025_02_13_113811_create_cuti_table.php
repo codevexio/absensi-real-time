@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps(); // created_at dan updated_at
 
             // Membuat foreign key pada karyawan_id
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
+            $table->foreign('karyawan_id')->references('id')->on('karyawan')->onDelete('cascade');
         });
     }
 
