@@ -36,4 +36,6 @@ class CutiController extends Controller
 
         return response()->json(['message' => 'Cuti berhasil diperbarui!']);
     }
+
+    
 }

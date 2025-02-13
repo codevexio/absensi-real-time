@@ -75,17 +75,19 @@ new #[Layout('layouts.guest')] class extends Component
             <img src="images/Logo_PTPN4.png" alt="Logo PTPN4" class="logo w-16 mx-auto">
             <h3 class="mt-2 fw-bold">Login</h3>
         </div>
-        <form>
-            <div class="mb-3 text-start">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" required>
-            </div>
-            <div class="mb-3 text-start">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" required>
-            </div>
-            <button type="submit" class="btn btn-custom">Masuk</button>
-        </form>
+        <form action="/login/store" method="post">
+            @csrf
+    <div class="mb-3 text-start">
+        <label for="email" class="form-label">Username</label>
+        <input type="text" class="form-control" id="email" name="email" required>
+    </div>
+    <div class="mb-3 text-start">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-custom">Masuk</button>
+</form>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
