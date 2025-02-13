@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CutiController;
 use App\Http\Controllers\Auth\AuthController;
 
 Route::view('/', 'login');
