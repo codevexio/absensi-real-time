@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CutiController;
 
-Route::view('/', 'welcome');
+Route::view('/', 'login');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -11,5 +12,7 @@ Route::view('dashboard', 'dashboard')
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+
+Route::get('update-cuti', [CutiController::class, 'updateExpiredCuti']);
 
 require __DIR__.'/auth.php';
