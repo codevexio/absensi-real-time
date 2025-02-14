@@ -8,11 +8,27 @@ use Illuminate\Database\Eloquent\Model;
 class Karyawan extends Model
 {
     use HasFactory;
+
     protected $table = 'karyawan';
     protected $fillable = ['nama', 'golongan', 'divisi'];
 
-    public function cuti()
+    public function presensi()
     {
-        return $this->hasOne(Cuti::class); // Setiap karyawan punya 1 data cuti
+        return $this->hasMany(Presensi::class);
+    }
+
+    public function keterlambatan()
+    {
+        return $this->hasMany(Keterlambatan::class);
+    }
+
+    public function pengajuanCuti()
+    {
+        return $this->hasMany(PengajuanCuti::class);
+    }
+
+    public function jadwalKerja()
+    {
+        return $this->hasMany(JadwalKerja::class);
     }
 }
