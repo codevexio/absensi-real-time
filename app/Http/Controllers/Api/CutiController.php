@@ -1,5 +1,8 @@
 <?php
-namespace App\Http\Controllers;
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Karyawan;
 use App\Models\PengajuanCuti;
@@ -18,8 +21,8 @@ class CutiController extends Controller
             $cuti = $k->cutis;
 
             if ($cuti && $cuti->expiredTahun <= now()) {
-                $cuti->expiredTahun = now()->addYear(); 
-                $cuti->cutiTahun = 12; 
+                $cuti->expiredTahun = now()->addYear();
+                $cuti->cutiTahun = 12;
             }
 
             if ($cuti && $cuti->expiredPanjang <= now()) {
@@ -54,7 +57,7 @@ class CutiController extends Controller
         ]);
 
         $approver = Karyawan::where('golongan', $this->getAtasan($karyawan->golongan))->first();
-        
+
         if ($approver) {
             ApprovalCuti::create([
                 'pengajuan_cuti_id' => $pengajuan->id,

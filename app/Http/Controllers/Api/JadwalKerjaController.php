@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\JadwalKerja;
 use Illuminate\Http\JsonResponse;
@@ -68,7 +69,7 @@ class JadwalKerjaController extends Controller
             return response()->json(['message' => 'Jadwal kerja tidak ditemukan'], 404);
         }
         $request->validate([
-            'karyawan_id' => 'required|exists:karyawan,id', 
+            'karyawan_id' => 'required|exists:karyawan,id',
             'shift_id' => 'required|exists:shift,id',
             'tanggalKerja' => 'required|date',
             'statusKerja' => 'required|in:Kerja,Cuti',

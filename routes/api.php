@@ -2,14 +2,17 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CutiController;
-use App\Http\Controllers\KaryawanController;
-use App\Http\Controllers\ShiftController;
-use App\Http\Controllers\JadwalKerjaController;
-use App\Http\Controllers\PresensiController;
-use App\Http\Controllers\KeterlambatanController;
-use App\Http\Controllers\PengajuanCutiController;
-use App\Http\Controllers\ApprovalCutiController;
+use App\Http\Controllers\Api\CutiController;
+use App\Http\Controllers\Api\KaryawanController;
+use App\Http\Controllers\Api\ShiftController;
+use App\Http\Controllers\Api\JadwalKerjaController;
+use App\Http\Controllers\Api\PresensiController;
+use App\Http\Controllers\Api\KeterlambatanController;
+use App\Http\Controllers\Api\PengajuanCutiController;
+use App\Http\Controllers\Api\ApprovalCutiController;
+use App\Http\Controllers\Api\PasswordResetTokenController;
+use App\Http\Controllers\Api\SessionController;
+use App\Http\Controllers\Api\UserAndroidController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -29,3 +32,6 @@ Route::apiResource('pengajuan-cuti', PengajuanCutiController::class);
 Route::apiResource('approval-cuti', ApprovalCutiController::class);
 Route::post('/approval-cuti/{id}/approve', [ApprovalCutiController::class, 'approve']);
 Route::post('/approval-cuti/{id}/reject', [ApprovalCutiController::class, 'reject']);
+Route::apiResource('user-android', UserAndroidController::class);
+Route::apiResource('password-reset-tokens', PasswordResetTokenController::class)->only(['index', 'store', 'destroy']);
+Route::apiResource('sessions', SessionController::class)->only(['index', 'store', 'destroy']);
