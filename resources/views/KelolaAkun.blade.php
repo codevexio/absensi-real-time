@@ -35,18 +35,30 @@
                             </tr>
                         </thead>
                         <tbody class="text-gray-800 dark:text-gray-200">
-                            @foreach($akun as $akuns)
-                            <tr>
-                                <td class="border px-4 py-2 text-center" colspan="6"></td>
-                                <td class="border px-4 py-2 text-center" colspan="6"></td>
-                                <td class="border px-4 py-2 text-center" colspan="6"></td>
-                                <td class="border px-4 py-2 text-center" colspan="6">{{ $akuns->username }}</td>
-                                <td class="border px-4 py-2 text-center" colspan="6"></td>
-                                <td class="border px-4 py-2 text-center" colspan="6"></td>
+                            @forelse($akun as $index => $akuns)
+                            <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center">
+                                <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
+                                <td class="border px-4 py-2">{{ $akuns->nama }}</td>
+                                <td class="border px-4 py-2">{{ $akuns->jabatan }}</td>
+                                <td class="border px-4 py-2">{{ $akuns->username }}</td>
+                                <td class="border px-4 py-2">******</td>
+                                <td class="border px-4 py-2 text-center">
+                                    <button class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded-lg">
+                                        ✏️
+                                    </button>
+                                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg">
+                                        🗑️
+                                    </button>
+                                </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="6" class="border px-4 py-2 text-center">Tidak ada data</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
+
                 </div>
 
                 <!-- Pagination -->
