@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\UserAndroid;
 use Illuminate\Http\Request;
 
 class KelolaAkunController extends Controller
@@ -12,7 +13,8 @@ class KelolaAkunController extends Controller
      */
     public function index()
     {
-        return view("KelolaAkun");
+        $akun = UserAndroid::All();
+        return view("KelolaAkun", compact("akun"));
     }
 
     /**

@@ -35,9 +35,16 @@
                             </tr>
                         </thead>
                         <tbody class="text-gray-800 dark:text-gray-200">
+                            @foreach($akun as $akuns)
                             <tr>
-                                <td class="border px-4 py-2 text-center" colspan="6">Tidak ada data</td>
+                                <td class="border px-4 py-2 text-center" colspan="6"></td>
+                                <td class="border px-4 py-2 text-center" colspan="6"></td>
+                                <td class="border px-4 py-2 text-center" colspan="6"></td>
+                                <td class="border px-4 py-2 text-center" colspan="6">{{ $akuns->username }}</td>
+                                <td class="border px-4 py-2 text-center" colspan="6"></td>
+                                <td class="border px-4 py-2 text-center" colspan="6"></td>
                             </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
