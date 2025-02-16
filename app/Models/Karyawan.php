@@ -31,4 +31,9 @@ class Karyawan extends Model
     {
         return $this->hasMany(JadwalKerja::class);
     }
+
+    public function userAndroid()
+    {
+        return $this->hasOne(UserAndroid::class);
+    }
 }

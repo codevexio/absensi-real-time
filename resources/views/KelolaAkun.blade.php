@@ -28,7 +28,7 @@
                             <tr>
                                 <th class="border px-4 py-2">No</th>
                                 <th class="border px-4 py-2">Nama Karyawan</th>
-                                <th class="border px-4 py-2">Jabatan</th>
+                                <th class="border px-4 py-2">Golongan</th>
                                 <th class="border px-4 py-2">Username</th>
                                 <th class="border px-4 py-2">Password</th>
                                 <th class="border px-4 py-2">Aksi</th>
@@ -38,8 +38,8 @@
                             @forelse($akun as $index => $akuns)
                             <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center">
                                 <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
-                                <td class="border px-4 py-2">{{ $akuns->nama }}</td>
-                                <td class="border px-4 py-2">{{ $akuns->jabatan }}</td>
+                                <td class="border px-4 py-2">{{ $akuns->karyawan->nama ?? '-' }}</td>
+                                <td class="border px-4 py-2">{{ $akuns->karyawan->golongan ?? '-' }}</td>
                                 <td class="border px-4 py-2">{{ $akuns->username }}</td>
                                 <td class="border px-4 py-2">******</td>
                                 <td class="border px-4 py-2 text-center">

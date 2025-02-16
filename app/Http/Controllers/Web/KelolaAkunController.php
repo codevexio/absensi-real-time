@@ -13,7 +13,7 @@ class KelolaAkunController extends Controller
      */
     public function index()
     {
-        $akun = UserAndroid::All();
+        $akun = UserAndroid::with('karyawan')->get();
         return view("KelolaAkun", compact("akun"));
     }
 
