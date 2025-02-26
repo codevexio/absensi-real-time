@@ -34,6 +34,6 @@ class Karyawan extends Model
 
     public function userAndroid()
     {
-        return $this->hasOne(UserAndroid::class);
+        return $this->hasOne(UserAndroid::class,'karywan_id');
     }
 }
