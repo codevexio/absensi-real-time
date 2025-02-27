@@ -24,7 +24,7 @@ class KelolaAkunController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        $karyawan = Karyawan::create([
+        Karyawan::create([
             'nama' => $request->nama,
             'golongan' => $request->golongan,
             'divisi' => $request->divisi,
@@ -32,29 +32,30 @@ class KelolaAkunController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
-        return redirect()->route('web/kelola-akun')->with('success', 'Acara berhasil ditambahkan');
+        return redirect()->route('web/kelola-akun')->with('success', 'Akun berhasil ditambahkan');
     }
 
     public function update(Request $request, $id)
     {
         $karyawan = Karyawan::findOrFail($id);
-        
+
         $request->validate([
             'nama' => 'required',
             'golongan' => 'required',
             'divisi' => 'required',
-            'username' => 'required|unique:karyawan,username,'.$id,
+            'username' => 'required|unique:karyawan,username,' . $id,
             'password' => 'nullable|min:6',
         ]);
 
         $data = $request->only(['nama', 'golongan', 'divisi', 'username']);
-        if ($request->password) {
+
+        if ($request->filled('password')) {
             $data['password'] = bcrypt($request->password);
         }
 
         $karyawan->update($data);
 
-        return redirect()->route('web/kelola-akun')->with('success', 'Acara berhasil ditambahkan');
+        return redirect()->route('web/kelola-akun')->with('success', 'Akun berhasil diperbarui');
     }
 
     public function destroy($id)
@@ -62,6 +63,6 @@ class KelolaAkunController extends Controller
         $karyawan = Karyawan::findOrFail($id);
         $karyawan->delete();
 
-        return redirect()->route('web/kelola-akun')->with('success', 'Acara berhasil ditambahkan');
+        return redirect()->route('web/kelola-akun')->with('success', 'Akun berhasil dihapus');
     }
 }

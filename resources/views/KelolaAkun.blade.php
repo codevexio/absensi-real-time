@@ -52,9 +52,10 @@
                                             <path d="m15 5 4 4" />
                                         </svg>
                                     </button>
-                                    <form action="{{ route('web/kelola-akun-del', $akuns->karyawan_id) }}" method="DELETE" class="inline">
+                                    <form action="{{ route('web/kelola-akun-del', $akuns->id) }}" method="POST" class="inline">
                                         @csrf
-                                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg" type="submit">
+                                        @method('DELETE')
+                                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg" type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus akun ini?')">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
                                                 <path d="M3 6h18" />
                                                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
@@ -162,19 +163,19 @@
         <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Edit Akun Karyawan</h3>
 
         <!-- Form Edit Akun -->
-        <form id="form-edit-akun" action="{{ route('web/kelola-akun-put') }}" method="PUT">
+        <form id="form-edit-akun" action="{{ route('web/kelola-akun-put', $akuns->id) }}" method="POST">
             @csrf
+            @method('PUT')
             <input type="hidden" name="id" id="edit-akun-id">
-
+        
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Nama Karyawan</label>
                 <input type="text" name="nama" id="edit-nama" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
             </div>
-
+        
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Golongan</label>
                 <select name="golongan" id="edit-golongan" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
-                    <option value="">Pilih Divisi</option>
                     <option value="A">A</option>
                     <option value="B">B</option>
                     <option value="C">C</option>
@@ -182,11 +183,10 @@
                     <option value="E">E</option>
                 </select>
             </div>
-
+        
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Divisi</label>
                 <select name="divisi" id="edit-divisi" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
-                    <option value="">Pilih Divisi</option>
                     <option value="A">A</option>
                     <option value="B">B</option>
                     <option value="C">C</option>
@@ -194,22 +194,23 @@
                     <option value="E">E</option>
                 </select>
             </div>
-
+        
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Username</label>
                 <input type="text" name="username" id="edit-username" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
             </div>
-
+        
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Password (Kosongkan jika tidak ingin mengubah)</label>
                 <input type="password" name="password" id="edit-password" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
             </div>
-
+        
             <div class="flex justify-end gap-2">
                 <button type="button" id="close-edit-akun" class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">Batal</button>
                 <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Update</button>
             </div>
         </form>
+        
     </dialog>
 
     <script>
