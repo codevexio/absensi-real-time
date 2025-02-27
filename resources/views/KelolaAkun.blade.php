@@ -39,30 +39,21 @@
                         </thead>
                         <tbody class="text-gray-800 dark:text-gray-200">
                             @forelse($akun as $index => $akuns)
-                            <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center">
+                            <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center" data-id="{{ $akuns->id }}">
                                 <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
-                                <td class="border px-4 py-2">{{ $akuns->nama}}</td>
-                                <td class="border px-4 py-2">{{ $akuns->golongan}}</td>
+                                <td class="border px-4 py-2">{{ $akuns->nama }}</td>
+                                <td class="border px-4 py-2">{{ $akuns->golongan }}</td>
                                 <td class="border px-4 py-2">{{ $akuns->divisi ?? '-' }}</td>
-                                <td class="border px-4 py-2">{{ $akuns->username}}</td>
+                                <td class="border px-4 py-2">{{ $akuns->username }}</td>
                                 <td class="border px-4 py-2 text-center">
-                                    <button id="tombol-edit-akun" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
-                                            <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
-                                            <path d="m15 5 4 4" />
-                                        </svg>
+                                    <button class="tombol-edit-akun bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded-lg">
+                                        ✏️
                                     </button>
                                     <form action="{{ route('web/kelola-akun-del', $akuns->id) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg" type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus akun ini?')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
-                                                <path d="M3 6h18" />
-                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                <line x1="10" x2="10" y1="11" y2="17" />
-                                                <line x1="14" x2="14" y1="11" y2="17" />
-                                            </svg>
+                                            🗑️
                                         </button>
                                     </form>
                                 </td>
@@ -73,6 +64,7 @@
                             </tr>
                             @endforelse
                         </tbody>
+                        
                     </table>
 
                 </div>
@@ -163,19 +155,19 @@
         <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Edit Akun Karyawan</h3>
 
         <!-- Form Edit Akun -->
-        <form id="form-edit-akun" action="{{ route('web/kelola-akun-put', $akuns->id) }}" method="POST">
+        <form id="form-edit-akun" action="" method="POST">
             @csrf
             @method('PUT')
             <input type="hidden" name="id" id="edit-akun-id">
         
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Nama Karyawan</label>
-                <input type="text" name="nama" id="edit-nama" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <input type="text" name="nama" id="edit-nama" required class="w-full px-3 py-2 border rounded-lg">
             </div>
         
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Golongan</label>
-                <select name="golongan" id="edit-golongan" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <select name="golongan" id="edit-golongan" required class="w-full px-3 py-2 border rounded-lg">
                     <option value="A">A</option>
                     <option value="B">B</option>
                     <option value="C">C</option>
@@ -186,7 +178,7 @@
         
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Divisi</label>
-                <select name="divisi" id="edit-divisi" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <select name="divisi" id="edit-divisi" required class="w-full px-3 py-2 border rounded-lg">
                     <option value="A">A</option>
                     <option value="B">B</option>
                     <option value="C">C</option>
@@ -197,19 +189,20 @@
         
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Username</label>
-                <input type="text" name="username" id="edit-username" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <input type="text" name="username" id="edit-username" required class="w-full px-3 py-2 border rounded-lg">
             </div>
         
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Password (Kosongkan jika tidak ingin mengubah)</label>
-                <input type="password" name="password" id="edit-password" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <input type="password" name="password" id="edit-password" class="w-full px-3 py-2 border rounded-lg">
             </div>
         
             <div class="flex justify-end gap-2">
-                <button type="button" id="close-edit-akun" class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">Batal</button>
-                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Update</button>
+                <button type="button" id="close-edit-akun" class="px-4 py-2 bg-gray-400 text-white rounded-lg">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg">Update</button>
             </div>
         </form>
+        
         
     </dialog>
 
@@ -224,9 +217,13 @@
 
         // Modal Edit Akun
         const dialogEdit = document.getElementById("edit-akun");
-        const btnEdits = document.querySelectorAll("#tombol-edit-akun");
+        const btnEdits = document.querySelectorAll(".tombol-edit-akun");
         const closeEdit = document.querySelector("#close-edit-akun");
 
+        // Form Edit Akun
+        const formEditAkun = document.getElementById("form-edit-akun");
+
+        // Tambahkan event listener untuk setiap tombol edit
         btnEdits.forEach(button => {
             button.addEventListener("click", function() {
                 const row = this.closest("tr");
@@ -242,9 +239,13 @@
                 document.getElementById("edit-divisi").value = divisi;
                 document.getElementById("edit-username").value = username;
 
+                // Perbarui action form edit
+                document.getElementById("form-edit-akun").action = `/web/kelola-akun/${id}`;
+
                 dialogEdit.showModal();
             });
         });
+
 
         closeEdit.addEventListener("click", () => dialogEdit.close());
     </script>
