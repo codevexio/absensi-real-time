@@ -10,7 +10,7 @@ class Karyawan extends Model
     use HasFactory;
 
     protected $table = 'karyawan';
-    protected $fillable = ['nama', 'golongan', 'divisi'];
+    protected $fillable = ['nama', 'username', 'password', 'golongan', 'divisi'];
 
     public function presensi()
     {
@@ -32,8 +32,9 @@ class Karyawan extends Model
         return $this->hasMany(JadwalKerja::class);
     }
 
-    public function userAndroid()
+    public function cuti()
     {
-        return $this->hasOne(UserAndroid::class,'karywan_id');
+        return $this->hasOne(Cuti::class);
     }
+
 }

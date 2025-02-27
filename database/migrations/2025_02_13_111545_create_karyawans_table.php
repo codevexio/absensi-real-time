@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('karyawan', function (Blueprint $table) {
             $table->id();
             $table->string('nama'); // Nama karyawan
+            $table->string('username');
+            $table->string('password');
             $table->enum('golongan', ['A', 'B', 'C', 'D','E']); // Golongan
             $table->enum('divisi', ['A', 'B', 'C', 'D','E']); // Divisi
             $table->timestamps();

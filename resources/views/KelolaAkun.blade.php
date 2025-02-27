@@ -41,9 +41,9 @@
                             @forelse($akun as $index => $akuns)
                             <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center">
                                 <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
-                                <td class="border px-4 py-2">{{ $akuns->karyawan->nama ?? '-' }}</td>
-                                <td class="border px-4 py-2">{{ $akuns->karyawan->golongan ?? '-' }}</td>
-                                <td class="border px-4 py-2">{{ $akuns->karyawan->divisi ?? '-' }}</td>
+                                <td class="border px-4 py-2">{{ $akuns->nama}}</td>
+                                <td class="border px-4 py-2">{{ $akuns->golongan}}</td>
+                                <td class="border px-4 py-2">{{ $akuns->divisi ?? '-' }}</td>
                                 <td class="border px-4 py-2">{{ $akuns->username}}</td>
                                 <td class="border px-4 py-2 text-center">
                                     <button id="tombol-edit-akun" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded-lg">

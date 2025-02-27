@@ -3,65 +3,65 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\UserAndroid;
+use App\Models\Karyawan;
 use Illuminate\Http\Request;
 
 class KelolaAkunController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $akun = UserAndroid::with('karyawan')->get();
-        return view("KelolaAkun", compact("akun"));
+        $akun = Karyawan::all();
+        return view('KelolaAkun', compact('akun'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama' => 'required',
+            'golongan' => 'required',
+            'divisi' => 'required',
+            'username' => 'required|unique:karyawans',
+            'password' => 'required|min:6',
+        ]);
+
+        $karyawan = Karyawan::create([
+            'nama' => $request->nama,
+            'golongan' => $request->golongan,
+            'divisi' => $request->divisi,
+            'username' => $request->username,
+            'password' => bcrypt($request->password),
+        ]);
+
+        return response()->json(['message' => 'Akun berhasil ditambahkan', 'data' => $karyawan]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $karyawan = Karyawan::findOrFail($id);
+        
+        $request->validate([
+            'nama' => 'required',
+            'golongan' => 'required',
+            'divisi' => 'required',
+            'username' => 'required|unique:karyawans,username,'.$id,
+            'password' => 'nullable|min:6',
+        ]);
+
+        $data = $request->only(['nama', 'golongan', 'divisi', 'username']);
+        if ($request->password) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        $karyawan->update($data);
+
+        return response()->json(['message' => 'Akun berhasil diperbarui', 'data' => $karyawan]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy($id)
     {
-        return view("");
-    }
+        $karyawan = Karyawan::findOrFail($id);
+        $karyawan->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['message' => 'Akun berhasil dihapus']);
     }
 }
