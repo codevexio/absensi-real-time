@@ -52,15 +52,18 @@
                                             <path d="m15 5 4 4" />
                                         </svg>
                                     </button>
-                                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
-                                            <path d="M3 6h18" />
-                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                            <line x1="10" x2="10" y1="11" y2="17" />
-                                            <line x1="14" x2="14" y1="11" y2="17" />
-                                        </svg>
-                                    </button>
+                                    <form action="{{ route('web/kelola-akun-del', $akuns->karyawan_id) }}" method="DELETE" class="inline">
+                                        @csrf
+                                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg" type="submit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
+                                                <path d="M3 6h18" />
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                <line x1="14" x2="14" y1="11" y2="17" />
+                                            </svg>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             @empty
@@ -97,7 +100,7 @@
         <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Tambah Akun Karyawan</h3>
 
         <!-- Form Tambah Akun -->
-        <form action="{{ route('karyawan.store') }}" method="POST">
+        <form action="{{ route('web/kelola-akun-post') }}" method="POST">
             @csrf
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Nama Karyawan</label>
@@ -107,7 +110,7 @@
 
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Golongan</label>
-                <select name="jabatan" required
+                <select name="golongan" required
                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
                     <option value="">Pilih Golongan</option>
                     <option value="A">A</option>
@@ -119,7 +122,7 @@
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Divisi</label>
-                <select name="jabatan" required
+                <select name="divisi" required
                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
                     <option value="">Pilih Divisi</option>
                     <option value="A">A</option>
@@ -147,10 +150,10 @@
                     class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">
                     Batal
                 </button>
-                <type="submit"
+                <button type="submit"
                     class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                     Tambah
-                    </button>
+                    </butttype>
             </div>
         </form>
     </dialog>
@@ -159,9 +162,8 @@
         <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Edit Akun Karyawan</h3>
 
         <!-- Form Edit Akun -->
-        <form id="form-edit-akun" method="POST">
+        <form id="form-edit-akun" action="{{ route('web/kelola-akun-put') }}" method="PUT">
             @csrf
-            @method('PUT')
             <input type="hidden" name="id" id="edit-akun-id">
 
             <div class="mb-4">
@@ -172,7 +174,7 @@
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Golongan</label>
                 <select name="golongan" id="edit-golongan" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
-                <option value="">Pilih Divisi</option>
+                    <option value="">Pilih Divisi</option>
                     <option value="A">A</option>
                     <option value="B">B</option>
                     <option value="C">C</option>
@@ -184,7 +186,7 @@
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Divisi</label>
                 <select name="divisi" id="edit-divisi" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
-                <option value="">Pilih Divisi</option>
+                    <option value="">Pilih Divisi</option>
                     <option value="A">A</option>
                     <option value="B">B</option>
                     <option value="C">C</option>
@@ -211,39 +213,39 @@
     </dialog>
 
     <script>
-    // Modal Tambah Akun
-    const dialogTambah = document.getElementById("tambah-akun");
-    const btnTambah = document.querySelector("#tombol-tambah-akun");
-    const closeTambah = document.querySelector("#close-tambah-akun");
+        // Modal Tambah Akun
+        const dialogTambah = document.getElementById("tambah-akun");
+        const btnTambah = document.querySelector("#tombol-tambah-akun");
+        const closeTambah = document.querySelector("#close-tambah-akun");
 
-    btnTambah.addEventListener("click", () => dialogTambah.showModal());
-    closeTambah.addEventListener("click", () => dialogTambah.close());
+        btnTambah.addEventListener("click", () => dialogTambah.showModal());
+        closeTambah.addEventListener("click", () => dialogTambah.close());
 
-    // Modal Edit Akun
-    const dialogEdit = document.getElementById("edit-akun");
-    const btnEdits = document.querySelectorAll("#tombol-edit-akun");
-    const closeEdit = document.querySelector("#close-edit-akun");
+        // Modal Edit Akun
+        const dialogEdit = document.getElementById("edit-akun");
+        const btnEdits = document.querySelectorAll("#tombol-edit-akun");
+        const closeEdit = document.querySelector("#close-edit-akun");
 
-    btnEdits.forEach(button => {
-        button.addEventListener("click", function () {
-            const row = this.closest("tr");
-            const id = row.dataset.id;
-            const nama = row.cells[1].innerText;
-            const golongan = row.cells[2].innerText;
-            const divisi = row.cells[3].innerText;
-            const username = row.cells[4].innerText;
+        btnEdits.forEach(button => {
+            button.addEventListener("click", function() {
+                const row = this.closest("tr");
+                const id = row.dataset.id;
+                const nama = row.cells[1].innerText;
+                const golongan = row.cells[2].innerText;
+                const divisi = row.cells[3].innerText;
+                const username = row.cells[4].innerText;
 
-            document.getElementById("edit-akun-id").value = id;
-            document.getElementById("edit-nama").value = nama;
-            document.getElementById("edit-golongan").value = golongan;
-            document.getElementById("edit-divisi").value = divisi;
-            document.getElementById("edit-username").value = username;
+                document.getElementById("edit-akun-id").value = id;
+                document.getElementById("edit-nama").value = nama;
+                document.getElementById("edit-golongan").value = golongan;
+                document.getElementById("edit-divisi").value = divisi;
+                document.getElementById("edit-username").value = username;
 
-            dialogEdit.showModal();
+                dialogEdit.showModal();
+            });
         });
-    });
 
-    closeEdit.addEventListener("click", () => dialogEdit.close());
-</script>
+        closeEdit.addEventListener("click", () => dialogEdit.close());
+    </script>
 
 </x-app-layout>

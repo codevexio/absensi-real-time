@@ -20,7 +20,7 @@ class KelolaAkunController extends Controller
             'nama' => 'required',
             'golongan' => 'required',
             'divisi' => 'required',
-            'username' => 'required|unique:karyawans',
+            'username' => 'required|unique:karyawan',
             'password' => 'required|min:6',
         ]);
 
@@ -32,7 +32,7 @@ class KelolaAkunController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
-        return response()->json(['message' => 'Akun berhasil ditambahkan', 'data' => $karyawan]);
+        return redirect()->route('web/kelola-akun')->with('success', 'Acara berhasil ditambahkan');
     }
 
     public function update(Request $request, $id)
@@ -43,7 +43,7 @@ class KelolaAkunController extends Controller
             'nama' => 'required',
             'golongan' => 'required',
             'divisi' => 'required',
-            'username' => 'required|unique:karyawans,username,'.$id,
+            'username' => 'required|unique:karyawan,username,'.$id,
             'password' => 'nullable|min:6',
         ]);
 
@@ -54,7 +54,7 @@ class KelolaAkunController extends Controller
 
         $karyawan->update($data);
 
-        return response()->json(['message' => 'Akun berhasil diperbarui', 'data' => $karyawan]);
+        return redirect()->route('web/kelola-akun')->with('success', 'Acara berhasil ditambahkan');
     }
 
     public function destroy($id)
@@ -62,6 +62,6 @@ class KelolaAkunController extends Controller
         $karyawan = Karyawan::findOrFail($id);
         $karyawan->delete();
 
-        return response()->json(['message' => 'Akun berhasil dihapus']);
+        return redirect()->route('web/kelola-akun')->with('success', 'Acara berhasil ditambahkan');
     }
 }
