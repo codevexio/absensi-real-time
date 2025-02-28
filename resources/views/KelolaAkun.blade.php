@@ -14,7 +14,6 @@
                         + AKUN KARYAWAN
                     </button>
 
-
                     <div class="flex gap-1 px-2 border rounded-lg dark:bg-gray-700 dark:text-white items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
                             <circle cx="11" cy="11" r="8" />
@@ -64,9 +63,7 @@
                             </tr>
                             @endforelse
                         </tbody>
-                        
                     </table>
-
                 </div>
 
                 <!-- Pagination -->
@@ -89,22 +86,18 @@
         </div>
     </div>
 
+    <!-- Modal Tambah Akun -->
     <dialog id="tambah-akun" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 w-full max-w-lg">
         <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Tambah Akun Karyawan</h3>
-
-        <!-- Form Tambah Akun -->
         <form action="{{ route('web/kelola-akun-post') }}" method="POST">
             @csrf
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Nama Karyawan</label>
-                <input type="text" name="nama" required
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <input type="text" name="nama" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
             </div>
-
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Golongan</label>
-                <select name="golongan" required
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <select name="golongan" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
                     <option value="">Pilih Golongan</option>
                     <option value="A">A</option>
                     <option value="B">B</option>
@@ -115,8 +108,7 @@
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Divisi</label>
-                <select name="divisi" required
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <select name="divisi" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
                     <option value="">Pilih Divisi</option>
                     <option value="A">A</option>
                     <option value="B">B</option>
@@ -125,36 +117,28 @@
                     <option value="E">E</option>
                 </select>
             </div>
-
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Username</label>
-                <input type="text" name="username" required
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <input type="text" name="username" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
             </div>
-
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Password</label>
-                <input type="password" name="password" required
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
+                <input type="password" name="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
             </div>
-
             <div class="flex justify-end gap-2">
-                <button type="button" id="close-tambah-akun"
-                    class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">
+                <button type="button" id="close-tambah-akun" class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">
                     Batal
                 </button>
-                <button type="submit"
-                    class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                     Tambah
-                    </butttype>
+                </button>
             </div>
         </form>
     </dialog>
 
+    <!-- Modal Edit Akun -->
     <dialog id="edit-akun" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 w-full max-w-lg">
         <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Edit Akun Karyawan</h3>
-
-        <!-- Form Edit Akun -->
         <form id="form-edit-akun" action="" method="POST">
             @csrf
             @method('PUT')
@@ -202,8 +186,6 @@
                 <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg">Update</button>
             </div>
         </form>
-        
-        
     </dialog>
 
     <script>
@@ -223,7 +205,6 @@
         // Form Edit Akun
         const formEditAkun = document.getElementById("form-edit-akun");
 
-        // Tambahkan event listener untuk setiap tombol edit
         btnEdits.forEach(button => {
             button.addEventListener("click", function() {
                 const row = this.closest("tr");
@@ -239,15 +220,41 @@
                 document.getElementById("edit-divisi").value = divisi;
                 document.getElementById("edit-username").value = username;
 
-                // Perbarui action form edit
+                // Update action form edit
                 document.getElementById("form-edit-akun").action = `/web/kelola-akun/${id}`;
 
                 dialogEdit.showModal();
             });
         });
 
-
         closeEdit.addEventListener("click", () => dialogEdit.close());
+
+        // Pencarian Akun
+        const searchInput = document.querySelector('input[type="text"]');
+        const tableRows = document.querySelectorAll('tbody tr');
+
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.toLowerCase();
+
+            tableRows.forEach(function(row) {
+                const cells = row.getElementsByTagName('td');
+                let found = false;
+
+                for (let i = 0; i < cells.length; i++) {
+                    const cell = cells[i];
+                    if (cell.textContent.toLowerCase().includes(query)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
     </script>
 
 </x-app-layout>

@@ -65,4 +65,17 @@ class KelolaAkunController extends Controller
 
         return redirect()->route('web/kelola-akun')->with('success', 'Akun berhasil dihapus');
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('query', ''); // Ambil query pencarian dari request
+
+        $akun = Karyawan::where('nama', 'like', "%{$query}%")
+                        ->orWhere('golongan', 'like', "%{$query}%")
+                        ->orWhere('divisi', 'like', "%{$query}%")
+                        ->orWhere('username', 'like', "%{$query}%")
+                        ->get();
+
+        return response()->json($akun);
+    }
 }
