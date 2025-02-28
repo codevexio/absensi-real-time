@@ -26,4 +26,5 @@ Route::put('/web/kelola-akun/{id}', [KelolaAkunController::class, 'update'])->na
 Route::delete('/kelola-akun/{id}', [KelolaAkunController::class, 'destroy'])->name('web/kelola-akun-del');
 Route::get('/izinkaryawan', [IzinKaryawanController::class,'index'])->name('web/izinkaryawan');
 Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('<Api>karyawan.store');
+Route::get('/izinkaryawan/search', [IzinKaryawanController::class, 'search'])->name('web/izinkaryawan-search');
 require __DIR__.'/auth.php';
