@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Izin Karyawan
+            Cuti Karyawan
         </h2>
     </x-slot>
 
@@ -29,10 +29,11 @@
                             <tr>
                                 <th class="border px-4 py-2">No</th>
                                 <th class="border px-4 py-2">Full Name</th>
+                                <th class="border px-4 py-2">Jenis Cuti</th>
+                                <th class="border px-4 py-2">Tangal Mulai</th>
+                                <th class="border px-4 py-2">Tanggal Selesai</th>
                                 <th class="border px-4 py-2">Status</th>
-                                <th class="border px-4 py-2">Divisi</th>
-                                <th class="border px-4 py-2">Tanggal dan Waktu</th>
-                                <th class="border px-4 py-2">Aksi</th>
+                                {{-- <th class="border px-4 py-2">Alasan Penolakan</th> --}}
                             </tr>
                         </thead>
                         <tbody class="text-gray-800 dark:text-gray-200">
@@ -45,14 +46,6 @@
                                 </td>
                                 <td class="border px-4 py-2">{{ $employee->email ?? '-' }}</td>
                                 <td class="border px-4 py-2">{{ $employee->date ?? '-' }}</td>
-                                <td class="border px-4 py-2 text-center">
-                                    <button class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded-lg">
-                                        ✏️
-                                    </button>
-                                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg">
-                                        🗑️
-                                    </button>
-                                </td>
                             </tr>
                             @empty
                             <tr>
