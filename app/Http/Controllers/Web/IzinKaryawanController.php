@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\PengajuanCuti;
 use Illuminate\Http\Request;
 
 class IzinKaryawanController extends Controller
@@ -12,7 +13,8 @@ class IzinKaryawanController extends Controller
      */
     public function index()
     {
-        return view("IzinKaryawan");
+        $employees = PengajuanCuti::with('karyawan')->get();
+        return view('IzinKaryawan', compact('employees'));
     }
 
     /**
