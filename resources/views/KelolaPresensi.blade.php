@@ -82,4 +82,32 @@
         </div>
     </div>
 
+    <script>
+        // Pencarian Presensi
+        const searchInput = document.querySelector('input[type="text"]');
+        const tableRows = document.querySelectorAll('tbody tr');
+
+        searchInput.addEventListener('input', function () {
+            const query = searchInput.value.toLowerCase();
+
+            tableRows.forEach(function (row) {
+                const cells = row.getElementsByTagName('td');
+                let found = false;
+
+                for (let i = 0; i < cells.length; i++) {
+                    const cell = cells[i];
+                    if (cell.textContent.toLowerCase().includes(query)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </x-app-layout>
