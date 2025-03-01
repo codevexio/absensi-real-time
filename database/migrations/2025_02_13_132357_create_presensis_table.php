@@ -22,8 +22,8 @@ return new class extends Migration
             $table->enum('statusPulang', ['Tepat Waktu', 'Tidak Presensi Pulang', 'Cuti']);
             $table->string('imageMasuk')->nullable();
             $table->string('imagePulang')->nullable();
-            $table->text('lokasiMasuk');
-            $table->text('lokasiPulang');
+            $table->json('lokasiMasuk');
+            $table->json('lokasiPulang')->nullable();
             $table->timestamps();
         });
     }

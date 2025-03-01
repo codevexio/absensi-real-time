@@ -28,6 +28,6 @@ class Presensi extends Model
 
     public function jadwalKerja()
     {
-        return $this->belongsTo(JadwalKerja::class);
+        return $this->belongsTo(JadwalKerja::class, 'jadwal_kerja_id');
     }
 }

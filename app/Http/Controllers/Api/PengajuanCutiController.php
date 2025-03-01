@@ -11,6 +11,14 @@ use Carbon\Carbon;
 
 class PengajuanCutiController extends Controller
 {
+    public function index()
+    {
+        $cutiPengajuan = PengajuanCuti::all();
+        if ($cutiPengajuan->isEmpty()) {
+            return response()->json(['message' => 'Pengajuan cuti tidak ditemukan'], 404);
+        }
+        return response()->json($cutiPengajuan);
+    }
     /**
      * Store a newly created resource in storage.
      */

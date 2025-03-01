@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Presensi;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 
 use Illuminate\Http\Request;
 
@@ -14,7 +15,11 @@ class PresensiController extends Controller
      */
     public function index()
     {
-        
+        $presensi = Presensi::all();
+        if ($presensi->isEmpty()) {
+            return response()->json(['message' => 'Presensi tidak ditemukan'], 404);
+        }
+        return response()->json($presensi);
     }
 
     /**
@@ -44,13 +49,13 @@ class PresensiController extends Controller
         $presensi = Presensi::create([
             'karyawan_id' => $request->karyawan_id,
             'jadwal_kerja_id' => $request->jadwal_kerja_id,
-            'tanggalPresensi' => $tanggalPresensi,  // Menyimpan tanggal saat ini
+            'tanggalPresensi' => $tanggalPresensi,
             'waktuMasuk' => $request->waktuMasuk,
             'statusMasuk' => $request->statusMasuk,
             'waktuPulang' => $request->waktuPulang,
             'statusPulang' => $request->statusPulang,
-            'lokasiMasuk' => $request->lokasiMasuk,  // Lokasi masuk disimpan sebagai array/JSON
-            'lokasiPulang' => $request->lokasiPulang,  // Lokasi pulang disimpan sebagai array/JSON
+            'lokasiMasuk' => json_encode($request->lokasiMasuk),  // Pastikan data dalam format JSON
+            'lokasiPulang' => $request->lokasiPulang ? json_encode($request->lokasiPulang) : null,
         ]);
 
         // Mengembalikan response sukses dengan data presensi yang baru
@@ -76,8 +81,13 @@ class PresensiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id): JsonResponse
     {
-        //
+        $presensi = Presensi::find($id);
+        if (!$presensi) {
+            return response()->json(['message' => 'Presensi tidak ditemukan'], 404);
+        }
+        $presensi->delete();
+        return response()->json(['message' => 'Presensi berhasil dihapus']);
     }
 }

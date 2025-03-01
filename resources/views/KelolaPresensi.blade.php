@@ -47,7 +47,7 @@
                                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">No</th>
                                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Nama</th>
                                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Tanggal</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Shift </th>
+                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Shift</th>
                                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Jam Masuk</th>
                                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Status Masuk</th>
                                     <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Jam Keluar</th>
@@ -55,14 +55,25 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Nanti isi dengan data dari database -->
-                                <tr>
-                                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-center"
-                                        colspan="10">
-                                        Data tidak tersedia
-                                    </td>
-                                </tr>
+                                @forelse ($employees as $index => $employee)
+                                    <tr>
+                                        <td class="border px-4 py-2">{{ $index + 1 }}</td>
+                                        <td class="border px-4 py-2">{{ $employee->karyawan->nama ?? '-' }}</td>
+                                        <td class="border px-4 py-2">{{ $employee->tanggalPresensi }}</td>
+                                        <td class="border px-4 py-2">{{ $employee->jadwalKerja->shift->namaShift ?? '-' }}</td> <!-- Ambil nama shift -->
+                                        <td class="border px-4 py-2">{{ $employee->waktuMasuk }}</td>
+                                        <td class="border px-4 py-2">{{ $employee->statusMasuk }}</td>
+                                        <td class="border px-4 py-2">{{ $employee->waktuPulang ?? '-' }}</td>
+                                        <td class="border px-4 py-2">{{ $employee->statusPulang }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="border px-4 py-2 text-center" colspan="8">Data tidak tersedia</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
+                            
+                            
                         </table>
                     </div>
 
