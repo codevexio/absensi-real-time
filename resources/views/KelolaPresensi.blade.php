@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-black-800  leading-tight">
-            {{ __('Dashboard') }}
+            {{-- {{ __('Dashboard') }} --}}
         </h2>
     </x-slot>
 
@@ -20,18 +20,15 @@
 
                         <!-- Export Buttons -->
                         <div>
-                            {{-- <a href="{{ route('export.pdf') }}"
+                            <a href="{{ route('export.pdf') }}"
                                 class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                                 Cetak PDF
                             </a>
-                            <a href="{{ route('export.excel') }}" --}}
+
+                            {{-- <a href="{{ route('export.excel') }}" --}}
                                 {{-- class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                                 Cetak Excel
                             </a> --}}
-                            <a 
-                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2">
-                                Cetak PDF
-                            </a>
                             <a 
                                 class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                                 Cetak Excel

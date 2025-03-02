@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\IzinKaryawanController;
 use App\Http\Controllers\Web\KelolaAkunController;
 use App\Http\Controllers\Web\KelolaPresensiController;
 use App\Http\Controllers\Api\KaryawanController;
+use App\Http\Controllers\ExportController;
 
 Route::view('/', 'login');
 
@@ -27,4 +28,5 @@ Route::delete('/kelola-akun/{id}', [KelolaAkunController::class, 'destroy'])->na
 Route::get('/izinkaryawan', [IzinKaryawanController::class,'index'])->name('web/izinkaryawan');
 Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('<Api>karyawan.store');
 Route::get('/izinkaryawan/search', [IzinKaryawanController::class, 'search'])->name('web/izinkaryawan-search');
+Route::get('/export/pdf', [ExportController::class, 'exportPDF'])->name('export.pdf');
 require __DIR__.'/auth.php';
