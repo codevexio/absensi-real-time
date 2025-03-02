@@ -29,4 +29,5 @@ Route::get('/izinkaryawan', [IzinKaryawanController::class,'index'])->name('web/
 Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('<Api>karyawan.store');
 Route::get('/izinkaryawan/search', [IzinKaryawanController::class, 'search'])->name('web/izinkaryawan-search');
 Route::get('/export/pdf', [ExportController::class, 'exportPDF'])->name('export.pdf');
+Route::get('/export/excel', [ExportController::class, 'exportExcel'])->name('export.excel');
 require __DIR__.'/auth.php';

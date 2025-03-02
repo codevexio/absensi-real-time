@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Presensi;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PresensiExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ExportController extends Controller
@@ -19,5 +21,10 @@ class ExportController extends Controller
 
         // Download PDF
         return $pdf->download('data_presensi.pdf');
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new PresensiExport, 'data_presensi.xlsx');
     }
 }
