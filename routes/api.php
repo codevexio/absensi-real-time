@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PengajuanCutiController;
 use App\Http\Controllers\Api\ApprovalCutiController;
 use App\Http\Controllers\Api\PasswordResetTokenController;
 use App\Http\Controllers\Api\SessionController;
+use App\Http\Controllers\GeminiController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -33,3 +34,4 @@ Route::post('/approval-cuti/{id}/approve', [ApprovalCutiController::class, 'appr
 Route::post('/approval-cuti/{id}/reject', [ApprovalCutiController::class, 'reject']);
 Route::apiResource('password-reset-tokens', PasswordResetTokenController::class)->only(['index', 'store', 'destroy']);
 Route::apiResource('sessions', SessionController::class)->only(['index', 'store', 'destroy']);
+Route::post('/gemini/generate', [GeminiController::class, 'generate']);

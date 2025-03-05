@@ -33,15 +33,16 @@
                             </tr>
                         </thead>
                         <tbody class="text-gray-800 dark:text-gray-200">
-                            {{-- @forelse($akun as $index => $akuns)
-                                <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center" data-id="{{ $akuns->id }}">
+                            @forelse($employees as $index => $employee)
+                                <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center" data-id="{{ $employees->id }}">
                                     <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
-                                    <td class="border px-4 py-2">{{ $akuns->nama }}</td>
-                                    <td class="border px-4 py-2">{{ $akuns->golongan }}</td>
-                                    <td class="border px-4 py-2">{{ $akuns->divisi ?? '-' }}</td>
-                                    <td class="border px-4 py-2">{{ $akuns->username }}</td>
-                                    <td class="border px-4 py-2 text-center"> --}}
-                                        {{-- <button
+                                    <td class="border px-4 py-2">{{ $employees->nama }}</td>
+                                    <td class="border px-4 py-2 text-center">
+                                        {{ $employee->jadwalKerja->shift->namaShift ?? '-' }}
+                                    </td>
+                                    <td class="border px-4 py-2">{{ $employees->username }}</td>
+                                    <td class="border px-4 py-2 text-center">
+                                        <button
                                             class="tombol-edit-akun bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded-lg">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -50,8 +51,8 @@
                                                     d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
                                                 <path d="m15 5 4 4" />
                                             </svg>
-                                        </button> --}}
-                                        {{-- <form action="{{ route('web/kelola-akun-del', $akuns->id) }}" method="POST"
+                                        </button>
+                                        <form action="{{ route('web/kelola-akun-del', $akuns->id) }}" method="POST"
                                             class="inline">
                                             @csrf
                                             @method('DELETE')
@@ -66,14 +67,14 @@
                                                     <line x1="14" x2="14" y1="11" y2="17" />
                                                 </svg>
                                             </button>
-                                        </form> --}}
+                                        </form>
                                     </td>
                                 </tr>
-                            {{-- @empty --}}
+                            @empty
                                 <tr>
                                     <td colspan="6" class="border px-4 py-2 text-center">Tidak ada data</td>
                                 </tr>
-                            {{-- @endforelse --}}
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Karyawan;
 
 class KelolaShiftController extends Controller
 {
@@ -12,54 +13,27 @@ class KelolaShiftController extends Controller
      */
     public function index()
     {
-        return view("KelolaShiftKaryawan");
+        // Ambil data presensi dengan relasi karyawan, jadwal kerja, dan shift
+        $employees = Karyawan::with(['jadwalKerja.shift'])->get();
+        
+        // Pass data ke view
+        return view('KelolaShiftKaryawan', compact('employees'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Fungsi Pencarian Presensi.
      */
-    public function create()
+    public function search(Request $request)
     {
-        //
-    }
+        $query = $request->get('query', '');
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        // Cari presensi berdasarkan nama karyawan atau status
+        $shift = Karyawan::whereHas('karyawan', function ($q) use ($query) {
+                $q->where('nama', 'like', "%{$query}%");
+            })
+            ->with(['jadwalKerja.shift']) // Pastikan relasi shift juga di-load
+            ->get();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json($shift);
     }
 }
