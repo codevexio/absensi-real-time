@@ -34,16 +34,17 @@
                         </thead>
                         <tbody class="text-gray-800 dark:text-gray-200">
                             @forelse($employees as $index => $employee)
-                                <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center" data-id="{{ $employees->id }}">
+                                <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center"
+                                    data-id="{{ $employee->id }}">
                                     <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
-                                    <td class="border px-4 py-2">{{ $employees->nama }}</td>
+                                    <td class="border px-4 py-2">{{ $employee->nama }}</td>
                                     <td class="border px-4 py-2 text-center">
-                                        {{ $employee->jadwalKerja->shift->namaShift ?? '-' }}
+                                         {{ $employee->shift->namaShift ?? '-' }}  
                                     </td>
-                                    <td class="border px-4 py-2">{{ $employees->username }}</td>
+                                    <td class="border px-4 py-2">{{ $employee->username }}</td>
                                     <td class="border px-4 py-2 text-center">
                                         <button
-                                            class="tombol-edit-akun bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded-lg">
+                                            class="tombol-edit-shift bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded-lg">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
@@ -52,22 +53,6 @@
                                                 <path d="m15 5 4 4" />
                                             </svg>
                                         </button>
-                                        <form action="{{ route('web/kelola-akun-del', $akuns->id) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg"
-                                                type="submit"
-                                                onclick="return confirm('Apakah Anda yakin ingin menghapus akun ini?')">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
-                                                    <path d="M3 6h18" />
-                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                    <line x1="10" x2="10" y1="11" y2="17" />
-                                                    <line x1="14" x2="14" y1="11" y2="17" />
-                                                </svg>
-                                            </button>
-                                        </form>
                                     </td>
                                 </tr>
                             @empty
@@ -104,9 +89,9 @@
     </div>
 
     <!-- Modal Edit Akun -->
-    <dialog id="edit-akun" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 w-full max-w-lg">
+    <dialog id="edit-shift" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 w-full max-w-lg">
         <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Edit Akun Karyawan</h3>
-        <form id="form-edit-akun" action="" method="POST">
+        <form id="form-edit-shift" action="" method="POST">
             @csrf
             @method('PUT')
             <input type="hidden" name="id" id="edit-akun-id">
@@ -139,7 +124,7 @@
             </div>
 
             <div class="flex justify-end gap-2">
-                <button type="button" id="close-edit-akun"
+                <button type="button" id="close-edit-shift"
                     class="px-4 py-2 bg-gray-400 text-white rounded-lg">Batal</button>
                 <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg">Update</button>
             </div>
@@ -147,21 +132,13 @@
     </dialog>
 
     <script>
-        // Modal Tambah Akun
-        const dialogTambah = document.getElementById("tambah-akun");
-        const btnTambah = document.querySelector("#tombol-tambah-akun");
-        const closeTambah = document.querySelector("#close-tambah-akun");
-
-        btnTambah.addEventListener("click", () => dialogTambah.showModal());
-        closeTambah.addEventListener("click", () => dialogTambah.close());
-
         // Modal Edit Akun
-        const dialogEdit = document.getElementById("edit-akun");
-        const btnEdits = document.querySelectorAll(".tombol-edit-akun");
-        const closeEdit = document.querySelector("#close-edit-akun");
+        const dialogEdit = document.getElementById("edit-shift");
+        const btnEdits = document.querySelectorAll(".tombol-edit-shift");
+        const closeEdit = document.querySelector("#close-edit-shift");
 
         // Form Edit Akun
-        const formEditAkun = document.getElementById("form-edit-akun");
+        const formEditShit = document.getElementById("form-edit-shift");
 
         btnEdits.forEach(button => {
             button.addEventListener("click", function () {
@@ -179,7 +156,7 @@
                 document.getElementById("edit-username").value = username;
 
                 // Update action form edit
-                document.getElementById("form-edit-akun").action = `/web/kelola-akun/${id}`;
+                document.getElementById("form-edit-shift").action = `/web/kelola-akun/${id}`;
 
                 dialogEdit.showModal();
             });

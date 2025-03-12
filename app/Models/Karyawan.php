@@ -29,7 +29,7 @@ class Karyawan extends Model
 
     public function jadwalKerja()
     {
-        return $this->hasMany(JadwalKerja::class);
+        return $this->hasMany(JadwalKerja::class,'karyawan_id', 'id');
     }
 
     public function cuti()
