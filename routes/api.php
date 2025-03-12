@@ -17,7 +17,12 @@ use App\Http\Controllers\GeminiController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+// Pengajuan Cuti
+Route::post('/pengajuan-cuti', [PengajuanCutiController::class, 'store']);
+Route::put('/pengajuan-cuti/{id}', [PengajuanCutiController::class, 'updateStatusCuti']);
 
+Route::post('/pengajuan-cuti', [PengajuanCutiController::class, 'ajukanCuti']);
+Route::put('/pengajuan-cuti/{id}', [PengajuanCutiController::class, 'updateStatusCuti']);
 Route::get('update-cuti', [CutiController::class, 'updateExpiredCuti']);
 Route::post('/cuti/update-expired', [CutiController::class, 'updateExpiredCuti']);
 Route::post('/cuti/ajukan', [CutiController::class, 'ajukanCuti']);
