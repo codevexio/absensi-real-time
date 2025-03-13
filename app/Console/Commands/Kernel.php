@@ -29,5 +29,6 @@ class Kernel extends ConsoleKernel
     {
         // Menjadwalkan command untuk dijalankan setiap hari
         $schedule->command('cuti:reset')->daily(); // Menyesuaikan dengan kebutuhanmu
+        $schedule->command('jadwal:generate')->daily();
     }
 }

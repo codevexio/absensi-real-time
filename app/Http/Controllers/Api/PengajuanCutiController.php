@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Cuti;
 use App\Models\PengajuanCuti;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PengajuanCutiController extends Controller
@@ -16,8 +17,12 @@ class PengajuanCutiController extends Controller
             'jenisCuti' => 'required|in:Cuti Panjang,Cuti Tahunan',
             'tanggalMulai' => 'required|date',
             'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
-            'jumlahHari' => 'required|integer|min:1',
         ]);
+
+        // Hitung jumlah hari otomatis
+        $tanggalMulai = Carbon::parse($request->tanggalMulai);
+        $tanggalSelesai = Carbon::parse($request->tanggalSelesai);
+        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1; // Tambah 1 agar inklusif
 
         // Ambil data cuti karyawan
         $cuti = Cuti::where('karyawan_id', $request->karyawan_id)->first();
@@ -26,10 +31,10 @@ class PengajuanCutiController extends Controller
         }
 
         // Validasi jatah cuti
-        if ($request->jenisCuti == 'Cuti Tahunan' && $cuti->cutiTahun < $request->jumlahHari) {
+        if ($request->jenisCuti == 'Cuti Tahunan' && $cuti->cutiTahun < $jumlahHari) {
             return response()->json(['message' => 'Jatah cuti tahunan tidak mencukupi'], 400);
         }
-        if ($request->jenisCuti == 'Cuti Panjang' && $cuti->cutiPanjang < $request->jumlahHari) {
+        if ($request->jenisCuti == 'Cuti Panjang' && $cuti->cutiPanjang < $jumlahHari) {
             return response()->json(['message' => 'Jatah cuti panjang tidak mencukupi'], 400);
         }
 
@@ -39,7 +44,7 @@ class PengajuanCutiController extends Controller
             'jenisCuti' => $request->jenisCuti,
             'tanggalMulai' => $request->tanggalMulai,
             'tanggalSelesai' => $request->tanggalSelesai,
-            'jumlahHari' => $request->jumlahHari,
+            'jumlahHari' => $jumlahHari,
             'statusCuti' => 'Diproses',
         ]);
 

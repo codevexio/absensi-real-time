@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Karyawan;
+use App\Models\Cuti;
 use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
 
 class KaryawanController extends Controller
 {
@@ -55,6 +57,16 @@ class KaryawanController extends Controller
         ]);
 
         $karyawan = Karyawan::create($request->all());
+
+        // Buat data cuti baru untuk karyawan ini
+        Cuti::create([
+            'karyawan_id' => $karyawan->id,
+            'cutiTahun' => 12, // Default cuti tahunan
+            'cutiPanjang' => 60, // Default cuti panjang
+            'expiredTahun' => Carbon::now()->addYear(), // Berlaku 1 tahun dari sekarang
+            'expiredPanjang' => Carbon::now()->addYears(5) // Berlaku 5 tahun dari sekarang
+        ]);
+
         return response()->json($karyawan, 201);
     }
 

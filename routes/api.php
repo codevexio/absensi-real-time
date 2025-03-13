@@ -31,6 +31,7 @@ Route::apiResource('karyawan', KaryawanController::class);
 Route::apiResource('shift', ShiftController::class);
 Route::apiResource('cuti', CutiController::class);
 Route::apiResource('jadwal-kerja', JadwalKerjaController::class);
+Route::post('/generate-presensi-harian', [JadwalKerjaController::class, 'generatePresensiHarian']);
 Route::apiResource('presensi', PresensiController::class);
 Route::apiResource('keterlambatan', KeterlambatanController::class);
 Route::apiResource('pengajuan-cuti', PengajuanCutiController::class);

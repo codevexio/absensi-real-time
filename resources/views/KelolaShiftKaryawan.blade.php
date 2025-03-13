@@ -37,11 +37,11 @@
                                 <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center"
                                     data-id="{{ $employee->id }}">
                                     <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
-                                    <td class="border px-4 py-2">{{ $employee->nama }}</td>
+                                    <td class="border px-4 py-2">{{ $employee->karyawan->nama }}</td>
                                     <td class="border px-4 py-2 text-center">
-                                         {{ $employee->shift->namaShift ?? '-' }}  
-                                    </td>
-                                    <td class="border px-4 py-2">{{ $employee->username }}</td>
+                                        {{ $employee->shift->namaShift ?? '-' }}  
+                                   </td>
+                                    <td class="border px-4 py-2">{{ $employee->karyawan->username }}</td>
                                     <td class="border px-4 py-2 text-center">
                                         <button
                                             class="tombol-edit-shift bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-1 rounded-lg">
@@ -95,40 +95,27 @@
             @csrf
             @method('PUT')
             <input type="hidden" name="id" id="edit-akun-id">
-
+        
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Nama Karyawan</label>
-                <input type="text" name="nama" id="edit-nama" required class="w-full px-3 py-2 border rounded-lg">
+                <input type="text" id="edit-nama" disabled class="w-full px-3 py-2 border rounded-lg">
             </div>
-
+        
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Shift</label>
-                <select name="golongan" id="edit-golongan" required class="w-full px-3 py-2 border rounded-lg">
-                    <option value="A">Reguler</option>
-                    <option value="B">Pagi</option>
-                    <option value="C">Sore</option>
-                    <option value="D">Malam</option>
+                <select name="shift_id" id="edit-shift-id" required class="w-full px-3 py-2 border rounded-lg">
+                    @foreach ($shifts as $shift)
+                        <option value="{{ $shift->id }}">{{ $shift->namaShift }}</option>
+                    @endforeach
                 </select>
             </div>
-
-            <div class="mb-4">
-                <label class="block text-gray-700 dark:text-gray-200">Username</label>
-                <input type="text" name="username" id="edit-username" required
-                    class="w-full px-3 py-2 border rounded-lg">
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-gray-700 dark:text-gray-200">Password (Kosongkan jika tidak ingin
-                    mengubah)</label>
-                <input type="password" name="password" id="edit-password" class="w-full px-3 py-2 border rounded-lg">
-            </div>
-
+        
             <div class="flex justify-end gap-2">
-                <button type="button" id="close-edit-shift"
-                    class="px-4 py-2 bg-gray-400 text-white rounded-lg">Batal</button>
+                <button type="button" id="close-edit-shift" class="px-4 py-2 bg-gray-400 text-white rounded-lg">Batal</button>
                 <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg">Update</button>
             </div>
         </form>
+        
     </dialog>
 
     <script>
@@ -141,26 +128,31 @@
         const formEditShit = document.getElementById("form-edit-shift");
 
         btnEdits.forEach(button => {
-            button.addEventListener("click", function () {
-                const row = this.closest("tr");
-                const id = row.dataset.id;
-                const nama = row.cells[1].innerText;
-                const golongan = row.cells[2].innerText;
-                const divisi = row.cells[3].innerText;
-                const username = row.cells[4].innerText;
+    button.addEventListener("click", function () {
+            const row = this.closest("tr");
+            const id = row.dataset.id;
+            const nama = row.cells[1].innerText;
+            const shift = row.cells[2].innerText;
 
-                document.getElementById("edit-akun-id").value = id;
-                document.getElementById("edit-nama").value = nama;
-                document.getElementById("edit-golongan").value = golongan;
-                document.getElementById("edit-divisi").value = divisi;
-                document.getElementById("edit-username").value = username;
+            document.getElementById("edit-akun-id").value = id;
+            document.getElementById("edit-nama").value = nama;
 
-                // Update action form edit
-                document.getElementById("form-edit-shift").action = `/web/kelola-akun/${id}`;
+            // Pilih shift yang sesuai
+            const shiftSelect = document.getElementById("edit-shift-id");
+            for (let option of shiftSelect.options) {
+                if (option.text === shift) {
+                    option.selected = true;
+                    break;
+                }
+            }
 
-                dialogEdit.showModal();
-            });
+            // Set action form edit
+            document.getElementById("form-edit-shift").action = `/kelola-shift/${id}`;
+
+            dialogEdit.showModal();
         });
+    });
+
 
         closeEdit.addEventListener("click", () => dialogEdit.close());
 
