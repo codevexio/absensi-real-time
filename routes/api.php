@@ -12,7 +12,7 @@ use App\Http\Controllers\Api\PengajuanCutiController;
 use App\Http\Controllers\Api\ApprovalCutiController;
 use App\Http\Controllers\Api\PasswordResetTokenController;
 use App\Http\Controllers\Api\SessionController;
-use App\Http\Controllers\GeminiController;
+use App\Http\Controllers\Api\AuthController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -41,10 +41,14 @@ Route::apiResource('karyawan', KaryawanController::class);
 Route::apiResource('shift', ShiftController::class);
 
 // Presensi
-Route::apiResource('presensi', PresensiController::class);
+Route::middleware('auth:sanctum')->post('/presensi/masuk', [PresensiController::class, 'presensiMasuk']);
 
 // Keterlambatan
 Route::apiResource('keterlambatan', KeterlambatanController::class);
+
+// Login Android
+Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 // etc
 Route::apiResource('pengajuan-cuti', PengajuanCutiController::class);

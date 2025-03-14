@@ -1,93 +1,72 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-use App\Http\Controllers\Controller;
-use App\Models\Presensi;
-use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Presensi;
+use App\Models\JadwalKerja;
+use App\Models\Keterlambatan;
+use Illuminate\Support\Facades\Auth;
 
 class PresensiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function presensiMasuk(Request $request)
     {
-        $presensi = Presensi::all();
-        if ($presensi->isEmpty()) {
-            return response()->json(['message' => 'Presensi tidak ditemukan'], 404);
-        }
-        return response()->json($presensi);
-    }
+        // Ambil karyawan_id dari sesi login
+        $karyawan_id = Auth::id();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        // Validasi input request
+        // Cek apakah karyawan sudah login
+        if (!$karyawan_id) {
+            return response()->json(['message' => 'Karyawan belum login'], 401);
+        }
+
+        // Cari jadwal kerja berdasarkan karyawan_id dan tanggal hari ini
+        $jadwalKerja = JadwalKerja::where('karyawan_id', $karyawan_id)
+            ->whereDate('tanggalKerja', now()->toDateString())
+            ->first();
+
+        if (!$jadwalKerja) {
+            return response()->json(['message' => 'Jadwal kerja tidak ditemukan'], 404);
+        }
+
+        // Ambil waktu sekarang
+        $waktuSekarang = now()->format('H:i:s');
+
+        // Tentukan status keterlambatan
+        $statusMasuk = ($waktuSekarang > $jadwalKerja->waktu_masuk) ? 'Terlambat' : 'Tepat Waktu';
+
+        // Validasi input
         $request->validate([
-            'karyawan_id' => 'required|exists:karyawan,id', // Pastikan karyawan_id ada di tabel karyawan
-            'jadwal_kerja_id' => 'required|exists:jadwal_kerja,id', // Pastikan jadwal_kerja_id ada di tabel jadwal_kerja
-            'waktuMasuk' => 'required|date_format:H:i:s', // Pastikan waktuMasuk adalah format waktu yang valid
-            'statusMasuk' => 'required|in:Tepat Waktu,Terlambat,Cuti', // Status Masuk harus sesuai pilihan
-            'waktuPulang' => 'nullable|date_format:H:i:s', // Waktu pulang bisa kosong
-            'statusPulang' => 'required|in:Tepat Waktu,Tidak Presensi Pulang,Cuti', // Status Pulang
-            'lokasiMasuk' => 'required|array', // Lokasi masuk harus berupa array dengan latitude dan longitude
-            'lokasiPulang' => 'nullable|array', // Lokasi pulang bisa kosong
+            'imageMasuk' => 'required|image|mimes:jpg,png,jpeg|max:2048',
+            'lokasiMasuk' => 'required|array',
         ]);
 
-        // Menyesuaikan tanggalPresensi dengan tanggal saat ini
-        $tanggalPresensi = Carbon::today()->toDateString();  // Menggunakan hanya tanggal (YYYY-MM-DD)
+        // Simpan gambar masuk
+        $imagePath = $request->file('imageMasuk')->store('uploads/presensi', 'public');
 
-        // Jika Anda ingin menyimpan waktu juga, bisa gunakan Carbon::now() untuk mendapatkan tanggal dan waktu
-        // $tanggalPresensi = Carbon::now()->toDateTimeString(); // Untuk menyimpan dengan waktu juga
-
-        // Buat presensi baru
+        // Simpan data presensi
         $presensi = Presensi::create([
-            'karyawan_id' => $request->karyawan_id,
-            'jadwal_kerja_id' => $request->jadwal_kerja_id,
-            'tanggalPresensi' => $tanggalPresensi,
-            'waktuMasuk' => $request->waktuMasuk,
-            'statusMasuk' => $request->statusMasuk,
-            'waktuPulang' => $request->waktuPulang,
-            'statusPulang' => $request->statusPulang,
-            'lokasiMasuk' => json_encode($request->lokasiMasuk),  // Pastikan data dalam format JSON
-            'lokasiPulang' => $request->lokasiPulang ? json_encode($request->lokasiPulang) : null,
+            'karyawan_id' => $karyawan_id,
+            'jadwal_kerja_id' => $jadwalKerja->id,
+            'tanggalPresensi' => now()->toDateString(),
+            'waktuMasuk' => $waktuSekarang,
+            'statusMasuk' => $statusMasuk,
+            'imageMasuk' => $imagePath,
+            'lokasiMasuk' => json_encode($request->lokasiMasuk),
         ]);
 
-        // Mengembalikan response sukses dengan data presensi yang baru
-        return response()->json($presensi, 201);
+        // Jika terlambat, masukkan ke tabel keterlambatan
+        if ($statusMasuk === 'Terlambat') {
+            Keterlambatan::create([
+                'karyawan_id' => $karyawan_id,
+                'presensi_id' => $presensi->id,
+            ]);
         }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id): JsonResponse
-    {
-        $presensi = Presensi::find($id);
-        if (!$presensi) {
-            return response()->json(['message' => 'Presensi tidak ditemukan'], 404);
-        }
-        $presensi->delete();
-        return response()->json(['message' => 'Presensi berhasil dihapus']);
+        return response()->json([
+            'message' => 'Presensi masuk berhasil dicatat',
+            'data' => $presensi
+        ], 201);
     }
 }
