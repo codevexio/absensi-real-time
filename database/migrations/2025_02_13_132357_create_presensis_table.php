@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::create('presensi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('karyawan_id')->constrained('karyawan')->onDelete('cascade');
-            $table->foreignId('jadwal_kerja_id')->constrained('jadwal_kerja')->onDelete('cascade');
+            $table->foreignId('karyawan_id')->constrained('karyawan')->onDelete('cascade')->index();
+            $table->foreignId('jadwal_kerja_id')->constrained('jadwal_kerja')->onDelete('cascade')->index();
             $table->date('tanggalPresensi');
-            $table->time('waktuMasuk');
-            $table->enum('statusMasuk', ['Tepat Waktu', 'Terlambat', 'Cuti']);
+            $table->time('waktuMasuk')->nullable();
+            $table->enum('statusMasuk', ['Tepat Waktu', 'Terlambat', 'Cuti'])->default('Tepat Waktu');
             $table->time('waktuPulang')->nullable();
-            $table->enum('statusPulang', ['Tepat Waktu', 'Tidak Presensi Pulang', 'Cuti']);
+            $table->enum('statusPulang', ['Tepat Waktu', 'Tidak Presensi Pulang', 'Cuti'])->default('Tidak Presensi Pulang');
             $table->string('imageMasuk')->nullable();
             $table->string('imagePulang')->nullable();
-            $table->json('lokasiMasuk');
+            $table->json('lokasiMasuk')->nullable();
             $table->json('lokasiPulang')->nullable();
             $table->timestamps();
         });
@@ -36,4 +36,3 @@ return new class extends Migration
         Schema::dropIfExists('presensi');
     }
 };
-
