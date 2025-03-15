@@ -33,6 +33,7 @@
                                 <th class="border px-4 py-2">Tangal Mulai</th>
                                 <th class="border px-4 py-2">Tanggal Selesai</th>
                                 <th class="border px-4 py-2">Jumlah Hari</th>
+                                <th class="border px-4 py-2">Dokumen Pengajuan</th>
                                 <th class="border px-4 py-2">Status</th>
                                 {{-- <th class="border px-4 py-2">Alasan Penolakan</th> --}}
                             </tr>
@@ -52,7 +53,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="border px-4 py-2 text-center text-gray-500">
+                                <td colspan="8" class="border px-4 py-2 text-center text-gray-500">
                                     Tidak ada data izin karyawan.
                                 </td>
                             </tr>
