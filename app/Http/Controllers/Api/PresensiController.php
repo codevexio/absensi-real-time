@@ -14,12 +14,11 @@ class PresensiController extends Controller
     public function presensiMasuk(Request $request)
     {
         // Ambil karyawan_id dari sesi login
-        $karyawan_id = Auth::id();
-
-        // Cek apakah karyawan sudah login
-        if (!$karyawan_id) {
+        $user = Auth::user();
+        if (!$user) {
             return response()->json(['message' => 'Karyawan belum login'], 401);
         }
+        $karyawan_id = $user->id;
 
         // Cari jadwal kerja berdasarkan karyawan_id dan tanggal hari ini
         $jadwalKerja = JadwalKerja::where('karyawan_id', $karyawan_id)
@@ -39,7 +38,8 @@ class PresensiController extends Controller
         // Validasi input
         $request->validate([
             'imageMasuk' => 'required|image|mimes:jpg,png,jpeg|max:2048',
-            'lokasiMasuk' => 'required|array',
+            'lokasiMasuk.latitude' => 'required|numeric',
+            'lokasiMasuk.longitude' => 'required|numeric',
         ]);
 
         // Simpan gambar masuk
@@ -53,7 +53,10 @@ class PresensiController extends Controller
             'waktuMasuk' => $waktuSekarang,
             'statusMasuk' => $statusMasuk,
             'imageMasuk' => $imagePath,
-            'lokasiMasuk' => json_encode($request->lokasiMasuk),
+            'lokasiMasuk' => json_encode([
+                'latitude' => $request->input('lokasiMasuk.latitude'),
+                'longitude' => $request->input('lokasiMasuk.longitude'),
+            ]),
         ]);
 
         // Jika terlambat, masukkan ke tabel keterlambatan
