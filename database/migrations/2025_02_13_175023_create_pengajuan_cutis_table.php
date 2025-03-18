@@ -20,11 +20,13 @@ return new class extends Migration
             $table->integer('jumlahHari');
             $table->enum('statusCuti', ['Diproses', 'Disetujui', 'Ditolak'])->default('Diproses'); 
             $table->string('alasanPenolakan')->nullable();
+            $table->string('file_surat_cuti')->nullable(); // Kolom untuk menyimpan path PDF
             $table->timestamps();
         
             // Foreign key ke tabel karyawan
             $table->foreign('karyawan_id')->references('id')->on('karyawan')->onDelete('cascade');
         });
+        
         
     }
 

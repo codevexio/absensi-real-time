@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Presensi;
 use App\Models\JadwalKerja;
+use Carbon\Carbon;
 use App\Models\Keterlambatan;
 use Illuminate\Support\Facades\Auth;
 
@@ -71,5 +72,43 @@ class PresensiController extends Controller
             'message' => 'Presensi masuk berhasil dicatat',
             'data' => $presensi
         ], 201);
+    }
+
+    public function presensiPulang(Request $request)
+    {
+        $karyawanId = Auth::id(); // Ambil ID karyawan dari sesi login
+
+        // Cek apakah karyawan sudah presensi masuk hari ini
+        $presensi = Presensi::where('karyawan_id', $karyawanId)
+            ->whereDate('tanggalPresensi', Carbon::today())
+            ->first();
+
+        if (!$presensi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda belum presensi masuk.'
+            ], 400);
+        }
+
+        // Cek apakah sudah melakukan presensi pulang
+        if ($presensi->waktuPulang) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah melakukan presensi pulang.'
+            ], 400);
+        }
+
+        // Simpan presensi pulang
+        $presensi->waktuPulang = Carbon::now()->format('H:i:s');
+        $presensi->statusPulang = $request->statusPulang ?? 'Tepat Waktu';
+        $presensi->imagePulang = $request->imagePulang ?? null;
+        $presensi->lokasiPulang = $request->lokasiPulang ?? null;
+        $presensi->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Presensi pulang berhasil dicatat',
+            'data' => $presensi
+        ]);
     }
 }

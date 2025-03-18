@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\AuthController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
 // Pengajuan Cuti
 Route::post('/pengajuan-cuti', [PengajuanCutiController::class, 'store']);
 Route::put('/pengajuan-cuti/{id}', [PengajuanCutiController::class, 'updateStatusCuti']);
@@ -42,6 +43,7 @@ Route::apiResource('shift', ShiftController::class);
 
 // Presensi
 Route::middleware('auth:sanctum')->post('/presensi/masuk', [PresensiController::class, 'presensiMasuk']);
+Route::middleware('auth:sanctum')->post('/presensi/pulang', [PresensiController::class, 'presensiPulang']);
 
 // Keterlambatan
 Route::apiResource('keterlambatan', KeterlambatanController::class);
