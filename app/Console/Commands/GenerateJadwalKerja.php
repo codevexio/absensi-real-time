@@ -6,13 +6,14 @@ use Illuminate\Console\Command;
 use App\Models\JadwalKerja;
 use App\Models\Karyawan;
 use App\Models\Shift;
+use App\Models\Presensi;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class GenerateJadwalKerja extends Command
 {
     protected $signature = 'jadwal:generate';
-    protected $description = 'Generate jadwal kerja harian untuk semua karyawan';
+    protected $description = 'Generate jadwal kerja harian dan data presensi default untuk semua karyawan';
 
     public function handle()
     {
@@ -35,23 +36,50 @@ class GenerateJadwalKerja extends Command
                 ->whereDate('tanggalSelesai', '>=', $tanggalHariIni)
                 ->exists();
 
-            // Tentukan status kerja
-            $statusKerja = $sedangCuti ? 'Cuti' : 'Kerja';
+            // Tentukan status kerja dan presensi
+            if ($sedangCuti) {
+                $statusKerja = 'Cuti';
+                $statusMasuk = 'Cuti';
+                $statusPulang = 'Cuti';
+            } else {
+                $statusKerja = 'Kerja';
+                $statusMasuk = 'Tidak Presensi Masuk';
+                $statusPulang = 'Tidak Presensi Pulang';
+            }
 
-            // Buat jadwal kerja
-            JadwalKerja::updateOrCreate(
-                [
+            // Cek apakah sudah ada jadwal kerja sebelumnya
+            $jadwal = JadwalKerja::where('karyawan_id', $karyawan->id)->first();
+
+            if ($jadwal) {
+                // Jika sudah ada, update tanggalnya ke hari ini
+                $jadwal->update([
+                    'tanggalKerja' => $tanggalHariIni,
+                    'statusKerja' => $statusKerja,
+                ]);
+            } else {
+                // Jika belum ada, buat baru
+                $jadwal = JadwalKerja::create([
                     'karyawan_id' => $karyawan->id,
                     'tanggalKerja' => $tanggalHariIni,
-                ],
-                [
                     'shift_id' => $defaultShift->id,
                     'statusKerja' => $statusKerja,
+                ]);
+            }
+
+            // *** Generate Data Presensi Default ***
+            Presensi::updateOrCreate(
+                [
+                    'karyawan_id' => $karyawan->id,
+                    'jadwal_kerja_id' => $jadwal->id,
+                    'tanggalPresensi' => $tanggalHariIni,
+                ],
+                [
+                    'statusMasuk' => $statusMasuk,
+                    'statusPulang' => $statusPulang,
                 ]
             );
         }
 
-        $this->info('Jadwal kerja berhasil dibuat!');
+        $this->info('Jadwal kerja dan presensi berhasil diperbarui atau dibuat!');
     }
 }
-

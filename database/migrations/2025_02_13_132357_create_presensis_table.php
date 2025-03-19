@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('jadwal_kerja_id');
             $table->date('tanggalPresensi');
             $table->time('waktuMasuk')->nullable();
-            $table->enum('statusMasuk', ['Tepat Waktu', 'Terlambat', 'Cuti'])->default('Tepat Waktu');
+            $table->enum('statusMasuk', ['Tepat Waktu', 'Terlambat', 'Cuti','Tidak Presensi Masuk'])->default('Tidak Presensi Masuk');
             $table->time('waktuPcutulang')->nullable();
             $table->enum('statusPulang', ['Tepat Waktu', 'Tidak Presensi Pulang', 'Cuti'])->default('Tidak Presensi Pulang');
             $table->string('imageMasuk')->nullable();

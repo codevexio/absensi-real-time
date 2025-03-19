@@ -6,35 +6,43 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Presensi;
 use App\Models\JadwalKerja;
-use Carbon\Carbon;
 use App\Models\Keterlambatan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class PresensiController extends Controller
 {
+    /**
+     * Presensi Masuk
+     */
     public function presensiMasuk(Request $request)
     {
-        // Ambil karyawan_id dari sesi login
         $user = Auth::user();
         if (!$user) {
             return response()->json(['message' => 'Karyawan belum login'], 401);
         }
-        $karyawan_id = $user->id;
 
-        // Cari jadwal kerja berdasarkan karyawan_id dan tanggal hari ini
+        $karyawan_id = $user->id;
+        $tanggalHariIni = Carbon::today()->toDateString();
+
+        // Cek jadwal kerja karyawan hari ini
         $jadwalKerja = JadwalKerja::where('karyawan_id', $karyawan_id)
-            ->whereDate('tanggalKerja', now()->toDateString())
+            ->whereDate('tanggalKerja', $tanggalHariIni)
             ->first();
 
         if (!$jadwalKerja) {
             return response()->json(['message' => 'Jadwal kerja tidak ditemukan'], 404);
         }
 
-        // Ambil waktu sekarang
-        $waktuSekarang = now()->format('H:i:s');
+        // Cek apakah sudah ada presensi hari ini
+        $presensi = Presensi::where('karyawan_id', $karyawan_id)
+            ->whereDate('tanggalPresensi', $tanggalHariIni)
+            ->first();
 
-        // Tentukan status keterlambatan
-        $statusMasuk = ($waktuSekarang > $jadwalKerja->waktu_masuk) ? 'Terlambat' : 'Tepat Waktu';
+        if ($presensi && $presensi->waktuMasuk) {
+            return response()->json(['message' => 'Anda sudah melakukan presensi masuk hari ini.'], 400);
+        }
 
         // Validasi input
         $request->validate([
@@ -43,26 +51,39 @@ class PresensiController extends Controller
             'lokasiMasuk.longitude' => 'required|numeric',
         ]);
 
+        // Hapus foto lama jika ada
+        if ($presensi && $presensi->imageMasuk) {
+            Storage::disk('public')->delete($presensi->imageMasuk);
+        }
+
         // Simpan gambar masuk
         $imagePath = $request->file('imageMasuk')->store('uploads/presensi', 'public');
 
-        // Simpan data presensi
-        $presensi = Presensi::create([
-            'karyawan_id' => $karyawan_id,
-            'jadwal_kerja_id' => $jadwalKerja->id,
-            'tanggalPresensi' => now()->toDateString(),
-            'waktuMasuk' => $waktuSekarang,
-            'statusMasuk' => $statusMasuk,
-            'imageMasuk' => $imagePath,
-            'lokasiMasuk' => json_encode([
-                'latitude' => $request->input('lokasiMasuk.latitude'),
-                'longitude' => $request->input('lokasiMasuk.longitude'),
-            ]),
+        // Tentukan status masuk (Tepat Waktu / Terlambat)
+        $waktuSekarang = now()->format('H:i:s');
+        $statusMasuk = ($waktuSekarang > $jadwalKerja->shift->waktu_masuk) ? 'Terlambat' : 'Tepat Waktu';
+
+        // Jika belum ada presensi, buat data baru
+        if (!$presensi) {
+            $presensi = new Presensi();
+            $presensi->karyawan_id = $karyawan_id;
+            $presensi->jadwal_kerja_id = $jadwalKerja->id;
+            $presensi->tanggalPresensi = $tanggalHariIni;
+        }
+
+        // Update data presensi masuk
+        $presensi->waktuMasuk = $waktuSekarang;
+        $presensi->statusMasuk = $statusMasuk;
+        $presensi->imageMasuk = $imagePath;
+        $presensi->lokasiMasuk = json_encode([
+            'latitude' => $request->input('lokasiMasuk.latitude'),
+            'longitude' => $request->input('lokasiMasuk.longitude'),
         ]);
+        $presensi->save();
 
         // Jika terlambat, masukkan ke tabel keterlambatan
         if ($statusMasuk === 'Terlambat') {
-            Keterlambatan::create([
+            Keterlambatan::firstOrCreate([
                 'karyawan_id' => $karyawan_id,
                 'presensi_id' => $presensi->id,
             ]);
@@ -71,44 +92,64 @@ class PresensiController extends Controller
         return response()->json([
             'message' => 'Presensi masuk berhasil dicatat',
             'data' => $presensi
-        ], 201);
+        ], 200);
     }
 
+    /**
+     * Presensi Pulang
+     */
     public function presensiPulang(Request $request)
     {
-        $karyawanId = Auth::id(); // Ambil ID karyawan dari sesi login
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Karyawan belum login'], 401);
+        }
 
-        // Cek apakah karyawan sudah presensi masuk hari ini
-        $presensi = Presensi::where('karyawan_id', $karyawanId)
-            ->whereDate('tanggalPresensi', Carbon::today())
+        $karyawan_id = $user->id;
+        $tanggalHariIni = Carbon::today()->toDateString();
+
+        // Cek presensi masuk
+        $presensi = Presensi::where('karyawan_id', $karyawan_id)
+            ->whereDate('tanggalPresensi', $tanggalHariIni)
             ->first();
 
-        if (!$presensi) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda belum presensi masuk.'
-            ], 400);
+        if (!$presensi || !$presensi->waktuMasuk) {
+            return response()->json(['message' => 'Anda belum presensi masuk.'], 400);
         }
 
         // Cek apakah sudah melakukan presensi pulang
         if ($presensi->waktuPulang) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda sudah melakukan presensi pulang.'
-            ], 400);
+            return response()->json(['message' => 'Anda sudah melakukan presensi pulang.'], 400);
         }
 
-        // Simpan presensi pulang
-        $presensi->waktuPulang = Carbon::now()->format('H:i:s');
-        $presensi->statusPulang = $request->statusPulang ?? 'Tepat Waktu';
-        $presensi->imagePulang = $request->imagePulang ?? null;
-        $presensi->lokasiPulang = $request->lokasiPulang ?? null;
+        // Validasi input
+        $request->validate([
+            'imagePulang' => 'required|image|mimes:jpg,png,jpeg|max:2048',
+            'lokasiPulang.latitude' => 'required|numeric',
+            'lokasiPulang.longitude' => 'required|numeric',
+        ]);
+
+        // Hapus foto lama jika ada
+        if ($presensi->imagePulang) {
+            Storage::disk('public')->delete($presensi->imagePulang);
+        }
+
+        // Simpan gambar pulang
+        $imagePath = $request->file('imagePulang')->store('uploads/presensi', 'public');
+
+        // Update data presensi pulang
+        $presensi->waktuPulang = now()->format('H:i:s');
+        $presensi->statusPulang = 'Tepat Waktu';
+        $presensi->imagePulang = $imagePath;
+        $presensi->lokasiPulang = json_encode([
+            'latitude' => $request->input('lokasiPulang.latitude'),
+            'longitude' => $request->input('lokasiPulang.longitude'),
+        ]);
         $presensi->save();
 
         return response()->json([
-            'success' => true,
             'message' => 'Presensi pulang berhasil dicatat',
             'data' => $presensi
-        ]);
+        ], 200);
     }
 }
