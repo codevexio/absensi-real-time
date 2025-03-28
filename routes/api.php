@@ -44,6 +44,9 @@ Route::apiResource('shift', ShiftController::class);
 // Presensi
 Route::middleware('auth:sanctum')->post('/presensi/masuk', [PresensiController::class, 'presensiMasuk']);
 Route::middleware('auth:sanctum')->post('/presensi/pulang', [PresensiController::class, 'presensiPulang']);
+Route::get('/cek-waktu-presensi', [PresensiController::class, 'cekWaktuPresensi']);
+Route::middleware('auth:sanctum')->get('/list-rekap-presensi', [PresensiController::class, 'listRekapPresensi']);
+Route::middleware('auth:sanctum')->get('/rekap-presensi-pdf/{bulan}', [PresensiController::class, 'rekapPresensiPDF']);
 
 // Keterlambatan
 Route::apiResource('keterlambatan', KeterlambatanController::class);
