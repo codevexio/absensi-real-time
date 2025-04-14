@@ -41,7 +41,7 @@
                         <tbody class="text-gray-800 dark:text-gray-200">
                             @forelse($akun as $index => $akuns)
                                 <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center" data-id="{{ $akuns->id }}">
-                                    <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
+                                    <td class="border px-4 py-2 text-center">{{ $akun->firstItem() + $index }}</td>
                                     <td class="border px-4 py-2">{{ $akuns->nama }}</td>
                                     <td class="border px-4 py-2">{{ $akuns->golongan }}</td>
                                     <td class="border px-4 py-2">{{ $akuns->divisi ?? '-' }}</td>
@@ -85,25 +85,7 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="flex justify-center mt-4">
-                    <button
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg">
-                        ⬅️
-                    </button>
-                    <button class="px-4 py-2 bg-blue-500 text-white rounded-lg mx-1">1</button>
-                    <button
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg">
-                        2
-                    </button>
-                    <button
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg">
-                        3
-                    </button>
-                    <button
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg">
-                        ➡️
-                    </button>
-                </div>
+                {{ $akun->links() }}
             </div>
         </div>
     </div>

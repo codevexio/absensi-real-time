@@ -10,7 +10,7 @@ class KelolaAkunController extends Controller
 {
     public function index()
     {
-        $akun = Karyawan::all();
+        $akun = Karyawan::paginate(10); // Ambil semua data karyawan dengan paginasi
         return view('KelolaAkun', compact('akun'));
     }
 

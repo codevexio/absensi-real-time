@@ -36,7 +36,7 @@
                             @forelse($employees as $index => $employee)
                                 <tr class="hover:bg-gray-200 dark:hover:bg-gray-700 text-center"
                                     data-id="{{ $employee->id }}">
-                                    <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
+                                    <td class="border px-4 py-2 text-center">{{ $employees->firstItem() + $index }}</td>
                                     <td class="border px-4 py-2">{{ $employee->karyawan->nama }}</td>
                                     <td class="border px-4 py-2 text-center">
                                         {{ $employee->shift->namaShift ?? '-' }}  
@@ -65,25 +65,7 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="flex justify-center mt-4">
-                    <button
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg">
-                        ⬅️
-                    </button>
-                    <button class="px-4 py-2 bg-blue-500 text-white rounded-lg mx-1">1</button>
-                    <button
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg">
-                        2
-                    </button>
-                    <button
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg">
-                        3
-                    </button>
-                    <button
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg">
-                        ➡️
-                    </button>
-                </div>
+                {{ $employees->links() }}
             </div>
         </div>
     </div>

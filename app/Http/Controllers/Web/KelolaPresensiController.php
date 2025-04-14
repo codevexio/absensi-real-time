@@ -14,7 +14,7 @@ class KelolaPresensiController extends Controller
     public function index()
     {
         // Ambil data presensi dengan relasi karyawan, jadwal kerja, dan shift
-        $employees = Presensi::with(['karyawan', 'jadwalKerja.shift'])->get();
+        $employees = Presensi::with(['karyawan', 'jadwalKerja.shift'])->paginate(10);
         
         // Pass data ke view
         return view('KelolaPresensi', compact('employees'));

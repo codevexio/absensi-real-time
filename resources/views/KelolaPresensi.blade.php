@@ -19,31 +19,31 @@
                             class="border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-lg w-1/3">
 
                         <!-- Export Buttons -->
-                            <a href="{{route("export.pdf")}}"
-                                class="bg-red-500 hover:bg-red-700 text-white font-bold ms-auto py-2 px-4 rounded-lg mr-2 flex item-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="lucide lucide-file-text">
-                                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-                                    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-                                    <path d="M10 9H8" />
-                                    <path d="M16 13H8" />
-                                    <path d="M16 17H8" />
-                                </svg>Cetak PDF
-                            </a>
-                            <a href="{{route("export.excel")}}"
-                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2"> 
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="lucide lucide-sheet">
-                                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                                    <line x1="3" x2="21" y1="9" y2="9" />
-                                    <line x1="3" x2="21" y1="15" y2="15" />
-                                    <line x1="9" x2="9" y1="9" y2="21" />
-                                    <line x1="15" x2="15" y1="9" y2="21" />
-                                </svg>  
-                                Cetak Excel
-                            </a>
+                        <a href="{{route("export.pdf")}}"
+                            class="bg-red-500 hover:bg-red-700 text-white font-bold ms-auto py-2 px-4 rounded-lg mr-2 flex item-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-file-text">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                                <path d="M10 9H8" />
+                                <path d="M16 13H8" />
+                                <path d="M16 17H8" />
+                            </svg>Cetak PDF
+                        </a>
+                        <a href="{{route("export.excel")}}"
+                            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-sheet">
+                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                <line x1="3" x2="21" y1="9" y2="9" />
+                                <line x1="3" x2="21" y1="15" y2="15" />
+                                <line x1="9" x2="9" y1="9" y2="21" />
+                                <line x1="15" x2="15" y1="9" y2="21" />
+                            </svg>
+                            Cetak Excel
+                        </a>
                     </div>
 
                     <!-- Tabel Presensi -->
@@ -64,14 +64,14 @@
                             <tbody>
                                 @forelse ($employees as $index => $employee)
                                     <tr>
-                                        <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
+                                        <td class="border px-4 py-2 text-center">{{ $employees->firstItem() + $index }}</td>
                                         <td class="border px-4 py-2 text-center">{{ $employee->karyawan->nama ?? '-' }}</td>
                                         <td class="border px-4 py-2 text-center">{{ $employee->tanggalPresensi }}</td>
                                         <td class="border px-4 py-2 text-center">
                                             {{ $employee->jadwalKerja->shift->namaShift ?? '-' }}
                                         </td>
                                         <!-- Ambil nama shift -->
-                                        <td class="border px-4 py-2 text-center">{{ $employee->waktuMasuk }}</td>
+                                        <td class="border px-4 py-2 text-center">{{ $employee->waktuMasuk ?? '-' }}</td>
                                         <td class="border px-4 py-2 text-center">{{ $employee->statusMasuk }}</td>
                                         <td class="border px-4 py-2 text-center">{{ $employee->waktuPulang ?? '-' }}</td>
                                         <td class="border px-4 py-2 text-center">{{ $employee->statusPulang }}</td>
@@ -86,7 +86,8 @@
 
                         </table>
                     </div>
-
+                    <!-- Pagination -->
+                    {{ $employees->links() }}
                 </div>
             </div>
         </div>
