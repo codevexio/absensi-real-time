@@ -67,9 +67,9 @@ class PresensiController extends Controller
         $waktuPulangShift = Carbon::parse($jadwalKerja->shift->waktu_pulang, 'UTC')->setTimezone('Asia/Jakarta');
 
         // Presensi time validation
-        $waktuBukaMasuk = $waktuMasukShift->copy()->subHour(10)->format('H:i:s');
+        $waktuBukaMasuk = $waktuMasukShift->copy()->subMinutes(120)->format('H:i:s');
         $waktuTutupMasuk = $waktuMasukShift->copy()->addMinutes(90)->format('H:i:s');
-        $waktuBukaPulang = $waktuPulangShift->copy()->subHour(20)->format('H:i:s');
+        $waktuBukaPulang = $waktuPulangShift->copy()->format('H:i:s');
         $waktuTutupPulang = $waktuPulangShift->copy()->addHours(5)->format('H:i:s');
 
         $presensi = Presensi::where('karyawan_id', $karyawan_id)
