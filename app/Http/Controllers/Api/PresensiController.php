@@ -49,8 +49,7 @@ class PresensiController extends Controller
 
         $karyawan_id = $user->id;
         $tanggalHariIni = Carbon::today('Asia/Jakarta')->toDateString();
-        
-        // Cek jadwal kerja karyawan
+
         $jadwalKerja = JadwalKerja::where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalKerja', $tanggalHariIni)
             ->first();
@@ -67,20 +66,16 @@ class PresensiController extends Controller
         $waktuMasukShift = Carbon::parse($jadwalKerja->shift->waktu_masuk, 'UTC')->setTimezone('Asia/Jakarta');
         $waktuPulangShift = Carbon::parse($jadwalKerja->shift->waktu_pulang, 'UTC')->setTimezone('Asia/Jakarta');
 
-        // Atur batas waktu presensi masuk
+        // Presensi time validation
         $waktuBukaMasuk = $waktuMasukShift->copy()->subMinutes(120)->format('H:i:s');
         $waktuTutupMasuk = $waktuMasukShift->copy()->addMinutes(90)->format('H:i:s');
-
-        // Atur batas waktu presensi pulang
         $waktuBukaPulang = $waktuPulangShift->copy()->format('H:i:s');
         $waktuTutupPulang = $waktuPulangShift->copy()->addHours(5)->format('H:i:s');
 
-        // Cek apakah presensi masuk sudah dilakukan
         $presensi = Presensi::where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalPresensi', $tanggalHariIni)
             ->first();
 
-        // Logika untuk menentukan apakah presensi bisa dilakukan
         if ($waktuSekarang < $waktuBukaMasuk) {
             return response()->json([
                 'bisaPresensiMasuk' => false,
@@ -113,13 +108,10 @@ class PresensiController extends Controller
             ]);
         }
 
-        $bisaPresensiMasuk = ($waktuSekarang >= $waktuBukaMasuk && $waktuSekarang <= $waktuTutupMasuk) && (!$presensi || !$presensi->waktuMasuk);
-        $bisaPresensiPulang = ($waktuSekarang >= $waktuBukaPulang && $waktuSekarang <= $waktuTutupPulang) && ($presensi && $presensi->waktuMasuk && !$presensi->waktuPulang);
-
         return response()->json([
-            'bisaPresensiMasuk' => $bisaPresensiMasuk,
-            'bisaPresensiPulang' => $bisaPresensiPulang,
-            'message' => $bisaPresensiMasuk ? 'Silakan lakukan presensi masuk' : ($bisaPresensiPulang ? 'Silakan lakukan presensi pulang' : 'Waktu presensi belum tersedia')
+            'bisaPresensiMasuk' => true,
+            'bisaPresensiPulang' => true,
+            'message' => 'Silakan lakukan presensi'
         ]);
     }
 
@@ -289,6 +281,4 @@ class PresensiController extends Controller
         $pdf = Pdf::loadView('pdf.rekap_presensi', $data);
         return $pdf->download("rekap-presensi-$bulan.pdf");
     }
-
-
 }

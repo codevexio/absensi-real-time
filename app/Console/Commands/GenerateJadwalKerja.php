@@ -17,6 +17,10 @@ class GenerateJadwalKerja extends Command
 
     public function handle()
     {
+        // Reconnect untuk menghindari error prepared statement PostgreSQL
+        DB::disconnect(); 
+        DB::reconnect();
+
         $tanggalHariIni = Carbon::now()->toDateString();
         $defaultShift = Shift::first();
 
@@ -28,6 +32,8 @@ class GenerateJadwalKerja extends Command
         $karyawanList = Karyawan::all();
 
         foreach ($karyawanList as $karyawan) {
+            DB::disconnect(); // force reconnect to prevent invalid prepared statement
+            DB::reconnect();
             // Cek apakah karyawan sedang cuti
             $sedangCuti = DB::table('pengajuan_cuti')
                 ->where('karyawan_id', $karyawan->id)
@@ -47,14 +53,16 @@ class GenerateJadwalKerja extends Command
                 $statusPulang = 'Tidak Presensi Pulang';
             }
 
-            // Cek apakah sudah ada jadwal kerja sebelumnya
-            $jadwal = JadwalKerja::where('karyawan_id', $karyawan->id)->first();
+            // Cek apakah sudah ada jadwal kerja untuk hari ini
+            $jadwal = JadwalKerja::where('karyawan_id', $karyawan->id)
+                ->whereDate('tanggalKerja', $tanggalHariIni)
+                ->first();
 
             if ($jadwal) {
-                // Jika sudah ada, update tanggalnya ke hari ini
+                // Jika sudah ada, update status kerja
                 $jadwal->update([
-                    'tanggalKerja' => $tanggalHariIni,
                     'statusKerja' => $statusKerja,
+                    'updated_at' => now(),
                 ]);
             } else {
                 // Jika belum ada, buat baru

@@ -92,7 +92,10 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'schema' => 'public',
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'sslmode' => 'prefer',
+            'options'   => [
+                PDO::ATTR_EMULATE_PREPARES => true,  // Nonaktifkan prepared statement
+            ],
         ],
 
 
