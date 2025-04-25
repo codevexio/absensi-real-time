@@ -92,10 +92,11 @@ class PresensiController extends Controller
 
         $jadwalKerja = JadwalKerja::where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalKerja', $tanggalHariIni)
+            ->with('shift') // pastikan eager loading shift
             ->first();
 
-        if (!$jadwalKerja) {
-            return response()->json(['message' => 'Jadwal kerja tidak ditemukan'], 404);
+        if (!$jadwalKerja || !$jadwalKerja->shift) {
+            return response()->json(['message' => 'Jadwal kerja atau shift tidak ditemukan'], 404);
         }
 
         $request->validate([
@@ -108,34 +109,34 @@ class PresensiController extends Controller
         $longitude = $request->input('lokasiMasuk.longitude');
 
         if (!$this->pengaturanLokasi($latitude, $longitude)) {
-            return response()->json(['message' => 'Lokasi di luar area kantor'], 400);
+            return response()->json(['message' => 'Anda berada di luar lokasi yang diizinkan untuk presensi.'], 400);
         }
 
-        $waktuMasuk = Carbon::now('Asia/Jakarta');
-        $jadwalMasuk = Carbon::parse($jadwalKerja->waktu_masuk, 'Asia/Jakarta');
-        $status = $waktuMasuk->gt($jadwalMasuk) ? 'Terlambat' : 'Tepat Waktu';
+        $waktuSekarang = Carbon::now('Asia/Jakarta');
+        $waktuMasukShift = Carbon::parse($jadwalKerja->shift->waktu_masuk, 'UTC')->setTimezone('Asia/Jakarta');
+        $statusMasuk = $waktuSekarang->gt($waktuMasukShift) ? 'Terlambat' : 'Tepat Waktu';
 
-        $path = $request->file('imageMasuk')->store('uploads/presensi', 'public');
+        $imagePath = $request->file('imageMasuk')->store('uploads/presensi', 'public');
 
         $presensi = Presensi::updateOrCreate(
             ['karyawan_id' => $karyawan_id, 'tanggalPresensi' => $tanggalHariIni],
             [
                 'jadwal_kerja_id' => $jadwalKerja->id,
-                'waktuMasuk' => $waktuMasuk,
-                'statusMasuk' => $status,
-                'imageMasuk' => $path,
+                'waktuMasuk' => $waktuSekarang,
+                'statusMasuk' => $statusMasuk,
+                'imageMasuk' => $imagePath,
                 'lokasiMasuk' => json_encode(['latitude' => $latitude, 'longitude' => $longitude]),
             ]
         );
 
-        if ($status === 'Terlambat') {
+        if ($statusMasuk === 'Terlambat') {
             Keterlambatan::firstOrCreate([
                 'karyawan_id' => $karyawan_id,
                 'presensi_id' => $presensi->id,
             ]);
         }
 
-        return response()->json(['message' => 'Presensi masuk berhasil', 'data' => $presensi], 200);
+        return response()->json(['message' => 'Presensi masuk berhasil dicatat', 'data' => $presensi], 200);
     }
 
     public function presensiPulang(Request $request)
