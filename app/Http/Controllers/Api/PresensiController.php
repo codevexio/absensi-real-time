@@ -10,32 +10,27 @@ use App\Models\Keterlambatan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PresensiController extends Controller
 {
-    /**
-     * Pengaturan Lokasi
-     */
-    private $officeLatitude = 0.5648395; // Latitude kantor
-    private $officeLongitude = 101.4284359; // Longitude kantor
-    private $radiusAllowed = 500; // Radius dalam meter
+    // Koordinat lokasi kantor dan radius yang diperbolehkan (dalam meter)
+    private $officeLatitude = 0.5648395;
+    private $officeLongitude = 101.4284359;
+    private $radiusAllowed = 500;
 
-    public function pengaturanLokasi($lat, $lng)
+    private function pengaturanLokasi($lat, $lng)
     {
-        $earthRadius = 6371000; // Radius bumi dalam meter
+        $earthRadius = 6371000;
         $dLat = deg2rad($lat - $this->officeLatitude);
         $dLng = deg2rad($lng - $this->officeLongitude);
-        $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($this->officeLatitude)) * cos(deg2rad($lat)) * sin($dLng / 2) * sin($dLng / 2);
+        $a = sin($dLat / 2) ** 2 + cos(deg2rad($this->officeLatitude)) * cos(deg2rad($lat)) * sin($dLng / 2) ** 2;
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
         $distance = $earthRadius * $c;
+
         return $distance <= $this->radiusAllowed;
     }
 
-    /**
-     * Cek Waktu Presensi
-     */
     public function cekWaktuPresensi()
     {
         $user = Auth::user();
@@ -50,11 +45,12 @@ class PresensiController extends Controller
         $karyawan_id = $user->id;
         $tanggalHariIni = Carbon::today('Asia/Jakarta')->toDateString();
 
-        $jadwalKerja = JadwalKerja::where('karyawan_id', $karyawan_id)
+        $jadwalKerja = JadwalKerja::with('shift')
+            ->where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalKerja', $tanggalHariIni)
             ->first();
 
-        if (!$jadwalKerja) {
+        if (!$jadwalKerja || !$jadwalKerja->shift) {
             return response()->json([
                 'bisaPresensiMasuk' => false,
                 'bisaPresensiPulang' => false,
@@ -62,62 +58,28 @@ class PresensiController extends Controller
             ], 404);
         }
 
-        $waktuSekarang = Carbon::now('Asia/Jakarta')->format('H:i:s');
-        $waktuMasukShift = Carbon::parse($jadwalKerja->shift->waktu_masuk, 'UTC')->setTimezone('Asia/Jakarta');
-        $waktuPulangShift = Carbon::parse($jadwalKerja->shift->waktu_pulang, 'UTC')->setTimezone('Asia/Jakarta');
-
-        // Presensi time validation
-        $waktuBukaMasuk = $waktuMasukShift->copy()->subMinutes(120)->format('H:i:s');
-        $waktuTutupMasuk = $waktuMasukShift->copy()->addMinutes(90)->format('H:i:s');
-        $waktuBukaPulang = $waktuPulangShift->copy()->format('H:i:s');
-        $waktuTutupPulang = $waktuPulangShift->copy()->addHours(5)->format('H:i:s');
+        $waktuSekarang = Carbon::now('Asia/Jakarta');
+        $waktuMasuk = Carbon::parse($jadwalKerja->shift->waktu_masuk, 'UTC')->setTimezone('Asia/Jakarta');
+        $waktuPulang = Carbon::parse($jadwalKerja->shift->waktu_pulang, 'UTC')->setTimezone('Asia/Jakarta');
 
         $presensi = Presensi::where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalPresensi', $tanggalHariIni)
             ->first();
 
-        if ($waktuSekarang < $waktuBukaMasuk) {
-            return response()->json([
-                'bisaPresensiMasuk' => false,
-                'bisaPresensiPulang' => false,
-                'message' => 'Belum saatnya presensi masuk'
-            ]);
-        }
+        $bisaPresensiMasuk = $waktuSekarang->between($waktuMasuk->copy()->subMinutes(120), $waktuMasuk->copy()->addMinutes(90))
+            && (!$presensi || !$presensi->waktuMasuk);
 
-        if ($waktuSekarang > $waktuTutupMasuk && (!$presensi || !$presensi->waktuMasuk)) {
-            return response()->json([
-                'bisaPresensiMasuk' => false,
-                'bisaPresensiPulang' => false,
-                'message' => 'Waktu presensi masuk sudah ditutup'
-            ]);
-        }
-
-        if ($waktuSekarang < $waktuBukaPulang) {
-            return response()->json([
-                'bisaPresensiMasuk' => false,
-                'bisaPresensiPulang' => false,
-                'message' => 'Belum saatnya presensi pulang'
-            ]);
-        }
-
-        if ($waktuSekarang > $waktuTutupPulang) {
-            return response()->json([
-                'bisaPresensiMasuk' => false,
-                'bisaPresensiPulang' => false,
-                'message' => 'Waktu presensi pulang sudah ditutup'
-            ]);
-        }
+        $bisaPresensiPulang = $presensi && $presensi->waktuMasuk &&
+            $waktuSekarang->between($waktuPulang, $waktuPulang->copy()->addHours(5)) &&
+            !$presensi->waktuPulang;
 
         return response()->json([
-            'bisaPresensiMasuk' => true,
-            'bisaPresensiPulang' => true,
-            'message' => 'Silakan lakukan presensi'
+            'bisaPresensiMasuk' => $bisaPresensiMasuk,
+            'bisaPresensiPulang' => $bisaPresensiPulang,
+            'message' => 'Status presensi berhasil diambil'
         ]);
     }
 
-    /**
-     * Presensi Masuk
-     */
     public function presensiMasuk(Request $request)
     {
         $user = Auth::user();
@@ -146,39 +108,36 @@ class PresensiController extends Controller
         $longitude = $request->input('lokasiMasuk.longitude');
 
         if (!$this->pengaturanLokasi($latitude, $longitude)) {
-            return response()->json(['message' => 'Anda berada di luar lokasi yang diizinkan untuk presensi.'], 400);
+            return response()->json(['message' => 'Lokasi di luar area kantor'], 400);
         }
 
-        $waktuSekarang = Carbon::now('Asia/Jakarta')->format('H:i:s');
-        $waktuMasukShift = Carbon::parse($jadwalKerja->waktu_masuk, 'Asia/Jakarta')->format('H:i:s');
-        $statusMasuk = ($waktuSekarang > $waktuMasukShift) ? 'Terlambat' : 'Tepat Waktu';
+        $waktuMasuk = Carbon::now('Asia/Jakarta');
+        $jadwalMasuk = Carbon::parse($jadwalKerja->waktu_masuk, 'Asia/Jakarta');
+        $status = $waktuMasuk->gt($jadwalMasuk) ? 'Terlambat' : 'Tepat Waktu';
 
-        $imagePath = $request->file('imageMasuk')->store('uploads/presensi', 'public');
+        $path = $request->file('imageMasuk')->store('uploads/presensi', 'public');
 
         $presensi = Presensi::updateOrCreate(
             ['karyawan_id' => $karyawan_id, 'tanggalPresensi' => $tanggalHariIni],
             [
                 'jadwal_kerja_id' => $jadwalKerja->id,
-                'waktuMasuk' => $waktuSekarang,
-                'statusMasuk' => $statusMasuk,
-                'imageMasuk' => $imagePath,
+                'waktuMasuk' => $waktuMasuk,
+                'statusMasuk' => $status,
+                'imageMasuk' => $path,
                 'lokasiMasuk' => json_encode(['latitude' => $latitude, 'longitude' => $longitude]),
             ]
         );
 
-        if ($statusMasuk === 'Terlambat') {
+        if ($status === 'Terlambat') {
             Keterlambatan::firstOrCreate([
                 'karyawan_id' => $karyawan_id,
                 'presensi_id' => $presensi->id,
             ]);
         }
 
-        return response()->json(['message' => 'Presensi masuk berhasil dicatat', 'data' => $presensi], 200);
+        return response()->json(['message' => 'Presensi masuk berhasil', 'data' => $presensi], 200);
     }
 
-    /**
-     * Presensi Pulang
-     */
     public function presensiPulang(Request $request)
     {
         $user = Auth::user();
@@ -187,14 +146,14 @@ class PresensiController extends Controller
         }
 
         $karyawan_id = $user->id;
-        $tanggalHariIni = Carbon::today()->toDateString();
+        $tanggalHariIni = Carbon::today('Asia/Jakarta')->toDateString();
 
         $presensi = Presensi::where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalPresensi', $tanggalHariIni)
             ->first();
 
         if (!$presensi || !$presensi->waktuMasuk) {
-            return response()->json(['message' => 'Anda belum presensi masuk.'], 400);
+            return response()->json(['message' => 'Belum presensi masuk'], 400);
         }
 
         $request->validate([
@@ -207,36 +166,32 @@ class PresensiController extends Controller
         $longitude = $request->input('lokasiPulang.longitude');
 
         if (!$this->pengaturanLokasi($latitude, $longitude)) {
-            return response()->json(['message' => 'Anda berada di luar lokasi yang diizinkan untuk presensi.'], 400);
+            return response()->json(['message' => 'Lokasi di luar area kantor'], 400);
         }
 
-        $imagePath = $request->file('imagePulang')->store('uploads/presensi', 'public');
+        $path = $request->file('imagePulang')->store('uploads/presensi', 'public');
 
         $presensi->update([
-            'waktuPulang' => now()->format('H:i:s'),
+            'waktuPulang' => Carbon::now('Asia/Jakarta'),
             'statusPulang' => 'Tepat Waktu',
-            'imagePulang' => $imagePath,
+            'imagePulang' => $path,
             'lokasiPulang' => json_encode(['latitude' => $latitude, 'longitude' => $longitude]),
         ]);
 
-        return response()->json(['message' => 'Presensi pulang berhasil dicatat', 'data' => $presensi], 200);
+        return response()->json(['message' => 'Presensi pulang berhasil', 'data' => $presensi], 200);
     }
 
-    /**
-     * List Rekap Presensi Bulanan
-     */
     public function listRekapPresensi()
     {
         $user = Auth::user();
-
         if (!$user) {
             return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
-        $rekap = Presensi::selectRaw('TO_CHAR("tanggalPresensi", \'YYYY-MM\') as bulan')
+        $rekap = Presensi::selectRaw("DATE_FORMAT(tanggalPresensi, '%Y-%m') as bulan")
             ->where('karyawan_id', $user->id)
             ->groupBy('bulan')
-            ->orderBy('bulan', 'desc')
+            ->orderByDesc('bulan')
             ->get();
 
         return response()->json([
@@ -246,9 +201,6 @@ class PresensiController extends Controller
         ]);
     }
 
-    /**
-     * Download PDF Rekapan Presensi Bulanan Karyawan
-     */
     public function rekapPresensiPDF($bulan)
     {
         $user = Auth::user();
@@ -256,28 +208,23 @@ class PresensiController extends Controller
             return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
-        $karyawan_id = $user->id;
-
         try {
-            // Perbaikan parsing tanggal
-            $tanggal_awal = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth();
-            $tanggal_akhir = Carbon::createFromFormat('Y-m', $bulan)->endOfMonth();
+            $start = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth();
+            $end = Carbon::createFromFormat('Y-m', $bulan)->endOfMonth();
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Format bulan tidak valid, gunakan format YYYY-MM'], 400);
+            return response()->json(['message' => 'Format bulan salah, gunakan YYYY-MM'], 400);
         }
 
-        // Ambil data presensi
-        $presensi = Presensi::where('karyawan_id', $karyawan_id)
-            ->whereBetween('tanggalPresensi', [$tanggal_awal, $tanggal_akhir])
+        $presensi = Presensi::where('karyawan_id', $user->id)
+            ->whereBetween('tanggalPresensi', [$start, $end])
             ->get();
 
         $data = [
-            'user' => $user, // Nama, golongan, divisi
+            'user' => $user,
             'bulan' => $bulan,
             'presensi' => $presensi,
         ];
 
-        // Generate PDF
         $pdf = Pdf::loadView('pdf.rekap_presensi', $data);
         return $pdf->download("rekap-presensi-$bulan.pdf");
     }
