@@ -18,8 +18,8 @@ class PresensiController extends Controller
     /**
      * Pengaturan Lokasi
      */
-    private $officeLatitude = -0.364388; // Latitude kantor
-    private $officeLongitude = 100.066725; // Longitude kantor
+    private $officeLatitude = 0.5648395; // Latitude kantor
+    private $officeLongitude = 101.4284359; // Longitude kantor
     private $radiusAllowed = 500; // Radius dalam meter
 
     public function pengaturanLokasi($lat, $lng)
