@@ -10,7 +10,7 @@ class KelolaAkunController extends Controller
 {
     public function index()
     {
-        $akun = Karyawan::paginate(10); // Ambil semua data karyawan dengan paginasi
+        $akun = Karyawan::orderBy('created_at','desc')->paginate(10); // Ambil semua data karyawan dengan paginasi
         return view('KelolaAkun', compact('akun'));
     }
 
@@ -31,7 +31,7 @@ class KelolaAkunController extends Controller
             'username' => $request->username,
             'password' => bcrypt($request->password),
         ]);
-
+        
         return redirect()->route('web/kelola-akun')->with('success', 'Akun berhasil ditambahkan');
     }
 

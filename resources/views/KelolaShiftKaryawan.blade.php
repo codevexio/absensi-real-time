@@ -72,7 +72,7 @@
 
     <!-- Modal Edit Akun -->
     <dialog id="edit-shift" class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 w-full max-w-lg">
-        <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Edit Akun Karyawan</h3>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Edit Shift Karyawan</h3>
         <form id="form-edit-shift" action="" method="POST">
             @csrf
             @method('PUT')

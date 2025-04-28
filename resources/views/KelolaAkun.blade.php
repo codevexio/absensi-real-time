@@ -105,11 +105,11 @@
                 <select name="golongan" required
                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
                     <option value="">Pilih Golongan</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
-                    <option value="E">E</option>
+                    <option value="A">Direksi</option>
+                    <option value="B">Kepala Bagian(Kabag)</option>
+                    <option value="C">Kepala SubBagian(Kasubag)</option>
+                    <option value="D">Asisten</option>
+                    <option value="E">Staff</option>
                 </select>
             </div>
             <div class="mb-4">
@@ -117,11 +117,20 @@
                 <select name="divisi" required
                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
                     <option value="">Pilih Divisi</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
-                    <option value="E">E</option>
+                    <option value="A">Bag.Sekper</option>
+                    <option value="B">Bag.SPI</option>
+                    <option value="C">Bag.SDM</option>
+                    <option value="D">Bag.Tanaman</option>
+                    <option value="E">Bag.Teknik & Pengolahan</option>
+                    <option value="E">Bag.Keuangan</option>
+                    <option value="E">Bag.Pemasaran & P.Baku</option>
+                    <option value="E">Bag.Perencanaa Strategis</option>
+                    <option value="E">Bag.Hukum</option>
+                    <option value="E">Bag.Pengadaan & TI</option>
+                    <option value="E">Keamanan</option>
+                    <option value="E">Papam</option>
+                    <option value="E">Bag.Percepetan Transformasi Teknologi</option>
+                    <option value="E">Bag.Teknik & Pengolahan</option>
                 </select>
             </div>
             <div class="mb-4">
@@ -234,7 +243,7 @@
                 document.getElementById("edit-username").value = username;
 
                 // Update action form edit
-                document.getElementById("form-edit-akun").action = `/web/kelola-akun/${id}`;
+                document.getElementById("form-edit-akun").action = `/web/kelola-akun/${id}`;    
 
                 dialogEdit.showModal();
             });

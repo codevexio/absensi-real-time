@@ -42,3 +42,7 @@ Route::get('/izinkaryawan/search', [IzinKaryawanController::class, 'search'])->n
 Route::get('/kelolashift', [KelolaShiftController::class,'index'])->name('web/kelola-shift');
 Route::put('/kelola-shift/{id}', [KelolaShiftController::class, 'update'])->name('kelola-shift.update');
 require __DIR__.'/auth.php';
+
+use App\Http\Controllers\Web\AdminDashboardController;
+
+Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');

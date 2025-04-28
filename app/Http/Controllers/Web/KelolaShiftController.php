@@ -15,7 +15,7 @@ class KelolaShiftController extends Controller
     
     public function index()
     {
-        $employees = JadwalKerja::with(['karyawan', 'shift'])->paginate(10); // Ambil data karyawan dengan relasi jadwal kerja dan shift
+        $employees = JadwalKerja::with(['karyawan', 'shift'])->orderBy('created_at','desc')->paginate(10); // Ambil data karyawan dengan relasi jadwal kerja dan shift
         $shifts = Shift::all(); // Ambil semua shift
 
         return view('KelolaShiftKaryawan', compact('employees', 'shifts'));
