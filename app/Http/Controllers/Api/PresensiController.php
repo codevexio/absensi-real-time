@@ -113,7 +113,9 @@ class PresensiController extends Controller
         }
 
         $waktuSekarang = Carbon::now('Asia/Jakarta');
-        $waktuMasukShift = Carbon::parse($jadwalKerja->shift->waktu_masuk, 'UTC')->setTimezone('Asia/Jakarta');
+        $waktuMasukShift = Carbon::createFromFormat('H:i:s', $jadwalKerja->shift->waktu_masuk, 'Asia/Jakarta');
+
+        // status presensi
         $statusMasuk = $waktuSekarang->gt($waktuMasukShift) ? 'Terlambat' : 'Tepat Waktu';
 
         $imagePath = $request->file('imageMasuk')->store('uploads/presensi', 'public');
