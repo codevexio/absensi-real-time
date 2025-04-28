@@ -66,7 +66,7 @@ class PresensiController extends Controller
             ->whereDate('tanggalPresensi', $tanggalHariIni)
             ->first();
 
-        $bisaPresensiMasuk = $waktuSekarang->between($waktuMasuk->copy()->subMinutes(120), $waktuMasuk->copy()->addMinutes(90))
+        $bisaPresensiMasuk = $waktuSekarang->between($waktuMasuk->copy()->subMinutes(120), $waktuMasuk->copy()->addMinutes(600))
             && (!$presensi || !$presensi->waktuMasuk);
 
         $bisaPresensiPulang = $presensi && $presensi->waktuMasuk &&
