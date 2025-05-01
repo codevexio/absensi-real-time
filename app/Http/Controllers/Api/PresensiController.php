@@ -90,15 +90,32 @@ class PresensiController extends Controller
         $karyawan_id = $user->id;
         $tanggalHariIni = Carbon::today('Asia/Jakarta')->toDateString();
 
-        $jadwalKerja = JadwalKerja::where('karyawan_id', $karyawan_id)
+        // Ambil jadwal kerja berdasarkan tanggal hari ini dan karyawan
+        $jadwalKerja = JadwalKerja::with('shift')
+            ->where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalKerja', $tanggalHariIni)
-            ->with('shift') // pastikan eager loading shift
             ->first();
 
         if (!$jadwalKerja || !$jadwalKerja->shift) {
-            return response()->json(['message' => 'Jadwal kerja atau shift tidak ditemukan'], 404);
+            return response()->json(['message' => 'Jadwal kerja tidak ditemukan'], 404);
         }
 
+        // Gunakan zona waktu Asia/Jakarta
+        $waktuSekarang = Carbon::now('Asia/Jakarta');
+        $waktuMasuk = Carbon::parse($jadwalKerja->shift->waktuMulai, 'Asia/Jakarta'); // Waktu masuk dari shift
+
+        // Tentukan batas toleransi, misalnya 10 menit
+        $batasTerlambat = $waktuMasuk->copy()->addMinutes(10);
+
+        // Tentukan status berdasarkan perbandingan waktu masuk
+        $statusMasuk = $waktuSekarang->greaterThan($batasTerlambat) ? 'Terlambat' : 'Tepat Waktu';
+
+        // Cek jika sudah lewat batas waktu masuk tanpa toleransi
+        if ($waktuSekarang->greaterThan($waktuMasuk)) {
+            $statusMasuk = 'Terlambat'; // Pastikan terlambat jika sudah lewat waktu masuk
+        }
+
+        // Validasi data input dari request
         $request->validate([
             'imageMasuk' => 'required|image|mimes:jpg,png,jpeg|max:2048',
             'lokasiMasuk.latitude' => 'required|numeric',
@@ -109,36 +126,35 @@ class PresensiController extends Controller
         $longitude = $request->input('lokasiMasuk.longitude');
 
         if (!$this->pengaturanLokasi($latitude, $longitude)) {
-            return response()->json(['message' => 'Anda berada di luar lokasi yang diizinkan untuk presensi.'], 400);
+            return response()->json(['message' => 'Lokasi di luar area kantor'], 400);
         }
 
-        $waktuSekarang = Carbon::now('Asia/Jakarta');
-        $waktuMasukShift = Carbon::createFromFormat('H:i:s', $jadwalKerja->shift->waktu_masuk, 'Asia/Jakarta');
+        $path = $request->file('imageMasuk')->store('uploads/presensi', 'public');
 
-        // status presensi
-        $statusMasuk = $waktuSekarang->gt($waktuMasukShift) ? 'Terlambat' : 'Tepat Waktu';
-
-        $imagePath = $request->file('imageMasuk')->store('uploads/presensi', 'public');
-
+        // Simpan atau update presensi
         $presensi = Presensi::updateOrCreate(
             ['karyawan_id' => $karyawan_id, 'tanggalPresensi' => $tanggalHariIni],
             [
-                'jadwal_kerja_id' => $jadwalKerja->id,
                 'waktuMasuk' => $waktuSekarang,
                 'statusMasuk' => $statusMasuk,
-                'imageMasuk' => $imagePath,
+                'imageMasuk' => $path,
                 'lokasiMasuk' => json_encode(['latitude' => $latitude, 'longitude' => $longitude]),
             ]
         );
 
+        // Jika terlambat, simpan ke tabel keterlambatan
         if ($statusMasuk === 'Terlambat') {
-            Keterlambatan::firstOrCreate([
-                'karyawan_id' => $karyawan_id,
-                'presensi_id' => $presensi->id,
-            ]);
+            Keterlambatan::updateOrCreate(
+                ['karyawan_id' => $karyawan_id, 'presensi_id' => $presensi->id],
+                []
+            );
         }
+        
 
-        return response()->json(['message' => 'Presensi masuk berhasil dicatat', 'data' => $presensi], 200);
+        return response()->json([
+            'message' => 'Presensi masuk berhasil',
+            'data' => $presensi,
+        ], 200);
     }
 
     public function presensiPulang(Request $request)
