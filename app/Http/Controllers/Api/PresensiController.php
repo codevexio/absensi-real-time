@@ -153,8 +153,15 @@ class PresensiController extends Controller
 
         return response()->json([
             'message' => 'Presensi masuk berhasil',
-            'data' => $presensi,
+            'data' => [
+                'id' => $presensi->id,
+                'waktuMasuk' => $presensi->waktuMasuk,
+                'statusMasuk' => $presensi->statusMasuk,
+                'imageMasuk' => $presensi->imageMasuk,
+                'lokasiMasuk' => json_decode($presensi->lokasiMasuk), // ✅ ubah string jadi object
+            ],
         ], 200);
+        
     }
 
     public function presensiPulang(Request $request)
