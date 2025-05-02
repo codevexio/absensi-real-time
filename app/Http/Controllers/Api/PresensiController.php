@@ -138,7 +138,11 @@ class PresensiController extends Controller
                 'waktuMasuk' => $waktuSekarang,
                 'statusMasuk' => $statusMasuk,
                 'imageMasuk' => $path,
-                'lokasiMasuk' => json_encode(['latitude' => $latitude, 'longitude' => $longitude]),
+                'lokasiMasuk' => [
+                    'latitude' => $latitude,
+                    'longitude' => $longitude,
+                ],
+
             ]
         );
 
