@@ -162,9 +162,9 @@ class PresensiController extends Controller
                 'waktuMasuk' => $presensi->waktuMasuk,
                 'statusMasuk' => $presensi->statusMasuk,
                 'imageMasuk' => $presensi->imageMasuk,
-                'lokasiMasuk' => $presensi->lokasiMasuk, // Tidak perlu json_decode
-            ],
-        ], 200);        
+                'lokasiMasuk' => $presensi->lokasiMasuk,
+            ]
+        ], 200);                
     }
 
     public function presensiPulang(Request $request)
