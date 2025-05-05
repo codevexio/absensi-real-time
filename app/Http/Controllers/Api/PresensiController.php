@@ -217,7 +217,8 @@ class PresensiController extends Controller
             return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
-        $rekap = Presensi::selectRaw("DATE_FORMAT(tanggalPresensi, '%Y-%m') as bulan")
+        // Menggunakan TO_CHAR untuk PostgreSQL
+        $rekap = Presensi::selectRaw("TO_CHAR(tanggalPresensi, 'YYYY-MM') as bulan")
             ->where('karyawan_id', $user->id)
             ->groupBy('bulan')
             ->orderByDesc('bulan')
@@ -229,6 +230,7 @@ class PresensiController extends Controller
             'rekap_presensi' => $rekap
         ]);
     }
+
 
     public function rekapPresensiPDF($bulan)
     {
@@ -257,4 +259,5 @@ class PresensiController extends Controller
         $pdf = Pdf::loadView('pdf.rekap_presensi', $data);
         return $pdf->download("rekap-presensi-$bulan.pdf");
     }
+
 }
