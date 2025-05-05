@@ -218,11 +218,12 @@ class PresensiController extends Controller
         }
 
         // Menggunakan TO_CHAR untuk PostgreSQL
-        $rekap = Presensi::selectRaw("TO_CHAR(tanggalPresensi, 'YYYY-MM') as bulan")
+        $rekap = Presensi::selectRaw("TO_CHAR(\"tanggalPresensi\", 'YYYY-MM') as bulan")
             ->where('karyawan_id', $user->id)
             ->groupBy('bulan')
             ->orderByDesc('bulan')
             ->get();
+
 
         return response()->json([
             'karyawan_id' => $user->id,
