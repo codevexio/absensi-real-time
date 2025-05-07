@@ -1,49 +1,51 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-use App\Http\Controllers\Controller;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use App\Models\Presensi;
+use App\Models\Keterlambatan;
 use Illuminate\Http\Request;
 
 class KeterlambatanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function statistikBulananOtomatis()
     {
-        //
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Karyawan belum login'], 401);
+        }
+
+        // Ambil bulan sekarang
+        $now = Carbon::now();
+        $start = $now->copy()->startOfMonth()->toDateString();
+        $end = $now->copy()->endOfMonth()->toDateString();
+
+        // Total presensi masuk bulan ini
+        $totalPresensi = Presensi::where('karyawan_id', $user->id)
+            ->whereBetween('tanggalPresensi', [$start, $end])
+            ->whereNotNull('waktuMasuk') // pastikan sudah presensi masuk
+            ->count();
+
+        // Jumlah keterlambatan bulan ini
+        $jumlahTerlambat = Keterlambatan::where('karyawan_id', $user->id)
+            ->whereHas('presensi', function ($query) use ($start, $end) {
+                $query->whereBetween('tanggalPresensi', [$start, $end]);
+            })
+            ->count();
+
+        // Hitung jumlah tepat waktu
+        $jumlahTepatWaktu = $totalPresensi - $jumlahTerlambat;
+
+        return response()->json([
+            'bulan' => $now->format('Y-m'),
+            'total_presensi' => $totalPresensi,
+            'jumlah_terlambat' => $jumlahTerlambat,
+            'jumlah_tepat_waktu' => $jumlahTepatWaktu
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }

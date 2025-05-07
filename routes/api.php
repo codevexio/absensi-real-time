@@ -42,7 +42,7 @@ Route::apiResource('karyawan', KaryawanController::class);
 Route::apiResource('shift', ShiftController::class);
 
 // Keterlambatan
-Route::apiResource('keterlambatan', KeterlambatanController::class);
+Route::middleware('auth:sanctum')->get('keterlambatan/statistik-bulanan', [KeterlambatanController::class, 'statistikBulananOtomatis']);
 
 // Presensi
 Route::middleware('auth:sanctum')->post('/presensi/masuk', [PresensiController::class, 'presensiMasuk']);

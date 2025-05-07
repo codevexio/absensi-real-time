@@ -30,4 +30,9 @@ class Presensi extends Model
     {
         return $this->belongsTo(JadwalKerja::class, 'jadwal_kerja_id');
     }
+
+    public function keterlambatan()
+    {
+        return $this->hasOne(Keterlambatan::class);
+    }
 }
