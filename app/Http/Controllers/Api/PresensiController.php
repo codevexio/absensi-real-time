@@ -66,19 +66,38 @@ class PresensiController extends Controller
             ->whereDate('tanggalPresensi', $tanggalHariIni)
             ->first();
 
-        $bisaPresensiMasuk = $waktuSekarang->between($waktuMasuk->copy()->subMinutes(120), $waktuMasuk->copy()->addMinutes(600))
-            && (!$presensi || !$presensi->waktuMasuk);
+        $sudahPresensiMasuk = $presensi && $presensi->waktuMasuk;
+        $sudahPresensiPulang = $presensi && $presensi->waktuPulang;
 
-        $bisaPresensiPulang = $presensi && $presensi->waktuMasuk &&
-            $waktuSekarang->between($waktuPulang, $waktuPulang->copy()->addHours(5)) &&
-            !$presensi->waktuPulang;
+        $bisaPresensiMasuk = $waktuSekarang->between($waktuMasuk->copy()->subMinutes(120), $waktuMasuk->copy()->addMinutes(600))
+            && !$sudahPresensiMasuk;
+
+        $bisaPresensiPulang = $sudahPresensiMasuk &&
+            !$sudahPresensiPulang &&
+            $waktuSekarang->between($waktuPulang, $waktuPulang->copy()->addHours(5));
+
+        // Tentukan pesan berdasarkan kondisi
+        $message = 'Status presensi berhasil diambil';
+
+        if ($bisaPresensiMasuk) {
+            $message = 'Silakan presensi masuk';
+        } elseif ($sudahPresensiMasuk && !$sudahPresensiPulang) {
+            $message = 'Presensi masuk sudah diterima';
+        }
+
+        if ($bisaPresensiPulang) {
+            $message = 'Silakan presensi pulang';
+        } elseif ($sudahPresensiPulang) {
+            $message = 'Presensi pulang sudah diterima';
+        }
 
         return response()->json([
             'bisaPresensiMasuk' => $bisaPresensiMasuk,
             'bisaPresensiPulang' => $bisaPresensiPulang,
-            'message' => 'Status presensi berhasil diambil'
+            'message' => $message,
         ]);
     }
+
 
     public function presensiMasuk(Request $request)
     {
