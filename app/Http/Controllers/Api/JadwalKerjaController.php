@@ -77,4 +77,31 @@ class JadwalKerjaController extends Controller
         return response()->json($jadwal);
     }
 
+    public function getJadwalHariIni($karyawan_id)
+    {
+        $today = Carbon::today()->toDateString();
+
+        $jadwal = JadwalKerja::with('shift') // pastikan relasi shift sudah dibuat
+            ->where('karyawan_id', $karyawan_id)
+            ->where('tanggalKerja', $today)
+            ->first();
+
+        if ($jadwal) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Jadwal ditemukan',
+                'data' => [
+                    'tanggal' => $jadwal->tanggalKerja,
+                    'statusKerja' => $jadwal->statusKerja,
+                    'shift' => $jadwal->shift->nama_shift ?? null,
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tidak ada jadwal kerja hari ini',
+                'data' => null,
+            ]);
+        }
+    }
 }
