@@ -13,11 +13,13 @@ class PengajuanCutiController extends Controller
 {
     public function store(Request $request)
     {
+        // Cek apakah user sudah login
         $user = Auth::guard('sanctum')->user();
         if (!$user) {
             return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
+        // Ambil data dari request
         $karyawan_id = $user->id;
         $tanggalMulai = Carbon::parse($request->tanggalMulai);
         $tanggalSelesai = Carbon::parse($request->tanggalSelesai);
@@ -28,6 +30,13 @@ class PengajuanCutiController extends Controller
             return response()->json(['message' => 'Tanggal selesai harus setelah tanggal mulai'], 422);
         }
 
+        // Validasi jenis cuti
+        $request->validate([
+            'tanggalMulai' => 'required|date',
+            'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
+            'jenisCuti' => 'required|string|in:Cuti Tahunan,Cuti Panjang',
+        ]);
+
         // Ambil data cuti karyawan
         $cuti = Cuti::where('karyawan_id', $karyawan_id)->first();
         if (!$cuti) {
@@ -36,19 +45,23 @@ class PengajuanCutiController extends Controller
 
         // Validasi sisa cuti dan tanggal kadaluarsa
         if ($request->jenisCuti === 'Cuti Tahunan') {
+            // Validasi sisa cuti tahunan
             if ($cuti->cutiTahunan < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 422);
             }
 
+            // Validasi tanggal kadaluarsa cuti tahunan
             if (Carbon::now()->gt(Carbon::parse($cuti->cutiTahunan_expired))) {
                 return response()->json(['message' => 'Cuti tahunan sudah kedaluwarsa'], 422);
             }
 
         } elseif ($request->jenisCuti === 'Cuti Panjang') {
+            // Validasi sisa cuti panjang
             if ($cuti->cutiPanjang < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti panjang tidak mencukupi'], 422);
             }
 
+            // Validasi tanggal kadaluarsa cuti panjang
             if (Carbon::now()->gt(Carbon::parse($cuti->cutiPanjang_expired))) {
                 return response()->json(['message' => 'Cuti panjang sudah kedaluwarsa'], 422);
             }
@@ -73,6 +86,7 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => $filePath,
         ]);
 
+        // Kembalikan response sukses
         return response()->json([
             'message' => 'Pengajuan cuti berhasil dikirim',
             'data' => $pengajuan
