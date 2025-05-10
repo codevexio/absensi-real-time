@@ -13,6 +13,13 @@ class PengajuanCutiController extends Controller
 {
     public function store(Request $request)
     {
+
+        return response()->json([
+            'guard' => config('auth.defaults.guard'),
+            'auth_user' => Auth::user(),
+            'token' => $request->bearerToken()
+        ]);
+
         // Cek user login
         $user = Auth::user();
         if (!$user) {
