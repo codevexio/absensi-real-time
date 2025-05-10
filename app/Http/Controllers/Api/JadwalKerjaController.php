@@ -79,38 +79,41 @@ class JadwalKerjaController extends Controller
         return response()->json($jadwal);
     }
 
-    public function getShiftHariIni(): JsonResponse
+    public function getShiftHariIni()
     {
         $user = Auth::user();
         if (!$user) {
-            return response()->json(['status' => false, 'message' => 'Karyawan belum login'], 401);
+            return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
-        $karyawan_id = $user->id; // atau sesuaikan dengan struktur kamu
+        $karyawan_id = $user->id; // atau $user->karyawan_id, tergantung struktur login kamu
         $today = Carbon::today()->toDateString();
 
+        // Mengambil data jadwal kerja karyawan hari ini beserta informasi shift-nya
         $jadwal = JadwalKerja::with('shift')
             ->where('karyawan_id', $karyawan_id)
-            ->whereDate('tanggalKerja', $today)
+            ->where('tanggalKerja', $today)
             ->first();
 
+        // Mengecek apakah ada jadwal kerja untuk hari ini dan shift-nya
         if ($jadwal && $jadwal->shift) {
             return response()->json([
                 'status' => true,
                 'message' => 'Shift ditemukan',
                 'shift' => [
-                    'nama' => $jadwal->shift->nama_shift,
-                    'jam_masuk' => $jadwal->shift->jam_masuk,
-                    'jam_pulang' => $jadwal->shift->jam_pulang,
-                ]
+                    'nama' => $jadwal->shift->namaShift,
+                    'jam_masuk' => $jadwal->shift->waktuMulai,
+                    'jam_pulang' => $jadwal->shift->waktuSelesai,
+                ],
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tidak ada shift hari ini',
+                'shift' => null,
             ]);
         }
+}
 
-        return response()->json([
-            'status' => false,
-            'message' => 'Tidak ada shift hari ini',
-            'shift' => null,
-        ]);
-    }
 
 }
