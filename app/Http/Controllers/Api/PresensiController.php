@@ -35,7 +35,6 @@ class PresensiController extends Controller
     public function cekWaktuPresensi()
     {
         $user = Auth::user();
-
         if (!$user) {
             return response()->json([
                 'bisaPresensiMasuk' => false,
@@ -62,11 +61,10 @@ class PresensiController extends Controller
 
         $waktuSekarang = Carbon::now('Asia/Jakarta');
 
-        // Buat waktu masuk dan pulang berdasarkan jam yang disimpan di shift (format H:i:s)
-        $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalHariIni . ' ' . $jadwalKerja->shift->waktu_masuk, 'Asia/Jakarta');
-        $waktuPulang = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalHariIni . ' ' . $jadwalKerja->shift->waktu_pulang, 'Asia/Jakarta');
+        // Gunakan Carbon::parse agar fleksibel terhadap format waktu
+        $waktuMasuk = Carbon::parse($tanggalHariIni . ' ' . $jadwalKerja->shift->waktu_masuk, 'Asia/Jakarta');
+        $waktuPulang = Carbon::parse($tanggalHariIni . ' ' . $jadwalKerja->shift->waktu_pulang, 'Asia/Jakarta');
 
-        // Ambil presensi hari ini
         $presensi = Presensi::where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalPresensi', $tanggalHariIni)
             ->first();
@@ -74,19 +72,17 @@ class PresensiController extends Controller
         $sudahPresensiMasuk = $presensi && $presensi->waktuMasuk;
         $sudahPresensiPulang = $presensi && $presensi->waktuPulang;
 
-        $bisaPresensiMasuk = $waktuSekarang->between(
-                $waktuMasuk->copy()->subMinutes(120),
-                $waktuMasuk->copy()->addMinutes(600)
-            ) && !$sudahPresensiMasuk;
+        // Tentukan apakah boleh presensi masuk
+        $windowMasukStart = $waktuMasuk->copy()->subMinutes(120);
+        $windowMasukEnd = $waktuMasuk->copy()->addMinutes(600); // sampai 10 jam setelah masuk
+        $bisaPresensiMasuk = $waktuSekarang->between($windowMasukStart, $windowMasukEnd) && !$sudahPresensiMasuk;
 
-        $bisaPresensiPulang = $sudahPresensiMasuk &&
-            !$sudahPresensiPulang &&
-            $waktuSekarang->between(
-                $waktuPulang,
-                $waktuPulang->copy()->addHours(5)
-            );
+        // Tentukan apakah boleh presensi pulang
+        $windowPulangStart = $waktuPulang;
+        $windowPulangEnd = $waktuPulang->copy()->addHours(5);
+        $bisaPresensiPulang = $sudahPresensiMasuk && !$sudahPresensiPulang && $waktuSekarang->between($windowPulangStart, $windowPulangEnd);
 
-        // Buat pesan status
+        // Tentukan pesan status
         $message = 'Status presensi berhasil diambil';
         if ($bisaPresensiMasuk) {
             $message = 'Silakan presensi masuk';
@@ -100,7 +96,6 @@ class PresensiController extends Controller
             $message = 'Presensi pulang sudah diterima';
         }
 
-        // Kembalikan JSON dengan debug info
         return response()->json([
             'bisaPresensiMasuk' => $bisaPresensiMasuk,
             'bisaPresensiPulang' => $bisaPresensiPulang,
@@ -111,10 +106,10 @@ class PresensiController extends Controller
                 'waktuPulang' => $waktuPulang->toDateTimeString(),
                 'presensiMasuk' => $sudahPresensiMasuk ? $presensi->waktuMasuk : null,
                 'presensiPulang' => $sudahPresensiPulang ? $presensi->waktuPulang : null,
-                'windowPresensiMasuk_start' => $waktuMasuk->copy()->subMinutes(120)->toDateTimeString(),
-                'windowPresensiMasuk_end' => $waktuMasuk->copy()->addMinutes(600)->toDateTimeString(),
-                'windowPresensiPulang_start' => $waktuPulang->toDateTimeString(),
-                'windowPresensiPulang_end' => $waktuPulang->copy()->addHours(5)->toDateTimeString(),
+                'windowPresensiMasuk_start' => $windowMasukStart->toDateTimeString(),
+                'windowPresensiMasuk_end' => $windowMasukEnd->toDateTimeString(),
+                'windowPresensiPulang_start' => $windowPulangStart->toDateTimeString(),
+                'windowPresensiPulang_end' => $windowPulangEnd->toDateTimeString(),
             ]
         ]);
     }
