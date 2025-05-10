@@ -19,10 +19,10 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Pengajuan Cuti
-Route::post('/pengajuan-cuti', [PengajuanCutiController::class, 'store']);
-Route::put('/pengajuan-cuti/{id}', [PengajuanCutiController::class, 'updateStatusCuti']);
-Route::post('/pengajuan-cuti', [PengajuanCutiController::class, 'ajukanCuti']);
-Route::put('/pengajuan-cuti/{id}', [PengajuanCutiController::class, 'updateStatusCuti']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/pengajuan-cuti', [PengajuanCutiController::class, 'store']);
+});
+
 
 // Jadwal Kerja
 Route::apiResource('jadwal-kerja', JadwalKerjaController::class);

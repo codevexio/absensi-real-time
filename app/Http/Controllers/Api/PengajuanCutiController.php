@@ -7,77 +7,61 @@ use App\Models\Cuti;
 use App\Models\PengajuanCuti;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PengajuanCutiController extends Controller
 {
+
     public function store(Request $request)
     {
         $request->validate([
-            'karyawan_id' => 'required|exists:karyawan,id',
-            'jenisCuti' => 'required|in:Cuti Panjang,Cuti Tahunan',
+            'jenisCuti' => 'required|in:Cuti Tahunan,Cuti Panjang',
             'tanggalMulai' => 'required|date',
             'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
+            'file_surat_cuti' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        // Hitung jumlah hari otomatis
+        $karyawan_id = Auth::user()->id; // atau ambil dari token
         $tanggalMulai = Carbon::parse($request->tanggalMulai);
         $tanggalSelesai = Carbon::parse($request->tanggalSelesai);
-        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1; // Tambah 1 agar inklusif
+        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
 
-        // Ambil data cuti karyawan
-        $cuti = Cuti::where('karyawan_id', $request->karyawan_id)->first();
+        $cuti = Cuti::where('karyawan_id', $karyawan_id)->first();
         if (!$cuti) {
             return response()->json(['message' => 'Data cuti tidak ditemukan'], 404);
         }
 
-        // Validasi jatah cuti
-        if ($request->jenisCuti == 'Cuti Tahunan' && $cuti->cutiTahun < $jumlahHari) {
-            return response()->json(['message' => 'Jatah cuti tahunan tidak mencukupi'], 400);
-        }
-        if ($request->jenisCuti == 'Cuti Panjang' && $cuti->cutiPanjang < $jumlahHari) {
-            return response()->json(['message' => 'Jatah cuti panjang tidak mencukupi'], 400);
+        // Cek sisa cuti
+        if ($request->jenisCuti === 'Cuti Tahunan') {
+            if ($jumlahHari > $cuti->cutiTahunan) {
+                return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 422);
+            }
+        } else if ($request->jenisCuti === 'Cuti Panjang') {
+            if ($jumlahHari > $cuti->cutiPanjang) {
+                return response()->json(['message' => 'Sisa cuti panjang tidak mencukupi'], 422);
+            }
         }
 
-        // Simpan pengajuan cuti
+        // Upload file jika ada
+        $filePath = null;
+        if ($request->hasFile('file_surat_cuti')) {
+            $filePath = $request->file('file_surat_cuti')->store('cuti_files', 'public');
+        }
+
         $pengajuan = PengajuanCuti::create([
-            'karyawan_id' => $request->karyawan_id,
+            'karyawan_id' => $karyawan_id,
             'jenisCuti' => $request->jenisCuti,
-            'tanggalMulai' => $request->tanggalMulai,
-            'tanggalSelesai' => $request->tanggalSelesai,
+            'tanggalMulai' => $tanggalMulai,
+            'tanggalSelesai' => $tanggalSelesai,
             'jumlahHari' => $jumlahHari,
             'statusCuti' => 'Diproses',
+            'file_surat_cuti' => $filePath,
         ]);
 
-        return response()->json(['message' => 'Pengajuan cuti berhasil dikirim', 'data' => $pengajuan], 201);
-    }
-
-    public function updateStatusCuti(Request $request, $id)
-    {
-        $request->validate([
-            'statusCuti' => 'required|in:Disetujui,Ditolak',
-            'alasanPenolakan' => 'nullable|string',
-        ]);
-
-        $pengajuan = PengajuanCuti::findOrFail($id);
-
-        if ($request->statusCuti == 'Disetujui') {
-            $cuti = Cuti::where('karyawan_id', $pengajuan->karyawan_id)->first();
-
-            if ($pengajuan->jenisCuti == 'Cuti Tahunan') {
-                $cuti->cutiTahun -= $pengajuan->jumlahHari;
-            } else {
-                $cuti->cutiPanjang -= $pengajuan->jumlahHari;
-            }
-
-            $cuti->save();
-        } else {
-            $pengajuan->alasanPenolakan = $request->alasanPenolakan;
-        }
-
-        $pengajuan->statusCuti = $request->statusCuti;
-        $pengajuan->save();
-
-        return response()->json(['message' => 'Status pengajuan cuti diperbarui'], 200);
+        return response()->json([
+            'message' => 'Pengajuan cuti berhasil dikirim',
+            'data' => $pengajuan
+        ], 201);
     }
 
 }
