@@ -35,6 +35,7 @@ class PresensiController extends Controller
     public function cekWaktuPresensi()
     {
         $user = Auth::user();
+
         if (!$user) {
             return response()->json([
                 'bisaPresensiMasuk' => false,
@@ -60,9 +61,12 @@ class PresensiController extends Controller
         }
 
         $waktuSekarang = Carbon::now('Asia/Jakarta');
-        $waktuMasuk = Carbon::parse($jadwalKerja->shift->waktu_masuk, 'UTC')->setTimezone('Asia/Jakarta');
-        $waktuPulang = Carbon::parse($jadwalKerja->shift->waktu_pulang, 'UTC')->setTimezone('Asia/Jakarta');
 
+        // Buat waktu masuk dan pulang berdasarkan jam yang disimpan di shift (format H:i:s)
+        $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalHariIni . ' ' . $jadwalKerja->shift->waktu_masuk, 'Asia/Jakarta');
+        $waktuPulang = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalHariIni . ' ' . $jadwalKerja->shift->waktu_pulang, 'Asia/Jakarta');
+
+        // Ambil presensi hari ini
         $presensi = Presensi::where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalPresensi', $tanggalHariIni)
             ->first();
@@ -70,14 +74,19 @@ class PresensiController extends Controller
         $sudahPresensiMasuk = $presensi && $presensi->waktuMasuk;
         $sudahPresensiPulang = $presensi && $presensi->waktuPulang;
 
-        $bisaPresensiMasuk = $waktuSekarang->between($waktuMasuk->copy()->subMinutes(120), $waktuMasuk->copy()->addMinutes(600))
-            && !$sudahPresensiMasuk;
+        $bisaPresensiMasuk = $waktuSekarang->between(
+                $waktuMasuk->copy()->subMinutes(120),
+                $waktuMasuk->copy()->addMinutes(600)
+            ) && !$sudahPresensiMasuk;
 
         $bisaPresensiPulang = $sudahPresensiMasuk &&
             !$sudahPresensiPulang &&
-            $waktuSekarang->between($waktuPulang, $waktuPulang->copy()->addHours(5));
+            $waktuSekarang->between(
+                $waktuPulang,
+                $waktuPulang->copy()->addHours(5)
+            );
 
-        // Tentukan pesan
+        // Buat pesan status
         $message = 'Status presensi berhasil diambil';
         if ($bisaPresensiMasuk) {
             $message = 'Silakan presensi masuk';
@@ -91,7 +100,7 @@ class PresensiController extends Controller
             $message = 'Presensi pulang sudah diterima';
         }
 
-        // Kirim semua data untuk debugging
+        // Kembalikan JSON dengan debug info
         return response()->json([
             'bisaPresensiMasuk' => $bisaPresensiMasuk,
             'bisaPresensiPulang' => $bisaPresensiPulang,
