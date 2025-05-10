@@ -31,13 +31,18 @@ class PengajuanCutiController extends Controller
         $tanggalSelesai = Carbon::parse($request->tanggalSelesai);
         $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1; // +1 untuk hitung hari terakhir
 
+        // Debug: Cek perhitungan jumlah hari
+        dd($tanggalMulai, $tanggalSelesai, $jumlahHari);
+
         // 4. Validasi tanggal cuti
         if ($tanggalSelesai->lt($tanggalMulai)) {
             return response()->json(['message' => 'Tanggal selesai harus setelah tanggal mulai'], 422);
         }
 
-        // 5. Validasi jenis cuti dan sisa cuti
+        // 5. Validasi jenis dan sisa cuti
         if ($request->jenisCuti === 'Cuti Tahunan') {
+            // Debug: Cek sisa cuti tahunan
+            dd($cuti->cutiTahunan, $jumlahHari);
             if ($cuti->cutiTahunan < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 422);
             }
