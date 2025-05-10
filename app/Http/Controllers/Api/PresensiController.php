@@ -79,8 +79,8 @@ class PresensiController extends Controller
         $sudahPresensiPulang = $presensi && $presensi->waktuPulang;
 
         $bisaPresensiMasuk = $waktuSekarang->between(
-                $waktuMasuk->copy()->subMinutes(120),
-                $waktuMasuk->copy()->addMinutes(600)
+                $waktuMasuk->copy()->subMinutes(60),
+                $waktuMasuk->copy()->addMinutes(30)
             ) && !$sudahPresensiMasuk;
 
         $bisaPresensiPulang = $sudahPresensiMasuk &&
