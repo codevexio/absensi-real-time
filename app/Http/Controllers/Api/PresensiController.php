@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Presensi;
 use App\Models\JadwalKerja;
+use Illuminate\Support\Facades\Log;
 use App\Models\Keterlambatan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
