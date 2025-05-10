@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\JadwalKerja;
 use App\Models\PengajuanCuti;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class JadwalKerjaController extends Controller
 {
