@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\JadwalKerja;
 use App\Models\PengajuanCuti;
 use Illuminate\Http\JsonResponse;
@@ -78,33 +79,38 @@ class JadwalKerjaController extends Controller
         return response()->json($jadwal);
     }
 
-    public function getShiftHariIni()
+    public function getShiftHariIni(): JsonResponse
     {
         $user = Auth::user();
         if (!$user) {
-            return response()->json(['message' => 'Karyawan belum login'], 401);
+            return response()->json(['status' => false, 'message' => 'Karyawan belum login'], 401);
         }
 
-        $karyawan_id = $user->id; // atau $user->karyawan_id, tergantung struktur login kamu
+        $karyawan_id = $user->id; // atau sesuaikan dengan struktur kamu
         $today = Carbon::today()->toDateString();
 
         $jadwal = JadwalKerja::with('shift')
             ->where('karyawan_id', $karyawan_id)
-            ->where('tanggalKerja', $today)
+            ->whereDate('tanggalKerja', $today)
             ->first();
 
         if ($jadwal && $jadwal->shift) {
             return response()->json([
                 'status' => true,
                 'message' => 'Shift ditemukan',
-                'shift' => $jadwal->shift->nama_shift,
-            ]);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'Tidak ada shift hari ini',
-                'shift' => null,
+                'shift' => [
+                    'nama' => $jadwal->shift->nama_shift,
+                    'jam_masuk' => $jadwal->shift->jam_masuk,
+                    'jam_pulang' => $jadwal->shift->jam_pulang,
+                ]
             ]);
         }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Tidak ada shift hari ini',
+            'shift' => null,
+        ]);
     }
+
 }
