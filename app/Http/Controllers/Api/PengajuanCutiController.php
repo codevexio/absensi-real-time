@@ -13,7 +13,7 @@ class PengajuanCutiController extends Controller
 {
     public function store(Request $request)
     {
-        $user = Auth::user(); // Mengambil user dari token
+        $user = Auth::guard('sanctum')->user();
         if (!$user) {
             return response()->json(['message' => 'Karyawan belum login'], 401);
         }
