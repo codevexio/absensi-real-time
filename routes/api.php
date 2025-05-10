@@ -27,7 +27,7 @@ Route::put('/pengajuan-cuti/{id}', [PengajuanCutiController::class, 'updateStatu
 // Jadwal Kerja
 Route::apiResource('jadwal-kerja', JadwalKerjaController::class);
 Route::post('/generate-presensi-harian', [JadwalKerjaController::class, 'generatePresensiHarian']);
-Route::middleware('auth:sanctum')->get('/jadwal/hari-ini/{karyawan_id}', [JadwalKerjaController::class, 'getJadwalHariIni']);
+Route::middleware('auth:sanctum')->get('/shift/hari-ini', [JadwalKerjaController::class, 'getShiftHariIni']);
 
 // Cuti
 Route::get('update-cuti', [CutiController::class, 'updateExpiredCuti']);
