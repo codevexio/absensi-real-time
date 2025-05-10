@@ -122,7 +122,7 @@ class PresensiController extends Controller
                 'windowPresensiMasuk_start' => $waktuMasuk->copy()->subMinutes(60)->toDateTimeString(),
                 'windowPresensiMasuk_end' => $waktuMasuk->copy()->addMinutes(30)->toDateTimeString(),
                 'windowPresensiPulang_start' => $waktuPulang->toDateTimeString(),
-                'windowPresensiPulang_end' => $waktuPulang->copy()->addHours(2)->toDateTimeString(),
+                'windowPresensiPulang_end' => $waktuPulang->copy()->addHours(6)->toDateTimeString(),
             ]
         ]);
     }
