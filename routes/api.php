@@ -21,6 +21,12 @@ Route::get('/user', function (Request $request) {
 // Pengajuan Cuti
 Route::middleware('auth:sanctum')->post('/pengajuan-cuti', [PengajuanCutiController::class, 'store']);
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('cuti/sisa', [CutiController::class, 'getSisaCuti']);
+    Route::post('cuti/ajukan', [CutiController::class, 'ajukanCuti']);
+    Route::get('cuti/pengajuan', [CutiController::class, 'getPengajuanCuti']);
+});
+
 // Jadwal Kerja
 Route::apiResource('jadwal-kerja', JadwalKerjaController::class);
 Route::post('/generate-presensi-harian', [JadwalKerjaController::class, 'generatePresensiHarian']);
