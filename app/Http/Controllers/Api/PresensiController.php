@@ -59,11 +59,17 @@ class PresensiController extends Controller
             ], 404);
         }
 
-        $waktuSekarang = Carbon::now('Asia/Jakarta');
+        if (!$jadwalKerja->shift->waktuMulai || !$jadwalKerja->shift->waktuSelesai) {
+            return response()->json([
+                'bisaPresensiMasuk' => false,
+                'bisaPresensiPulang' => false,
+                'message' => 'Waktu shift belum disetel dengan benar'
+            ], 422);
+        }
 
-        // Gunakan Carbon::parse agar fleksibel terhadap format waktu
-        $waktuMasuk = Carbon::parse($tanggalHariIni . ' ' . $jadwalKerja->shift->waktu_masuk, 'Asia/Jakarta');
-        $waktuPulang = Carbon::parse($tanggalHariIni . ' ' . $jadwalKerja->shift->waktu_pulang, 'Asia/Jakarta');
+        $waktuSekarang = Carbon::now('Asia/Jakarta');
+        $waktuMasuk = Carbon::parse($tanggalHariIni . ' ' . $jadwalKerja->shift->waktuMulai, 'Asia/Jakarta');
+        $waktuPulang = Carbon::parse($tanggalHariIni . ' ' . $jadwalKerja->shift->waktuSelesai, 'Asia/Jakarta');
 
         $presensi = Presensi::where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalPresensi', $tanggalHariIni)
@@ -72,17 +78,19 @@ class PresensiController extends Controller
         $sudahPresensiMasuk = $presensi && $presensi->waktuMasuk;
         $sudahPresensiPulang = $presensi && $presensi->waktuPulang;
 
-        // Tentukan apakah boleh presensi masuk
-        $windowMasukStart = $waktuMasuk->copy()->subMinutes(120);
-        $windowMasukEnd = $waktuMasuk->copy()->addMinutes(600); // sampai 10 jam setelah masuk
-        $bisaPresensiMasuk = $waktuSekarang->between($windowMasukStart, $windowMasukEnd) && !$sudahPresensiMasuk;
+        $bisaPresensiMasuk = $waktuSekarang->between(
+                $waktuMasuk->copy()->subMinutes(120),
+                $waktuMasuk->copy()->addMinutes(600)
+            ) && !$sudahPresensiMasuk;
 
-        // Tentukan apakah boleh presensi pulang
-        $windowPulangStart = $waktuPulang;
-        $windowPulangEnd = $waktuPulang->copy()->addHours(5);
-        $bisaPresensiPulang = $sudahPresensiMasuk && !$sudahPresensiPulang && $waktuSekarang->between($windowPulangStart, $windowPulangEnd);
+        $bisaPresensiPulang = $sudahPresensiMasuk &&
+            !$sudahPresensiPulang &&
+            $waktuSekarang->between(
+                $waktuPulang,
+                $waktuPulang->copy()->addHours(5)
+            );
 
-        // Tentukan pesan status
+        // Tentukan pesan
         $message = 'Status presensi berhasil diambil';
         if ($bisaPresensiMasuk) {
             $message = 'Silakan presensi masuk';
@@ -106,10 +114,10 @@ class PresensiController extends Controller
                 'waktuPulang' => $waktuPulang->toDateTimeString(),
                 'presensiMasuk' => $sudahPresensiMasuk ? $presensi->waktuMasuk : null,
                 'presensiPulang' => $sudahPresensiPulang ? $presensi->waktuPulang : null,
-                'windowPresensiMasuk_start' => $windowMasukStart->toDateTimeString(),
-                'windowPresensiMasuk_end' => $windowMasukEnd->toDateTimeString(),
-                'windowPresensiPulang_start' => $windowPulangStart->toDateTimeString(),
-                'windowPresensiPulang_end' => $windowPulangEnd->toDateTimeString(),
+                'windowPresensiMasuk_start' => $waktuMasuk->copy()->subMinutes(120)->toDateTimeString(),
+                'windowPresensiMasuk_end' => $waktuMasuk->copy()->addMinutes(600)->toDateTimeString(),
+                'windowPresensiPulang_start' => $waktuPulang->toDateTimeString(),
+                'windowPresensiPulang_end' => $waktuPulang->copy()->addHours(5)->toDateTimeString(),
             ]
         ]);
     }
