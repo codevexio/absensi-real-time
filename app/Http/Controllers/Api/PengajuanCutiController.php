@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
-class CutiController extends Controller
+class PengajuanCutiController extends Controller
 {
     // Menampilkan sisa cuti karyawan yang sudah login
     public function getSisaCuti()
