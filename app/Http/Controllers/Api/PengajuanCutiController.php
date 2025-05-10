@@ -13,55 +13,44 @@ class PengajuanCutiController extends Controller
 {
     public function store(Request $request)
     {
-        // Cek apakah user sudah login
+        // 1. Ambil data karyawan yang sedang login
         $user = Auth::guard('sanctum')->user();
         if (!$user) {
             return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
-        // Ambil data dari request
+        // 2. Ambil data cuti karyawan berdasarkan ID
         $karyawan_id = $user->id;
-        $tanggalMulai = Carbon::parse($request->tanggalMulai);
-        $tanggalSelesai = Carbon::parse($request->tanggalSelesai);
-        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
-
-        // Validasi tanggal cuti
-        if ($tanggalSelesai->lt($tanggalMulai)) {
-            return response()->json(['message' => 'Tanggal selesai harus setelah tanggal mulai'], 422);
-        }
-
-        // Validasi jenis cuti
-        $request->validate([
-            'tanggalMulai' => 'required|date',
-            'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
-            'jenisCuti' => 'required|string|in:Cuti Tahunan,Cuti Panjang',
-        ]);
-
-        // Ambil data cuti karyawan
         $cuti = Cuti::where('karyawan_id', $karyawan_id)->first();
         if (!$cuti) {
             return response()->json(['message' => 'Data cuti tidak ditemukan'], 404);
         }
 
-        // Validasi sisa cuti dan tanggal kadaluarsa
+        // 3. Ambil tanggal mulai dan tanggal selesai cuti yang diajukan
+        $tanggalMulai = Carbon::parse($request->tanggalMulai);
+        $tanggalSelesai = Carbon::parse($request->tanggalSelesai);
+        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1; // +1 untuk hitung hari terakhir
+
+        // 4. Validasi tanggal cuti
+        if ($tanggalSelesai->lt($tanggalMulai)) {
+            return response()->json(['message' => 'Tanggal selesai harus setelah tanggal mulai'], 422);
+        }
+
+        // 5. Validasi jenis cuti dan sisa cuti
         if ($request->jenisCuti === 'Cuti Tahunan') {
-            // Validasi sisa cuti tahunan
             if ($cuti->cutiTahunan < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 422);
             }
 
-            // Validasi tanggal kadaluarsa cuti tahunan
             if (Carbon::now()->gt(Carbon::parse($cuti->cutiTahunan_expired))) {
                 return response()->json(['message' => 'Cuti tahunan sudah kedaluwarsa'], 422);
             }
 
         } elseif ($request->jenisCuti === 'Cuti Panjang') {
-            // Validasi sisa cuti panjang
             if ($cuti->cutiPanjang < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti panjang tidak mencukupi'], 422);
             }
 
-            // Validasi tanggal kadaluarsa cuti panjang
             if (Carbon::now()->gt(Carbon::parse($cuti->cutiPanjang_expired))) {
                 return response()->json(['message' => 'Cuti panjang sudah kedaluwarsa'], 422);
             }
@@ -69,24 +58,30 @@ class PengajuanCutiController extends Controller
             return response()->json(['message' => 'Jenis cuti tidak valid'], 422);
         }
 
-        // Upload file surat cuti (jika ada)
+        // 6. Upload file surat cuti jika ada
         $filePath = null;
         if ($request->hasFile('file_surat_cuti')) {
             $filePath = $request->file('file_surat_cuti')->store('cuti_files', 'public');
         }
 
-        // Simpan pengajuan cuti
+        // 7. Simpan pengajuan cuti
         $pengajuan = PengajuanCuti::create([
             'karyawan_id' => $karyawan_id,
             'jenisCuti' => $request->jenisCuti,
             'tanggalMulai' => $tanggalMulai,
             'tanggalSelesai' => $tanggalSelesai,
             'jumlahHari' => $jumlahHari,
-            'statusCuti' => 'Diproses',
+            'statusCuti' => 'Diproses', // Status pengajuan cuti awal
             'file_surat_cuti' => $filePath,
         ]);
 
-        // Kembalikan response sukses
+        // 8. Kurangi jumlah cuti tahunan jika jenis cuti adalah cuti tahunan
+        if ($request->jenisCuti === 'Cuti Tahunan') {
+            $cuti->cutiTahunan -= $jumlahHari;
+            $cuti->save(); // Simpan perubahan sisa cuti tahunan
+        }
+
+        // 9. Return response success
         return response()->json([
             'message' => 'Pengajuan cuti berhasil dikirim',
             'data' => $pengajuan
