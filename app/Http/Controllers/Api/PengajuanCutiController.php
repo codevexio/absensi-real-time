@@ -14,14 +14,12 @@ class PengajuanCutiController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'jenisCuti' => 'required|in:Cuti Tahunan,Cuti Panjang',
-            'tanggalMulai' => 'required|date',
-            'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
-            'file_surat_cuti' => 'nullable|file|mimes:pdf|max:2048',
-        ]);
+        $user = Auth::user();  // Menggunakan Auth::user() untuk mengambil data user berdasarkan token
+        if (!$user) {
+            return response()->json(['message' => 'Karyawan belum login'], 401);
+        }
 
-        $karyawan_id = Auth::user()->id; // atau ambil dari token
+        $karyawan_id = $user->id; // Ambil id karyawan dari user yang terautentikasi
         $tanggalMulai = Carbon::parse($request->tanggalMulai);
         $tanggalSelesai = Carbon::parse($request->tanggalSelesai);
         $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
@@ -63,5 +61,4 @@ class PengajuanCutiController extends Controller
             'data' => $pengajuan
         ], 201);
     }
-
 }

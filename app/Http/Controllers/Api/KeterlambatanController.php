@@ -12,54 +12,40 @@ use Illuminate\Http\Request;
 class KeterlambatanController extends Controller
 {
 
-    public function store(Request $request)
+    public function statistikBulananOtomatis()
     {
-        $user = Auth::user();  // Menggunakan Auth::user() untuk mengambil data user berdasarkan token
+        $user = Auth::user();
         if (!$user) {
             return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
-        $karyawan_id = $user->id; // Ambil id karyawan dari user yang terautentikasi
-        $tanggalMulai = Carbon::parse($request->tanggalMulai);
-        $tanggalSelesai = Carbon::parse($request->tanggalSelesai);
-        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
+        // Ambil bulan sekarang
+        $now = Carbon::now();
+        $start = $now->copy()->startOfMonth()->toDateString();
+        $end = $now->copy()->endOfMonth()->toDateString();
 
-        $cuti = Cuti::where('karyawan_id', $karyawan_id)->first();
-        if (!$cuti) {
-            return response()->json(['message' => 'Data cuti tidak ditemukan'], 404);
-        }
+        // Total presensi masuk bulan ini
+        $totalPresensi = Presensi::where('karyawan_id', $user->id)
+            ->whereBetween('tanggalPresensi', [$start, $end])
+            ->whereNotNull('waktuMasuk') // pastikan sudah presensi masuk
+            ->count();
 
-        // Cek sisa cuti
-        if ($request->jenisCuti === 'Cuti Tahunan') {
-            if ($jumlahHari > $cuti->cutiTahunan) {
-                return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 422);
-            }
-        } else if ($request->jenisCuti === 'Cuti Panjang') {
-            if ($jumlahHari > $cuti->cutiPanjang) {
-                return response()->json(['message' => 'Sisa cuti panjang tidak mencukupi'], 422);
-            }
-        }
+        // Jumlah keterlambatan bulan ini
+        $jumlahTerlambat = Keterlambatan::where('karyawan_id', $user->id)
+            ->whereHas('presensi', function ($query) use ($start, $end) {
+                $query->whereBetween('tanggalPresensi', [$start, $end]);
+            })
+            ->count();
 
-        // Upload file jika ada
-        $filePath = null;
-        if ($request->hasFile('file_surat_cuti')) {
-            $filePath = $request->file('file_surat_cuti')->store('cuti_files', 'public');
-        }
-
-        $pengajuan = PengajuanCuti::create([
-            'karyawan_id' => $karyawan_id,
-            'jenisCuti' => $request->jenisCuti,
-            'tanggalMulai' => $tanggalMulai,
-            'tanggalSelesai' => $tanggalSelesai,
-            'jumlahHari' => $jumlahHari,
-            'statusCuti' => 'Diproses',
-            'file_surat_cuti' => $filePath,
-        ]);
+        // Hitung jumlah tepat waktu
+        $jumlahTepatWaktu = $totalPresensi - $jumlahTerlambat;
 
         return response()->json([
-            'message' => 'Pengajuan cuti berhasil dikirim',
-            'data' => $pengajuan
-        ], 201);
+            'bulan' => $now->format('Y-m'),
+            'total_presensi' => $totalPresensi,
+            'jumlah_terlambat' => $jumlahTerlambat,
+            'jumlah_tepat_waktu' => $jumlahTepatWaktu
+        ]);
     }
 
 }
