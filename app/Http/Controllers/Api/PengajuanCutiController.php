@@ -64,6 +64,15 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
+        // Mengecek apakah ada pengajuan cuti yang masih diproses
+        $pengajuanCutiDiproses = PengajuanCuti::where('karyawan_id', $user->id)
+                                                ->where('statusCuti', 'Diproses')
+                                                ->exists();
+
+        if ($pengajuanCutiDiproses) {
+            return response()->json(['message' => 'Anda masih memiliki pengajuan cuti yang sedang diproses'], 400);
+        }
+
         // Menghitung jumlah hari cuti berdasarkan perbedaan tanggal
         $tanggalMulai = Carbon::parse($validated['tanggalMulai']);
         $tanggalSelesai = Carbon::parse($validated['tanggalSelesai']);
