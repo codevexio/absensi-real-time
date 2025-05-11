@@ -65,6 +65,29 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
+        // Ambil data cuti karyawan
+        $cuti = Cuti::where('karyawan_id', $user->id)->first();
+
+        if (!$cuti) {
+            return response()->json(['message' => 'Data cuti tidak ditemukan'], 404);
+        }
+
+        // Cek cukup atau tidaknya sisa cuti
+        $sisaCutiTahun = $cuti->cutiTahun;
+        $sisaCutiPanjang = $cuti->cutiPanjang;
+        
+        // Cek berdasarkan jenis cuti yang diajukan
+        if ($validated['jenisCuti'] === 'Cuti Tahunan') {
+            if ($sisaCutiTahun < $validated['jumlahHari']) {
+                return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 400);
+            }
+        } elseif ($validated['jenisCuti'] === 'Cuti Panjang') {
+            if ($sisaCutiPanjang < $validated['jumlahHari']) {
+                return response()->json(['message' => 'Sisa cuti panjang tidak mencukupi'], 400);
+            }
+        }
+
+        // Proses pengajuan cuti jika cukup
         $data = [
             'karyawan_id' => $user->id,
             'jenisCuti' => $validated['jenisCuti'],
@@ -81,9 +104,10 @@ class PengajuanCutiController extends Controller
             $data['file_surat_cuti'] = $path;
         }
 
+        // Simpan pengajuan cuti
         PengajuanCuti::create($data);
 
-        return response()->json(['message' => 'Pengajuan cuti berhasil dikirim'], 201);
+        return response()->json(['message' => 'Pengajuan cuti berhasil dikirim dan sedang diproses'], 201);
     }
 
     // Menampilkan semua pengajuan cuti dari karyawan yang sudah login
