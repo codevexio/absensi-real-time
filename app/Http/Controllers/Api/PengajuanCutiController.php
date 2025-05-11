@@ -61,9 +61,13 @@ class PengajuanCutiController extends Controller
             'jenisCuti' => 'required|in:Cuti Panjang,Cuti Tahunan',
             'tanggalMulai' => 'required|date',
             'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
-            'jumlahHari' => 'required|integer|min:1',
             'file_surat_cuti' => 'nullable|file|mimes:pdf|max:2048',
         ]);
+
+        // Menghitung jumlah hari cuti berdasarkan perbedaan tanggal
+        $tanggalMulai = Carbon::parse($validated['tanggalMulai']);
+        $tanggalSelesai = Carbon::parse($validated['tanggalSelesai']);
+        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1; // Menambahkan 1 untuk termasuk hari mulai
 
         // Ambil data cuti karyawan
         $cuti = Cuti::where('karyawan_id', $user->id)->first();
@@ -78,11 +82,11 @@ class PengajuanCutiController extends Controller
         
         // Cek berdasarkan jenis cuti yang diajukan
         if ($validated['jenisCuti'] === 'Cuti Tahunan') {
-            if ($sisaCutiTahun < $validated['jumlahHari']) {
+            if ($sisaCutiTahun < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 400);
             }
         } elseif ($validated['jenisCuti'] === 'Cuti Panjang') {
-            if ($sisaCutiPanjang < $validated['jumlahHari']) {
+            if ($sisaCutiPanjang < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti panjang tidak mencukupi'], 400);
             }
         }
@@ -93,7 +97,7 @@ class PengajuanCutiController extends Controller
             'jenisCuti' => $validated['jenisCuti'],
             'tanggalMulai' => $validated['tanggalMulai'],
             'tanggalSelesai' => $validated['tanggalSelesai'],
-            'jumlahHari' => $validated['jumlahHari'],
+            'jumlahHari' => $jumlahHari,
             'statusCuti' => 'Diproses',
         ];
 
