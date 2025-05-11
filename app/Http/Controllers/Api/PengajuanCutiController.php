@@ -64,24 +64,25 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        // Menyimpan pengajuan cuti
-        $validated['karyawan_id'] = $user->id; // Ambil karyawan_id dari user yang sudah login
-        $pengajuanCuti = PengajuanCuti::create($validated);
+        $data = [
+            'karyawan_id' => $user->id,
+            'jenisCuti' => $validated['jenisCuti'],
+            'tanggalMulai' => $validated['tanggalMulai'],
+            'tanggalSelesai' => $validated['tanggalSelesai'],
+            'jumlahHari' => $validated['jumlahHari'],
+            'statusCuti' => 'Menunggu',
+        ];
 
-        // Mengupdate sisa cuti karyawan jika pengajuan disetujui
-        if ($pengajuanCuti->statusCuti == 'Disetujui') {
-            $cuti = Cuti::where('karyawan_id', $user->id)->first();
-
-            if ($pengajuanCuti->jenisCuti == 'Cuti Tahunan') {
-                $cuti->cutiTahun -= $pengajuanCuti->jumlahHari;
-            } elseif ($pengajuanCuti->jenisCuti == 'Cuti Panjang') {
-                $cuti->cutiPanjang -= $pengajuanCuti->jumlahHari;
-            }
-
-            $cuti->save();
+        // Simpan file jika ada
+        if ($request->hasFile('file_surat_cuti')) {
+            $file = $request->file('file_surat_cuti');
+            $path = $file->store('surat_cuti', 'public');
+            $data['file_surat_cuti'] = $path;
         }
 
-        return response()->json(['message' => 'Pengajuan cuti berhasil'], 201);
+        PengajuanCuti::create($data);
+
+        return response()->json(['message' => 'Pengajuan cuti berhasil dikirim'], 201);
     }
 
     // Menampilkan semua pengajuan cuti dari karyawan yang sudah login
