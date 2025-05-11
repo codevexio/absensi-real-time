@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\PasswordResetTokenController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\AuthController;
 
+// Login
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -51,9 +52,5 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 // etc
-Route::apiResource('pengajuan-cuti', PengajuanCutiController::class);
-Route::apiResource('approval-cuti', ApprovalCutiController::class);
-Route::post('/approval-cuti/{id}/approve', [ApprovalCutiController::class, 'approve']);
-Route::post('/approval-cuti/{id}/reject', [ApprovalCutiController::class, 'reject']);
 Route::apiResource('password-reset-tokens', PasswordResetTokenController::class)->only(['index', 'store', 'destroy']);
 Route::apiResource('sessions', SessionController::class)->only(['index', 'store', 'destroy']);
