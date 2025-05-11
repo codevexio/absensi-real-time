@@ -71,7 +71,7 @@ class PengajuanCutiController extends Controller
             'tanggalMulai' => $validated['tanggalMulai'],
             'tanggalSelesai' => $validated['tanggalSelesai'],
             'jumlahHari' => $validated['jumlahHari'],
-            'statusCuti' => 'Menunggu',
+            'statusCuti' => 'Diproses',
         ];
 
         // Simpan file jika ada
