@@ -19,8 +19,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Pengajuan Cuti
-Route::middleware('auth:sanctum')->post('/pengajuan-cuti', [PengajuanCutiController::class, 'store']);
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('cuti/sisa', [PengajuanCutiController::class, 'getSisaCuti']);
     Route::post('cuti/ajukan', [PengajuanCutiController::class, 'ajukanCuti']);
@@ -31,13 +29,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('jadwal-kerja', JadwalKerjaController::class);
 Route::post('/generate-presensi-harian', [JadwalKerjaController::class, 'generatePresensiHarian']);
 Route::middleware('auth:sanctum')->get('/shift/hari-ini', [JadwalKerjaController::class, 'getShiftHariIni']);
-
-// Cuti
-Route::get('update-cuti', [CutiController::class, 'updateExpiredCuti']);
-Route::post('/cuti/update-expired', [CutiController::class, 'updateExpiredCuti']);
-Route::post('/cuti/ajukan', [CutiController::class, 'ajukanCuti']);
-Route::post('/cuti/approve/{id}', [CutiController::class, 'approveCuti']);
-Route::apiResource('cuti', CutiController::class);
 
 // Karyawan
 Route::apiResource('karyawan', KaryawanController::class);
