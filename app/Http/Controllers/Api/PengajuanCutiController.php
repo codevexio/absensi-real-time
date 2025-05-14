@@ -59,12 +59,22 @@ class PengajuanCutiController extends Controller
         }
 
         // Validasi input
-        $validated = $request->validate([
+        $validated = Validator::make($request->all(), [
             'jenisCuti' => 'required|in:Cuti Panjang,Cuti Tahunan',
             'tanggalMulai' => 'required|date',
             'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
-            'file_surat_cuti' => 'nullable|file|mimes:pdf|max:2048',
+            'file_surat_cuti' => 'nullable|file|mimes:pdf|max:5128',
         ]);
+
+        if ($validated->fails()) {
+            return response()->json([
+                'message' => 'Validasi gagal',
+                'errors' => $validated->errors()
+            ], 422);
+        }
+
+        $data = $validated->validated();
+
 
         // Cek cuti yang masih diproses
         $pengajuanCutiDiproses = PengajuanCuti::where('karyawan_id', $user->id)
