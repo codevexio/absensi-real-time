@@ -66,7 +66,7 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        // Cek pengajuan sebelumnya
+        // Cek cuti yang masih diproses
         $pengajuanCutiDiproses = PengajuanCuti::where('karyawan_id', $user->id)
                                             ->where('statusCuti', 'Diproses')
                                             ->exists();
@@ -75,14 +75,13 @@ class PengajuanCutiController extends Controller
             return response()->json(['message' => 'Anda masih memiliki pengajuan cuti yang sedang diproses'], 400);
         }
 
-        // Hitung jumlah hari
+        // Hitung jumlah hari cuti
         $tanggalMulai = Carbon::parse($validated['tanggalMulai']);
         $tanggalSelesai = Carbon::parse($validated['tanggalSelesai']);
         $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
 
-        // Ambil data cuti
+        // Ambil jatah cuti
         $cuti = Cuti::where('karyawan_id', $user->id)->first();
-
         if (!$cuti) {
             return response()->json(['message' => 'Data cuti tidak ditemukan'], 404);
         }
@@ -92,41 +91,37 @@ class PengajuanCutiController extends Controller
             if ($cuti->cutiTahun < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 400);
             }
-        } elseif ($validated['jenisCuti'] === 'Cuti Panjang') {
+        } else {
             if ($cuti->cutiPanjang < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti panjang tidak mencukupi'], 400);
             }
         }
 
-        // Siapkan data
-        $data = [
-            'karyawan_id'    => $user->id,
-            'jenisCuti'      => $validated['jenisCuti'],
-            'tanggalMulai'   => $validated['tanggalMulai'],
-            'tanggalSelesai' => $validated['tanggalSelesai'],
-            'jumlahHari'     => $jumlahHari,
-            'statusCuti'     => 'Diproses',
-        ];
-
-        // Simpan file PDF jika ada
+        // Simpan file kalau ada
+        $path = null;
         if ($request->hasFile('file_surat_cuti')) {
             $file = $request->file('file_surat_cuti');
             $filename = 'surat_cuti_' . time() . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('surat_cuti', $filename, 'public');
-
-            $data['file_surat_cuti'] = $path;
-
-            Log::info('File surat cuti berhasil diupload: ' . $path);
+            Log::info('File cuti disimpan di: ' . $path);
         } else {
-            Log::warning('Tidak ada file surat cuti dikirim.');
+            Log::warning('Tidak ada file surat cuti');
         }
 
-        // Simpan ke database
-        $pengajuan = PengajuanCuti::create($data);
+        // Simpan ke DB
+        $pengajuan = PengajuanCuti::create([
+            'karyawan_id' => $user->id,
+            'jenisCuti' => $validated['jenisCuti'],
+            'tanggalMulai' => $validated['tanggalMulai'],
+            'tanggalSelesai' => $validated['tanggalSelesai'],
+            'jumlahHari' => $jumlahHari,
+            'statusCuti' => 'Diproses',
+            'file_surat_cuti' => $path,
+        ]);
 
         return response()->json([
             'message' => 'Pengajuan cuti berhasil dikirim dan sedang diproses',
-            'data' => $pengajuan,
+            'data' => $pengajuan
         ], 201);
     }
 

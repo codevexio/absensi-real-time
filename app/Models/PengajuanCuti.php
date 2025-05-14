@@ -11,8 +11,14 @@ class PengajuanCuti extends Model
 
     protected $table = 'pengajuan_cuti';
     protected $fillable = [
-        'karyawan_id', 'jenisCuti', 'tanggalMulai',
-        'tanggalSelesai', 'jumlahHari', 'statusCuti', 'alasanPenolakan'
+        'karyawan_id',
+        'jenisCuti',
+        'tanggalMulai',
+        'tanggalSelesai',
+        'jumlahHari',
+        'statusCuti',
+        'alasanPenolakan',
+        'file_surat_cuti', // INI WAJIB!
     ];
 
     public function karyawan()
