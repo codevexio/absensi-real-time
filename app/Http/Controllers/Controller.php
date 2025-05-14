@@ -11,7 +11,6 @@ abstract class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    // Tambahkan fungsi umum yang bisa dipakai semua controller turunan
     protected function responseSuccess($data = [], $message = 'Berhasil', $code = 200)
     {
         return response()->json([
