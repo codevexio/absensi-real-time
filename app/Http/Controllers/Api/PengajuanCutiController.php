@@ -74,21 +74,20 @@ class PengajuanCutiController extends Controller
             ], 422);
         }
 
-        $data = $validated->validated();
-
+        $data = $validated->validated(); // Using validated() to get the data
 
         // Cek cuti yang masih diproses
         $pengajuanCutiDiproses = PengajuanCuti::where('karyawan_id', $user->id)
-                                            ->where('statusCuti', 'Diproses')
-                                            ->exists();
+                                                ->where('statusCuti', 'Diproses')
+                                                ->exists();
 
         if ($pengajuanCutiDiproses) {
             return response()->json(['message' => 'Anda masih memiliki pengajuan cuti yang sedang diproses'], 400);
         }
 
         // Hitung jumlah hari cuti
-        $tanggalMulai = Carbon::parse($validated['tanggalMulai']);
-        $tanggalSelesai = Carbon::parse($validated['tanggalSelesai']);
+        $tanggalMulai = Carbon::parse($data['tanggalMulai']);
+        $tanggalSelesai = Carbon::parse($data['tanggalSelesai']);
         $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
 
         // Ambil jatah cuti
@@ -98,7 +97,7 @@ class PengajuanCutiController extends Controller
         }
 
         // Cek sisa cuti
-        if ($validated['jenisCuti'] === 'Cuti Tahunan') {
+        if ($data['jenisCuti'] === 'Cuti Tahunan') {
             if ($cuti->cutiTahun < $jumlahHari) {
                 return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 400);
             }
@@ -122,9 +121,9 @@ class PengajuanCutiController extends Controller
         // Simpan ke DB
         $pengajuan = PengajuanCuti::create([
             'karyawan_id' => $user->id,
-            'jenisCuti' => $validated['jenisCuti'],
-            'tanggalMulai' => $validated['tanggalMulai'],
-            'tanggalSelesai' => $validated['tanggalSelesai'],
+            'jenisCuti' => $data['jenisCuti'], // Use $data to access validated values
+            'tanggalMulai' => $data['tanggalMulai'],
+            'tanggalSelesai' => $data['tanggalSelesai'],
             'jumlahHari' => $jumlahHari,
             'statusCuti' => 'Diproses',
             'file_surat_cuti' => $path,
@@ -135,6 +134,7 @@ class PengajuanCutiController extends Controller
             'data' => $pengajuan
         ], 201);
     }
+
 
     // Menampilkan semua pengajuan cuti dari karyawan yang sudah login
     public function getPengajuanCuti()
