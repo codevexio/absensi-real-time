@@ -66,12 +66,12 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        // Cek jika ada pengajuan cuti yang masih diproses
-        $pengajuanCutiDiproses = PengajuanCuti::where('karyawan_id', $user->id)
-                                            ->where('statusCuti', 'Diproses')
-                                            ->exists();
+        // Cek pengajuan aktif
+        $pengajuanAktif = PengajuanCuti::where('karyawan_id', $user->id)
+                                        ->where('statusCuti', 'Diproses')
+                                        ->exists();
 
-        if ($pengajuanCutiDiproses) {
+        if ($pengajuanAktif) {
             return response()->json(['message' => 'Anda masih memiliki pengajuan cuti yang sedang diproses'], 400);
         }
 
@@ -80,25 +80,23 @@ class PengajuanCutiController extends Controller
         $tanggalSelesai = Carbon::parse($validated['tanggalSelesai']);
         $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
 
-        // Ambil data cuti karyawan
+        // Ambil data cuti
         $cuti = Cuti::where('karyawan_id', $user->id)->first();
 
         if (!$cuti) {
             return response()->json(['message' => 'Data cuti tidak ditemukan'], 404);
         }
 
-        // Validasi sisa cuti
-        if ($validated['jenisCuti'] === 'Cuti Tahunan') {
-            if ($cuti->cutiTahun < $jumlahHari) {
-                return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 400);
-            }
-        } elseif ($validated['jenisCuti'] === 'Cuti Panjang') {
-            if ($cuti->cutiPanjang < $jumlahHari) {
-                return response()->json(['message' => 'Sisa cuti panjang tidak mencukupi'], 400);
-            }
+        // Cek sisa cuti
+        if ($validated['jenisCuti'] === 'Cuti Tahunan' && $cuti->cutiTahun < $jumlahHari) {
+            return response()->json(['message' => 'Sisa cuti tahunan tidak mencukupi'], 400);
         }
 
-        // Persiapan data pengajuan cuti
+        if ($validated['jenisCuti'] === 'Cuti Panjang' && $cuti->cutiPanjang < $jumlahHari) {
+            return response()->json(['message' => 'Sisa cuti panjang tidak mencukupi'], 400);
+        }
+
+        // Siapkan data
         $data = [
             'karyawan_id' => $user->id,
             'jenisCuti' => $validated['jenisCuti'],
@@ -108,18 +106,16 @@ class PengajuanCutiController extends Controller
             'statusCuti' => 'Diproses',
         ];
 
-        // Simpan file jika dikirim
+        // Upload file jika ada
         if ($request->hasFile('file_surat_cuti')) {
             $file = $request->file('file_surat_cuti');
-
-            // Logging nama file untuk debug
-            Log::info('File surat cuti ditemukan: ' . $file->getClientOriginalName());
-
-            // Simpan file ke folder storage/app/public/surat_cuti
             $path = $file->store('surat_cuti', 'public');
             $data['file_surat_cuti'] = $path;
+
+            // Logging untuk debug
+            Log::info('File surat cuti berhasil diupload: ' . $path);
         } else {
-            Log::warning('File surat cuti tidak ditemukan dalam request.');
+            Log::warning('Tidak ada file surat cuti yang dikirim.');
         }
 
         // Simpan ke database
