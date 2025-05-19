@@ -52,8 +52,11 @@ class KaryawanController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'golongan' => 'required|in:A,B,C,D,E',
-            'divisi' => 'required|in:A,B,C,D,E'
+            'golongan' => 'required|in:Direksi,Kepala Bagian,Kepala SubBagian,Asisten,Staff',
+            'divisi' => 'required|in:Bag.Sekper,Bag.SPI,Bag.SDM,Bag.Tanaman,Bag.Teknik & Pengolahan, 
+                                     Bag.Keuangan,Bag.Pemasaran & P.Baku,Bag.Perencana Strategis, 
+                                     Bag.Hukum,Bag.Pengadaan & TI,Keamanan,Papam, 
+                                     Bag.Percepetan Transformasi Teknologi,Bag.Teknik & Pengolahan'
         ]);
 
         $karyawan = Karyawan::create($request->all());
@@ -82,8 +85,11 @@ class KaryawanController extends Controller
 
         $request->validate([
             'nama' => 'string|max:255',
-            'golongan' => 'in:A,B,C,D,E',
-            'divisi' => 'in:A,B,C,D,E'
+            'golongan' => 'in:Direksi,Kepala Bagian,Kepala SubBagian,Asisten,Staff',
+            'divisi' => 'in:Bag.Sekper,Bag.SPI,Bag.SDM,Bag.Tanaman,Bag.Teknik & Pengolahan, 
+                            Bag.Keuangan,Bag.Pemasaran & P.Baku,Bag.Perencana Strategis, 
+                            Bag.Hukum,Bag.Pengadaan & TI,Keamanan,Papam, 
+                            Bag.Percepetan Transformasi Teknologi,Bag.Teknik & Pengolahan'
         ]);
 
         $karyawan->update($request->all());

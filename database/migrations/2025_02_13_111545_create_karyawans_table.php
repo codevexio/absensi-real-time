@@ -16,8 +16,11 @@ return new class extends Migration
             $table->string('nama'); // Nama karyawan
             $table->string('username');
             $table->string('password');
-            $table->enum('golongan', ['A', 'B', 'C', 'D','E']); // Golongan
-            $table->enum('divisi', ['A', 'B', 'C', 'D','E']); // Divisi
+            $table->enum('golongan', ['Direksi', 'Kepala Bagian', 'Kepala SubBagian', 'Asisten', 'Staff']); // Golongan
+            $table->enum('divisi', ['Bag.Sekper', 'Bag.SPI', 'Bag.SDM', 'Bag.Tanaman', 'Bag.Teknik & Pengolahan', 
+                                    'Bag.Keuangan', 'Bag.Pemasaran & P.Baku', 'Bag.Perencana Strategis', 
+                                    'Bag.Hukum', 'Bag.Pengadaan & TI', 'Keamanan', 'Papam', 
+                                    'Bag.Percepetan Transformasi Teknologi', 'Bag.Teknik & Pengolahan' ]); // Divisi
             $table->timestamps();
         });
     }
