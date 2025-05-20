@@ -126,7 +126,7 @@
                     option.selected = true;
                     break;
                 }
-            }
+            }   
 
             // Set action form edit
             document.getElementById("form-edit-shift").action = `/kelola-shift/${id}`;

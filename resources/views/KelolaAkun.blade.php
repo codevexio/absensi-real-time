@@ -64,7 +64,10 @@
                                             <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg"
                                                 type="submit"
                                                 onclick="return confirm('Apakah Anda yakin ingin menghapus akun ini?')">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                    class="lucide lucide-trash-2">
                                                     <path d="M3 6h18" />
                                                     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                                     <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
@@ -105,32 +108,31 @@
                 <select name="golongan" required
                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
                     <option value="">Pilih Golongan</option>
-                    <option value="A">Direksi</option>
-                    <option value="B">Kepala Bagian(Kabag)</option>
-                    <option value="C">Kepala SubBagian(Kasubag)</option>
-                    <option value="D">Asisten</option>
-                    <option value="E">Staff</option>
+                    <option value="Direksi">Direksi</option>
+                    <option value="Kepala Bagian">Kepala Bagian (Kabag)</option>
+                    <option value="Kepala SubBagian">Kepala SubBagian (Kasubag)</option>
+                    <option value="Asisten">Asisten</option>
+                    <option value="Staff">Staff</option>
                 </select>
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Divisi</label>
                 <select name="divisi" required
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
-                    <option value="">Pilih Divisi</option>
-                    <option value="A">Bag.Sekper</option>
-                    <option value="B">Bag.SPI</option>
-                    <option value="C">Bag.SDM</option>
-                    <option value="D">Bag.Tanaman</option>
-                    <option value="E">Bag.Teknik & Pengolahan</option>
-                    <option value="E">Bag.Keuangan</option>
-                    <option value="E">Bag.Pemasaran & P.Baku</option>
-                    <option value="E">Bag.Perencanaa Strategis</option>
-                    <option value="E">Bag.Hukum</option>
-                    <option value="E">Bag.Pengadaan & TI</option>
-                    <option value="E">Keamanan</option>
-                    <option value="E">Papam</option>
-                    <option value="E">Bag.Percepetan Transformasi Teknologi</option>
-                    <option value="E">Bag.Teknik & Pengolahan</option>
+                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">   
+                    <option value="Bag.Sekper">Bag.Sekper</option>
+                    <option value="Bag.SPI">Bag.SPI</option>
+                    <option value="Bag.SDM">Bag.SDM</option>
+                    <option value="Bag.Tanaman">Bag.Tanaman</option>
+                    <option value="Bag.Teknik & Pengolahan">Bag.Teknik & Pengolahan</option>
+                    <option value="Bag.Keuangan">Bag.Keuangan</option>
+                    <option value="Bag.Pemasaran & P.Baku">Bag.Pemasaran & P.Baku</option>
+                    <option value="Bag.Perencanaa Strategis">Bag.Perencanaa Strategis</option>
+                    <option value="Bag.Hukum">Bag.Hukum</option>
+                    <option value="Bag.Pengadaan & TI">Bag.Pengadaan & TI</option>
+                    <option value="Keamanan">Keamanan</option>
+                    <option value="Papam">Papam</option>
+                    <option value="Bag.Percepetan Transformasi Teknologi">Bag.Percepetan Transformasi Teknologi</option>
+                    <option value="Bag.Teknik & Pengolahan">Bag.Teknik & Pengolahan</option>
                 </select>
             </div>
             <div class="mb-4">
@@ -171,22 +173,33 @@
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Golongan</label>
                 <select name="golongan" id="edit-golongan" required class="w-full px-3 py-2 border rounded-lg">
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
-                    <option value="E">E</option>
+                    <option value="">Pilih Golongan</option>
+                    <option value="A">Direksi</option>
+                    <option value="B">Kepala Bagian (Kabag)</option>
+                    <option value="C">Kepala SubBagian (Kasubag)</option>
+                    <option value="D">Asisten</option>
+                    <option value="E">Staff</option>
                 </select>
             </div>
 
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Divisi</label>
                 <select name="divisi" id="edit-divisi" required class="w-full px-3 py-2 border rounded-lg">
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
-                    <option value="E">E</option>
+                    
+                    <option value="A">Bag.Sekper</option>
+                    <option value="B">Bag.SPI</option>
+                    <option value="C">Bag.SDM</option>
+                    <option value="D">Bag.Tanaman</option>
+                    <option value="E">Bag.Teknik & Pengolahan</option>
+                    <option value="E">Bag.Keuangan</option>
+                    <option value="E">Bag.Pemasaran & P.Baku</option>
+                    <option value="E">Bag.Perencanaa Strategis</option>
+                    <option value="E">Bag.Hukum</option>
+                    <option value="E">Bag.Pengadaan & TI</option>
+                    <option value="E">Keamanan</option>
+                    <option value="E">Papam</option>
+                    <option value="E">Bag.Percepetan Transformasi Teknologi</option>
+                    <option value="E">Bag.Teknik & Pengolahan</option>
                 </select>
             </div>
 
@@ -243,7 +256,7 @@
                 document.getElementById("edit-username").value = username;
 
                 // Update action form edit
-                document.getElementById("form-edit-akun").action = `/web/kelola-akun/${id}`;    
+                document.getElementById("form-edit-akun").action = `/web/kelola-akun/${id}`;
 
                 dialogEdit.showModal();
             });
