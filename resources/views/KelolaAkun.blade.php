@@ -174,32 +174,31 @@
                 <label class="block text-gray-700 dark:text-gray-200">Golongan</label>
                 <select name="golongan" id="edit-golongan" required class="w-full px-3 py-2 border rounded-lg">
                     <option value="">Pilih Golongan</option>
-                    <option value="A">Direksi</option>
-                    <option value="B">Kepala Bagian (Kabag)</option>
-                    <option value="C">Kepala SubBagian (Kasubag)</option>
-                    <option value="D">Asisten</option>
-                    <option value="E">Staff</option>
+                    <option value="Direksi">Direksi</option>
+                    <option value="Kepala Bagian">Kepala Bagian (Kabag)</option>
+                    <option value="Kepala SubBagian">Kepala SubBagian (Kasubag)</option>
+                    <option value="Asisten">Asisten</option>
+                    <option value="Staff">Staff</option>
                 </select>
             </div>
 
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Divisi</label>
                 <select name="divisi" id="edit-divisi" required class="w-full px-3 py-2 border rounded-lg">
-                    
-                    <option value="A">Bag.Sekper</option>
-                    <option value="B">Bag.SPI</option>
-                    <option value="C">Bag.SDM</option>
-                    <option value="D">Bag.Tanaman</option>
-                    <option value="E">Bag.Teknik & Pengolahan</option>
-                    <option value="E">Bag.Keuangan</option>
-                    <option value="E">Bag.Pemasaran & P.Baku</option>
-                    <option value="E">Bag.Perencanaa Strategis</option>
-                    <option value="E">Bag.Hukum</option>
-                    <option value="E">Bag.Pengadaan & TI</option>
-                    <option value="E">Keamanan</option>
-                    <option value="E">Papam</option>
-                    <option value="E">Bag.Percepetan Transformasi Teknologi</option>
-                    <option value="E">Bag.Teknik & Pengolahan</option>
+                    <option value="Bag.Sekper">Bag.Sekper</option>
+                    <option value="Bag.SPI">Bag.SPI</option>
+                    <option value="Bag.SDM">Bag.SDM</option>
+                    <option value="Bag.Tanaman">Bag.Tanaman</option>
+                    <option value="Bag.Teknik & Pengolahan">Bag.Teknik & Pengolahan</option>
+                    <option value="Bag.Keuangan">Bag.Keuangan</option>
+                    <option value="Bag.Pemasaran & P.Baku">Bag.Pemasaran & P.Baku</option>
+                    <option value="Bag.Perencanaa Strategis">Bag.Perencanaa Strategis</option>
+                    <option value="Bag.Hukum">Bag.Hukum</option>
+                    <option value="Bag.Pengadaan & TI">Bag.Pengadaan & TI</option>
+                    <option value="Keamanan">Keamanan</option>
+                    <option value="Papam">Papam</option>
+                    <option value="Bag.Percepetan Transformasi Teknologi">Bag.Percepetan Transformasi Teknologi</option>
+                    <option value="Bag.Teknik & Pengolahan">Bag.Teknik & Pengolahan</option>
                 </select>
             </div>
 
