@@ -13,7 +13,7 @@ class IzinKaryawanController extends Controller
      */
     public function index()
     {
-        $employees = PengajuanCuti::with('karyawan'); 
+        $employees = PengajuanCuti::with('karyawan')->get(); 
         return view('IzinKaryawan', compact('employees'));
     }
 

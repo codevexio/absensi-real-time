@@ -6,28 +6,40 @@
     </x-slot>
 
     <div class="py-6">
+        @if (session('success'))
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            </script>
+        @endif
+        @if (session('error'))
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            </script>
+        @endif
+
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
-                <div class="flex justify-between mb-4">
+                <div class="flex mb-4">
                     <button id="tombol-tambah-akun"
                         class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
                         + AKUN KARYAWAN
                     </button>
-
-                    <div
-                        class="flex gap-1 px-2 border rounded-lg dark:bg-gray-700 dark:text-white items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-search">
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="m21 21-4.3-4.3" />
-                        </svg>
-                        <input type="text" placeholder="Search." class="border-none focus:outline-none focus:ring-0">
-                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full border-collapse border border-gray-300 dark:border-gray-700 rounded-lg">
+                    <table id="data-table" class="w-full border-collapse border border-gray-300 dark:border-gray-700 rounded-lg">
                         <thead class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                             <tr>
                                 <th class="border px-4 py-2">No</th>
@@ -118,7 +130,7 @@
             <div class="mb-4">
                 <label class="block text-gray-700 dark:text-gray-200">Divisi</label>
                 <select name="divisi" required
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">   
+                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white">
                     <option value="Bag.Sekper">Bag.Sekper</option>
                     <option value="Bag.SPI">Bag.SPI</option>
                     <option value="Bag.SDM">Bag.SDM</option>

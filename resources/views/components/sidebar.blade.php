@@ -1,14 +1,14 @@
 <div class="w-64 min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-3">
     <div class="p-5 text-xl font-semibold border-b dark:border-gray-700">
-        <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
+        <a href="{{ route('dashboard') }}" class="flex items-center space-x-2" tabindex="-1">
             <img src="images/Logo_PTPN4.png" alt="Logo PTPN4" class="logo w-28 mx-auto">
         </a>
     </div>
-    <nav class="mt-10">
+    <nav class="mt-10 sidebar">
         <ul>
             <li>
                 <a href="{{ route('dashboard') }}"
-                    class="flex gap-1 block px-5 py-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
+                    class="flex gap-1 px-5 py-3 hover:bg-gray-200 {{ request()->routeIs("dashboard") ? "active" : null }} dark:hover:bg-gray-700 rounded-lg transition">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="lucide lucide-layout-dashboard">
@@ -22,7 +22,7 @@
             </li>
             <li>
                 <a href="{{ route('web/kelola-akun') }}"
-                    class="flex gap-1 block px-5 py-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
+                    class="flex gap-1 {{ request()->routeIs("web/kelola-akun*") ? "active" : null }} px-5 py-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="lucide lucide-users-round">
@@ -35,7 +35,7 @@
             </li>
             <li>
                 <a href="{{ route('web/presensi') }}"
-                    class="flex gap-1 px-5 py-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
+                    class="flex gap-1 px-5 py-3 {{ request()->routeIs("web/presensi") ? "active" : null }} hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="lucide lucide-clipboard-list">
@@ -51,7 +51,7 @@
             </li>
             <li>
                 <a href="{{ route('web/izinkaryawan') }}"
-                    class="flex gap-1 block px-5 py-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
+                    class="flex gap-1 {{ request()->routeIs("web/izinkaryawan*") ? "active" : null }} px-5 py-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="lucide lucide-clipboard-pen">
@@ -66,7 +66,7 @@
             </li>
             <li>
                 <a href="{{ route('web/kelola-shift') }}"
-                    class="flex gap-1 block px-5 py-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
+                    class="flex gap-1 {{ request()->routeIs("web/kelola-shift*") ? "active" : null }} px-5 py-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="lucide lucide-calendar-clock">
