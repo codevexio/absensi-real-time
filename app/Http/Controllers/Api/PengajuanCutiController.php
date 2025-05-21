@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cuti;
+use App\Models\ApprovalCuti;
 use App\Models\PengajuanCuti;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -129,12 +130,71 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => $path,
         ]);
 
+        // Simulasi struktur approval
+        $strukturApproval = [
+            'Asisten' => ['Kepala Sub Bagian', 'Kepala Bagian', 'Direksi'],
+            'Kepala Sub Bagian' => ['Kepala Bagian', 'Direksi'],
+            'Kepala Bagian' => ['Direksi'],
+            'Direksi' => [], // tidak perlu approval lagi
+        ];
+
+        // Ambil golongan/role dari user login
+        $golongan = $user->golongan; // pastikan ini ada di tabel `karyawan`
+
+        $daftarApproval = $strukturApproval[$golongan] ?? [];
+
+        foreach ($daftarApproval as $role) {
+            // Cari user yang punya jabatan/golongan tersebut
+            $penyetuju = User::where('golongan', $role)->first(); // atau pakai jabatan jika lebih tepat
+            if ($penyetuju) {
+                ApprovalCuti::create([
+                    'pengajuan_cuti_id' => $pengajuan->id,
+                    'penyetuju_id' => $penyetuju->id,
+                    'jabatan' => $role,
+                    'status' => 'Menunggu',
+                ]);
+            }
+        }
+
+        // Kalau direksi, langsung setujui otomatis
+        if ($golongan == 'Direksi') {
+            $pengajuan->update(['statusCuti' => 'Disetujui']);
+        }
+
         return response()->json([
             'message' => 'Pengajuan cuti berhasil dikirim dan sedang diproses',
             'data' => $pengajuan
         ], 201);
     }
 
+    public function trackingCuti($id)
+    {
+        $user = Auth::user();
 
+        $pengajuan = PengajuanCuti::where('id', $id)
+            ->where('karyawan_id', $user->id)
+            ->first();
+
+        if (!$pengajuan) {
+            return response()->json(['message' => 'Pengajuan cuti tidak ditemukan'], 404);
+        }
+
+        $tracking = $pengajuan->approvalCutis() // relasi hasMany di model PengajuanCuti
+            ->with('penyetuju:id,nama') // nama relasi user
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'jabatan' => $item->jabatan,
+                    'penyetuju' => $item->penyetuju->nama ?? '-',
+                    'status' => $item->status,
+                    'alasan_penolakan' => $item->alasan_penolakan ?? '-',
+                ];
+            });
+
+        return response()->json([
+            'pengajuan' => $pengajuan,
+            'tracking' => $tracking,
+        ]);
+    }
     
 }

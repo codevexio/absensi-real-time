@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('cuti/sisa', [PengajuanCutiController::class, 'getSisaCuti']);
     Route::post('cuti/ajukan', [PengajuanCutiController::class, 'ajukanCuti']);
     Route::get('cuti/pengajuan', [PengajuanCutiController::class, 'getPengajuanCuti']);
+    Route::get('/cuti/track/{id}', [PengajuanCutiController::class, 'trackingCuti']);
 });
 
 // Jadwal Kerja
