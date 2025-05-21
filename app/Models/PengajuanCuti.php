@@ -33,8 +33,9 @@ class PengajuanCuti extends Model
 
     public function penyetuju()
     {
-        return $this->belongsTo(karyawan::class, 'penyetuju_id');
+        return $this->belongsTo(Karyawan::class, 'approver_id');
     }
+
 
 
 }
