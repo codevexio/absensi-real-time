@@ -130,6 +130,23 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => $path,
         ]);
 
+        // Ambil golongan user (pastikan relasi ke data golongan udah ada atau kolom tersedia)
+        $golongan = $user->golongan; // Misalnya golongan disimpan langsung di user
+
+        if ($golongan == 'Direksi') {
+            // Langsung setujui
+            $pengajuan->update(['statusCuti' => 'Disetujui']);
+        } else {
+            // Insert ke tabel approval_cuti
+            ApprovalCuti::create([
+                'pengajuan_cuti_id' => $pengajuan->id,
+                'approver_id' => null, // Akan diisi saat disetujui nanti
+                'approver_golongan' => $this->getNextGolongan($golongan), // Fungsi bantu (lihat di bawah)
+                'status' => 'Menunggu',
+                'catatan' => null,
+            ]);
+        }
+
         // Kalau direksi, langsung setujui otomatis
         if ($golongan == 'Direksi') {
             $pengajuan->update(['statusCuti' => 'Disetujui']);
@@ -140,5 +157,18 @@ class PengajuanCutiController extends Controller
             'data' => $pengajuan
         ], 201);
     }
+
+    private function getNextGolongan($currentGolongan)
+    {
+        $urutan = ['E', 'D', 'C', 'B', 'Direksi']; // Urutan dari paling rendah ke atas
+        $index = array_search($currentGolongan, $urutan);
+
+        if ($index === false || $index + 1 >= count($urutan)) {
+            return null; // Tidak ada level di atasnya
+        }
+
+        return $urutan[$index + 1];
+    }
+
     
 }

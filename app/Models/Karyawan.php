@@ -43,4 +43,9 @@ class Karyawan extends Authenticatable
         return $this->hasOne(Cuti::class);
     }
 
+    public function approvalCuti()
+    {
+        return $this->hasMany(ApprovalCuti::class, 'approver_id');
+    }
+
 }

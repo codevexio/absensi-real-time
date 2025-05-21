@@ -19,14 +19,14 @@ class ApprovalCuti extends Model
         'catatan',
     ];
 
-    // Relasi ke tabel pengajuan cuti
-    public function pengajuanCuti()
+    // Relasi ke pengajuan cuti
+    public function pengajuan()
     {
         return $this->belongsTo(PengajuanCuti::class, 'pengajuan_cuti_id');
     }
 
-    // Relasi ke karyawan yang menjadi approver
-    public function penyetuju()
+    // Relasi ke karyawan yang menyetujui
+    public function approver()
     {
         return $this->belongsTo(Karyawan::class, 'approver_id');
     }
