@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+nav.sidebar a.active {
+    @apply bg-green-600 text-white;
+}
+
+/* customize data table library */
+.dt-length {
+    @apply !flex items-center gap-2;
+}
+
+.dt-length select {
+    @apply !w-14;
+}
+
+.dt-search {
+    @apply !flex items-center gap-2;
+}
+
+.dt-layout-row:has(select) {
+    @apply !px-px !flex-row-reverse justify-between;
+}
+
+.dt-layout-cell {
+    @apply !m-0
+}

@@ -35,8 +35,8 @@ Route::delete('/kelola-akun/{id}', [KelolaAkunController::class, 'destroy'])->na
 
 //Kelola Izin
 Route::get('/izinkaryawan', [IzinKaryawanController::class,'index'])->name('web/izinkaryawan');
-Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('<Api>karyawan.store');
 Route::get('/izinkaryawan/search', [IzinKaryawanController::class, 'search'])->name('web/izinkaryawan-search');
+Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('<Api>karyawan.store');
 
 //Kelola Shift
 Route::get('/kelolashift', [KelolaShiftController::class,'index'])->name('web/kelola-shift');

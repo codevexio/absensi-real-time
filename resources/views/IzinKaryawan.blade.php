@@ -39,16 +39,17 @@
                             </tr>
                         </thead>
                         <tbody class="text-gray-800 dark:text-gray-200">
-                            @forelse ($employees as $index => $employee)
+                            @forelse ($employees as $employee)
                             <tr class="hover:bg-gray-200 dark:hover:bg-gray-700">
-                                <td class="border px-4 py-2 text-center">{{ $index + 1 }}</td>
-                                <td class="border px-4 py-2 text-center">{{ $employee->karyawan->nama }}</td>
+                                <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
+                                <td class="border px-4 py-2 text-center">{{ $employee->nama }}</td>
                                 <td class="border px-4 py-2 text-center">
                                     {{ $employee->jenisCuti ?? '-' }}
                                 </td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->tanggalMulai ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->tanggalSelesai ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->jumlahHari ?? '-' }}</td>
+                                <td class="border px-4 py-2 text-center">{{ $employee->dokumen ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->statusCuti ?? '-' }}</td>
                             </tr>
                             @empty

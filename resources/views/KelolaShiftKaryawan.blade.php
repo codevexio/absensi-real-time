@@ -8,21 +8,9 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
-                <div class="flex justify-between mb-4">
-                    <div
-                        class="flex gap-1 px-2 border rounded-lg dark:bg-gray-700 dark:text-white items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-search">
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="m21 21-4.3-4.3" />
-                        </svg>
-                        <input type="text" placeholder="Search." class="border-none focus:outline-none focus:ring-0">
-                    </div>
-                </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full border-collapse border border-gray-300 dark:border-gray-700 rounded-lg">
+                    <table id="data-table"class="w-full border-collapse border border-gray-300 dark:border-gray-700 rounded-lg">
                         <thead class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                             <tr>
                                 <th class="border px-4 py-2">No</th>
@@ -56,9 +44,6 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="6" class="border px-4 py-2 text-center">Tidak ada data</td>
-                                </tr>
                             @endforelse
                         </tbody>
                     </table>
