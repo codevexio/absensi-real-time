@@ -23,7 +23,7 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('cuti/sisa', [PengajuanCutiController::class, 'getSisaCuti']);
     Route::post('cuti/ajukan', [PengajuanCutiController::class, 'ajukanCuti']);
-    Route::get('cuti/pengajuan', [PengajuanCutiController::class, 'getPengajuanCuti']);
+    Route::get('cuti/detail/{id}', [PengajuanCutiController::class, 'detailPengajuanCuti']);
 });
 
 // Jadwal Kerja

@@ -130,21 +130,20 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => $path,
         ]);
 
-        // Ambil golongan user (pastikan relasi ke data golongan udah ada atau kolom tersedia)
-        $golongan = $user->golongan; // Misalnya golongan disimpan langsung di user
+        // Buat approval cuti bertingkat
+        $urutanGolongan = ['Staff', 'Asisten', 'Kepala Sub Bagian', 'Kepala Bagian', 'Direksi'];
+        $currentIndex = array_search($golongan, $urutanGolongan);
 
-        if ($golongan == 'Direksi') {
-            // Langsung setujui
-            $pengajuan->update(['statusCuti' => 'Disetujui']);
-        } else {
-            // Insert ke tabel approval_cuti
-            ApprovalCuti::create([
-                'pengajuan_cuti_id' => $pengajuan->id,
-                'approver_id' => null, // Akan diisi saat disetujui nanti
-                'approver_golongan' => $this->getNextGolongan($golongan), // Fungsi bantu (lihat di bawah)
-                'status' => 'Menunggu',
-                'catatan' => null,
-            ]);
+        if ($currentIndex !== false) {
+            for ($i = $currentIndex + 1; $i < count($urutanGolongan); $i++) {
+                ApprovalCuti::create([
+                    'pengajuan_cuti_id' => $pengajuan->id,
+                    'approver_id' => null,
+                    'approver_golongan' => $urutanGolongan[$i],
+                    'status' => 'Menunggu',
+                    'catatan' => null,
+                ]);
+            }
         }
 
         // Kalau direksi, langsung setujui otomatis
@@ -158,16 +157,33 @@ class PengajuanCutiController extends Controller
         ], 201);
     }
 
-    private function getNextGolongan($currentGolongan)
+    public function detailPengajuanCuti($id)
     {
-        $urutan = ['E', 'D', 'C', 'B', 'Direksi']; // Urutan dari paling rendah ke atas
-        $index = array_search($currentGolongan, $urutan);
+        $user = Auth::user();
 
-        if ($index === false || $index + 1 >= count($urutan)) {
-            return null; // Tidak ada level di atasnya
+        $pengajuan = PengajuanCuti::with(['approvals.approver'])->where('id', $id)->where('karyawan_id', $user->id)->first();
+
+        if (!$pengajuan) {
+            return response()->json(['message' => 'Pengajuan cuti tidak ditemukan'], 404);
         }
 
-        return $urutan[$index + 1];
+        $hasil = [];
+
+        foreach ($pengajuan->approvals as $approval) {
+            $hasil[] = [
+                'golongan' => $approval->approver_golongan,
+                'nama' => $approval->approver ? $approval->approver->nama : '-',
+                'status' => $approval->status,
+                'catatan' => $approval->catatan,
+            ];
+        }
+
+        $catatanPenolakan = $pengajuan->approvals->where('status', 'Ditolak')->first()->catatan ?? null;
+
+        return response()->json([
+            'approval' => $hasil,
+            'alasan_penolakan' => $catatanPenolakan,
+        ]);
     }
 
     
