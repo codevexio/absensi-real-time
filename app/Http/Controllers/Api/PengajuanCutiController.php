@@ -145,15 +145,18 @@ class PengajuanCutiController extends Controller
 
         foreach ($daftarApproval as $role) {
             // Cari user yang punya jabatan/golongan tersebut
-            $penyetuju = User::where('golongan', $role)->first(); // atau pakai jabatan jika lebih tepat
-            if ($penyetuju) {
-                ApprovalCuti::create([
-                    'pengajuan_cuti_id' => $pengajuan->id,
-                    'penyetuju_id' => $penyetuju->id,
-                    'jabatan' => $role,
-                    'status' => 'Menunggu',
-                ]);
+            $penyetuju = Karyawan::where('golongan', $role)->first(); // atau pakai jabatan jika lebih tepat
+            if (!$penyetuju) {
+                Log::warning("Tidak ditemukan penyetuju dengan golongan: $role");
+                continue;
             }
+
+            ApprovalCuti::create([
+                'pengajuan_cuti_id' => $pengajuan->id,
+                'penyetuju_id' => $penyetuju->id,
+                'jabatan' => $role,
+                'status' => 'Menunggu',
+            ]);
         }
 
         // Kalau direksi, langsung setujui otomatis
