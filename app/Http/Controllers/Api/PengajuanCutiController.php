@@ -181,15 +181,25 @@ class PengajuanCutiController extends Controller
     public function detailPengajuanCuti($id)
     {
         $user = Auth::user();
+        \Log::info('User ID Login: ' . $user->id);
+        \Log::info('Mencari pengajuan cuti id: ' . $id);
 
-        $pengajuan = PengajuanCuti::with(['approvals.approver'])->where('id', $id)->where('karyawan_id', $user->id)->first();
+        // Ambil data pengajuan tanpa filter karyawan_id dulu, untuk cek ada atau tidak
+        $pengajuan = PengajuanCuti::with(['approvals.approver'])->where('id', $id)->first();
 
         if (!$pengajuan) {
+            \Log::warning('Pengajuan cuti tidak ditemukan sama sekali');
+            return response()->json(['message' => 'Pengajuan cuti tidak ditemukan'], 404);
+        }
+
+        \Log::info('Pengajuan ditemukan, karyawan_id: ' . $pengajuan->karyawan_id);
+
+        if ($pengajuan->karyawan_id != $user->id) {
+            \Log::warning('User login bukan pemilik pengajuan cuti');
             return response()->json(['message' => 'Pengajuan cuti tidak ditemukan'], 404);
         }
 
         $hasil = [];
-
         foreach ($pengajuan->approvals as $approval) {
             $hasil[] = [
                 'golongan' => $approval->approver_golongan,
@@ -206,6 +216,7 @@ class PengajuanCutiController extends Controller
             'alasan_penolakan' => $catatanPenolakan,
         ]);
     }
+
 
     
 }
