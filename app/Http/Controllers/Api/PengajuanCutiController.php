@@ -131,7 +131,7 @@ class PengajuanCutiController extends Controller
         ]);
 
         // Urutan golongan approver dari yang lebih rendah ke tinggi
-        $urutanGolongan = ['Staff', 'Asisten', 'Kepala Sub Bagian', 'Kepala Bagian', 'Direksi'];
+        $urutanGolongan = ['Staff', 'Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
 
         // Golongan karyawan yang mengajukan cuti
         $golonganUser = $user->golongan;
