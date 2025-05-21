@@ -130,27 +130,45 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => $path,
         ]);
 
-        // ✅ Ambil golongan karyawan yang login
-        $golongan = $user->golongan;
-
-        // Buat approval cuti bertingkat
+        // Urutan golongan approver dari yang lebih rendah ke tinggi
         $urutanGolongan = ['Staff', 'Asisten', 'Kepala Sub Bagian', 'Kepala Bagian', 'Direksi'];
-        $currentIndex = array_search($golongan, $urutanGolongan);
 
-        if ($currentIndex !== false) {
-            for ($i = $currentIndex + 1; $i < count($urutanGolongan); $i++) {
+        // Golongan karyawan yang mengajukan cuti
+        $golonganUser = $user->golongan;
+
+        // Cari posisi golongan karyawan di array
+        $posisiUser = array_search($golonganUser, $urutanGolongan);
+
+        if ($posisiUser === false) {
+            return response()->json(['message' => 'Golongan tidak valid'], 400);
+        }
+
+        // Loop dari posisi golongan setelah user sampai golongan tertinggi
+        for ($i = $posisiUser + 1; $i < count($urutanGolongan); $i++) {
+            $golonganApprover = $urutanGolongan[$i];
+
+            // Ambil semua approver di golongan ini (bisa lebih dari 1 orang)
+            $approvers = \App\Models\Karyawan::where('golongan', $golonganApprover)->get();
+
+            if ($approvers->isEmpty()) {
+                // Jika tidak ada approver, skip dan lanjut ke golongan berikutnya
+                Log::warning("Tidak ada approver ditemukan untuk golongan: $golonganApprover, proses approval di golongan ini di-skip.");
+                continue;
+            }
+
+            foreach ($approvers as $approver) {
                 ApprovalCuti::create([
                     'pengajuan_cuti_id' => $pengajuan->id,
-                    'approver_id' => null,
-                    'approver_golongan' => $urutanGolongan[$i],
+                    'approver_id' => $approver->id,
+                    'approver_golongan' => $golonganApprover,
                     'status' => 'Menunggu',
                     'catatan' => null,
                 ]);
             }
         }
 
-        // Kalau direksi, langsung disetujui
-        if ($golongan == 'Direksi') {
+        // Jika pengaju adalah Direksi langsung setujui
+        if ($golonganUser == 'Direksi') {
             $pengajuan->update(['statusCuti' => 'Disetujui']);
         }
 
