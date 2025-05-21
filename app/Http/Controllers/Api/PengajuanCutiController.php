@@ -130,6 +130,9 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => $path,
         ]);
 
+        // ✅ Ambil golongan karyawan yang login
+        $golongan = $user->golongan;
+
         // Buat approval cuti bertingkat
         $urutanGolongan = ['Staff', 'Asisten', 'Kepala Sub Bagian', 'Kepala Bagian', 'Direksi'];
         $currentIndex = array_search($golongan, $urutanGolongan);
@@ -146,7 +149,7 @@ class PengajuanCutiController extends Controller
             }
         }
 
-        // Kalau direksi, langsung setujui otomatis
+        // Kalau direksi, langsung disetujui
         if ($golongan == 'Direksi') {
             $pengajuan->update(['statusCuti' => 'Disetujui']);
         }
