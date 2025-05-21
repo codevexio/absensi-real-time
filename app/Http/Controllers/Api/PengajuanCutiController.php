@@ -136,21 +136,5 @@ class PengajuanCutiController extends Controller
     }
 
 
-    // Menampilkan semua pengajuan cuti dari karyawan yang sudah login
-    public function getPengajuanCuti()
-    {
-        $user = Auth::user();
-
-        if (!$user) {
-            return response()->json(['message' => 'Karyawan belum login'], 401);
-        }
-
-        $pengajuanCuti = PengajuanCuti::where('karyawan_id', $user->id)->get();
-
-        if ($pengajuanCuti->isEmpty()) {
-            return response()->json(['message' => 'Tidak ada pengajuan cuti'], 404);
-        }
-
-        return response()->json($pengajuanCuti);
-    }
+    
 }
