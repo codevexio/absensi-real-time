@@ -26,7 +26,7 @@ class ApprovalCuti extends Model
     }
 
     // Relasi ke karyawan yang menjadi approver
-    public function approver()
+    public function penyetuju()
     {
         return $this->belongsTo(Karyawan::class, 'approver_id');
     }

@@ -28,7 +28,7 @@ class PengajuanCuti extends Model
 
     public function approvalCutis()
     {
-        return $this->hasMany(ApprovalCuti::class);
+        return $this->hasMany(ApprovalCuti::class, 'pengajuan_cuti_id');
     }
 
     public function penyetuju()
