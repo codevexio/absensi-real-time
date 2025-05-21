@@ -153,10 +153,11 @@ class PengajuanCutiController extends Controller
 
             ApprovalCuti::create([
                 'pengajuan_cuti_id' => $pengajuan->id,
-                'penyetuju_id' => $penyetuju->id,
-                'jabatan' => $role,
+                'approver_id' => $penyetuju->id,
+                'approver_golongan' => $role,
                 'status' => 'Menunggu',
             ]);
+
         }
 
         // Kalau direksi, langsung setujui otomatis
