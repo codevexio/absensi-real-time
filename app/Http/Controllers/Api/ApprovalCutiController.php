@@ -82,10 +82,6 @@ class ApprovalCutiController extends Controller
             return response()->json(['message' => 'Tidak ada approval yang harus Anda proses'], 403);
         }
 
-        if ($currentApproval->karyawan_id != $user->id) {
-            return response()->json(['message' => 'Anda tidak berhak melakukan approval ini'], 403);
-        }
-
         DB::beginTransaction();
         try {
             // Update status approval yang sedang diproses
