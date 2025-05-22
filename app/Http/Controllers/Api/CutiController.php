@@ -12,12 +12,5 @@ use Illuminate\Http\Request;
 
 class CutiController extends Controller
 {
-    public function index()
-    {
-        $shift = Cuti::all();
-        if ($shift->isEmpty()) {
-            return response()->json(['message' => 'Shift tidak ditemukan'], 404);
-        }
-        return response()->json($shift);
-    }
+    
 }
