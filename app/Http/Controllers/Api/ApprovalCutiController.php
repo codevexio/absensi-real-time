@@ -66,6 +66,10 @@ class ApprovalCutiController extends Controller
             'catatan' => 'nullable|string|max:1000',
         ]);
 
+        if ($request->status === 'Ditolak' && empty($request->catatan)) {
+            return response()->json(['message' => 'Catatan wajib diisi saat menolak cuti'], 422);
+        }
+
         $user = $request->user();
         $golongan = $user->golongan;
 
