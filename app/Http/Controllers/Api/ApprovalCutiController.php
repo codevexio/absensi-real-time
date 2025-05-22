@@ -17,15 +17,15 @@ class ApprovalCutiController extends Controller
         $user = $request->user();
         $golongan = $user->golongan;
 
-        // Cari pengajuan cuti dengan status 'Menunggu' yang masih ada approval 'Menunggu' di golongan user
+        // Cari pengajuan cuti dengan status 'Diproses' yang masih ada approval 'Menunggu' di golongan user
         $pengajuan = PengajuanCuti::where('statusCuti', 'Diproses')
             ->whereHas('cutiApprovals', function ($query) use ($golongan) {
-                $query->where('golongan', $golongan)
+                $query->where('approver_golongan', $golongan)
                     ->where('status', 'Menunggu');
             })
             ->with(['cutiApprovals' => function ($query) use ($golongan) {
-                // Hanya ambil approval golongan ini yg status menunggu supaya bisa dilihat
-                $query->where('golongan', $golongan);
+                // Hanya ambil approval golongan ini yang status menunggu supaya bisa dilihat
+                $query->where('approver_golongan', $golongan);
             }, 'karyawan'])
             ->get();
 
