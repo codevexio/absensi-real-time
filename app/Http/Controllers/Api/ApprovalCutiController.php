@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ApprovalCutiController extends Controller
 {
-    // GET: Menampilkan pengajuan cuti yang perlu diverifikasi oleh approver
+    // Menampilkan pengajuan cuti yang perlu diverifikasi oleh approver
     public function listPengajuanUntukDisetujui()
     {
         $user = Auth::user();
@@ -20,10 +20,19 @@ class ApprovalCutiController extends Controller
             return response()->json(['message' => 'Anda belum login'], 401);
         }
 
-        $list = ApprovalCuti::with('pengajuan.karyawan')
+        $approvals = ApprovalCuti::with('pengajuan.karyawan')
             ->where('approver_id', $user->id)
             ->where('status', 'Menunggu')
             ->get()
+            ->filter(function ($approval) {
+                // Cek semua approval SEBELUM id ini, apakah sudah Disetujui?
+                $sebelumnya = ApprovalCuti::where('pengajuan_cuti_id', $approval->pengajuan_cuti_id)
+                    ->where('id', '<', $approval->id)
+                    ->where('status', '!=', 'Disetujui')
+                    ->count();
+
+                return $sebelumnya === 0;
+            })
             ->map(function ($item) {
                 return [
                     'approval_id' => $item->id,
@@ -39,12 +48,12 @@ class ApprovalCutiController extends Controller
             });
 
         return response()->json([
-            'message' => 'Daftar pengajuan cuti menunggu persetujuan',
-            'data' => $list
+            'message' => 'Daftar pengajuan cuti menunggu persetujuan giliran Anda',
+            'data' => $approvals->values()
         ]);
     }
 
-    // POST: Menyetujui atau menolak pengajuan cuti
+    // Menyetujui atau menolak pengajuan cuti
     public function prosesApproval(Request $request, $approvalId)
     {
         $user = Auth::user();
