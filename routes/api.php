@@ -28,8 +28,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Approval Cuti
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/approval-cuti', [ApprovalCuti::class, 'listPengajuanUntukDisetujui']);
-    Route::post('/approval-cuti/{id}', [ApprovalCuti::class, 'prosesApproval']);
+    Route::get('/approval-cuti', [ApprovalCutiController::class, 'listPengajuanUntukDisetujui']);
+    Route::post('/approval-cuti/{id}', [ApprovalCutiController::class, 'prosesApproval']);
 });
 
 // Jadwal Kerja
