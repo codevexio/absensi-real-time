@@ -102,16 +102,16 @@ class ApprovalCutiController extends Controller
 
         if ($semuaDisetujui) {
             $pengajuan->update(['statusCuti' => 'Disetujui']);
-        }
 
-        // Potong jatah cuti
-        $cuti = \App\Models\Cuti::where('karyawan_id', $pengajuan->karyawan_id)->first();
-        if ($pengajuan->jenisCuti === 'Cuti Tahunan') {
-            $cuti->cutiTahun -= $pengajuan->jumlahHari;
-        } else {
-            $cuti->cutiPanjang -= $pengajuan->jumlahHari;
+            // Potong jatah cuti HANYA SEKARANG
+            $cuti = \App\Models\Cuti::where('karyawan_id', $pengajuan->karyawan_id)->first();
+            if ($pengajuan->jenisCuti === 'Cuti Tahunan') {
+                $cuti->cutiTahun -= $pengajuan->jumlahHari;
+            } else {
+                $cuti->cutiPanjang -= $pengajuan->jumlahHari;
+            }
+            $cuti->save();
         }
-        $cuti->save();
 
         return response()->json(['message' => 'Approval berhasil diproses.']);
     }
