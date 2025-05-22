@@ -12,123 +12,60 @@ use Illuminate\Support\Facades\Validator;
 class ApprovalCutiController extends Controller
 {
     // Menampilkan pengajuan cuti yang bisa disetujui oleh user saat ini
-    public function listPengajuanUntukDisetujui()
+    public function listPengajuanUntukApprove()
     {
         $user = Auth::user();
 
         if (!$user) {
-            return response()->json(['message' => 'Anda belum login'], 401);
+            return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
-        // Ambil semua approval milik user yang masih Menunggu
-        $approvals = ApprovalCuti::with('pengajuan.karyawan', 'pengajuan.approvals')
+        $golonganUser = $user->golongan;
+
+        // Ambil data ApprovalCuti dengan status "Menunggu" untuk golongan user
+        // Approval ini harus terkait pengajuan cuti dengan status "Diproses"
+        $approvalList = ApprovalCuti::with('pengajuanCuti.karyawan')
             ->where('approver_id', $user->id)
+            ->where('approver_golongan', $golonganUser)
             ->where('status', 'Menunggu')
-            ->get()
-            ->filter(function ($approval) {
-                $allApprovals = $approval->pengajuan->approvals;
-
-                // Cari level aktif saat ini (level terkecil yang masih Menunggu)
-                $activeLevel = $allApprovals
-                    ->where('status', 'Menunggu')
-                    ->pluck('level')
-                    ->min();
-
-                // Hanya izinkan approval jika level user saat ini adalah level aktif
-                return $approval->level == $activeLevel;
+            ->whereHas('pengajuanCuti', function ($query) {
+                $query->where('statusCuti', 'Diproses');
             })
-            ->map(function ($item) {
-                return [
-                    'approval_id' => $item->id,
-                    'pengajuan_id' => $item->pengajuan->id,
-                    'nama_pengaju' => $item->pengajuan->karyawan->nama,
-                    'jenis_cuti' => $item->pengajuan->jenisCuti,
-                    'tanggal_mulai' => $item->pengajuan->tanggalMulai,
-                    'tanggal_selesai' => $item->pengajuan->tanggalSelesai,
-                    'jumlah_hari' => $item->pengajuan->jumlahHari,
-                    'status_pengajuan' => $item->pengajuan->statusCuti,
-                    'file_surat_cuti' => $item->pengajuan->file_surat_cuti,
-                ];
-            });
+            ->get();
+
+        // Kalau ternyata ada user lain di golongan yang sama, mereka juga bisa lihat pengajuan cuti untuk golongan ini,
+        // Jadi kita perlu cari semua approval status Menunggu di golongan user, bukan hanya milik user ini
+
+        // Jadi ubah sedikit query untuk ambil semua approval status Menunggu di golongan user
+        $approvalList = ApprovalCuti::with('pengajuanCuti.karyawan')
+            ->where('approver_golongan', $golonganUser)
+            ->where('status', 'Menunggu')
+            ->whereHas('pengajuanCuti', function ($query) {
+                $query->where('statusCuti', 'Diproses');
+            })
+            ->get();
+
+        // Filter approval list yang unik berdasarkan pengajuan_cuti_id supaya satu pengajuan cuti muncul sekali saja
+        $pengajuanUnik = $approvalList->unique('pengajuan_cuti_id')->values();
+
+        // Format data agar lebih jelas
+        $result = $pengajuanUnik->map(function ($approval) {
+            return [
+                'pengajuan_cuti_id' => $approval->pengajuan_cuti_id,
+                'karyawan_id' => $approval->pengajuanCuti->karyawan->id,
+                'nama_karyawan' => $approval->pengajuanCuti->karyawan->nama,
+                'jenis_cuti' => $approval->pengajuanCuti->jenisCuti,
+                'tanggal_mulai' => $approval->pengajuanCuti->tanggalMulai,
+                'tanggal_selesai' => $approval->pengajuanCuti->tanggalSelesai,
+                'jumlah_hari' => $approval->pengajuanCuti->jumlahHari,
+                'status_cuti' => $approval->pengajuanCuti->statusCuti,
+                'status_approval' => $approval->status,
+            ];
+        });
 
         return response()->json([
-            'message' => 'Daftar pengajuan cuti menunggu giliran Anda',
-            'data' => $approvals->values()
-        ]);
-    }
-
-    // Menyetujui atau menolak pengajuan cuti
-    public function prosesApproval(Request $request, $approvalId)
-    {
-        $user = Auth::user();
-
-        if (!$user) {
-            return response()->json(['message' => 'Anda belum login'], 401);
-        }
-
-        $approval = ApprovalCuti::with('pengajuan.approvals')->find($approvalId);
-
-        if (!$approval || $approval->approver_id != $user->id) {
-            return response()->json(['message' => 'Data approval tidak ditemukan atau bukan milik Anda'], 403);
-        }
-
-        if ($approval->status != 'Menunggu') {
-            return response()->json(['message' => 'Approval sudah diproses sebelumnya'], 400);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|in:Disetujui,Ditolak',
-            'catatan' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['message' => 'Validasi gagal', 'errors' => $validator->errors()], 422);
-        }
-
-        $data = $validator->validated();
-
-        // Jika status Ditolak, catatan wajib diisi
-        if ($data['status'] === 'Ditolak' && empty($data['catatan'])) {
-            return response()->json(['message' => 'Catatan wajib diisi jika cuti ditolak'], 422);
-        }
-
-        // Update status dan catatan untuk approval ini
-        $approval->update([
-            'status' => $data['status'],
-            'catatan' => $data['catatan'] ?? null,
-        ]);
-
-        $pengajuan = $approval->pengajuan;
-
-        if ($data['status'] === 'Ditolak') {
-            // Jika ditolak, status pengajuan langsung Ditolak
-            $pengajuan->update(['statusCuti' => 'Ditolak']);
-        } else {
-            // Jika disetujui, tandai approval lain di level yang sama sebagai "Lewati"
-            $currentLevel = $approval->level;
-
-            ApprovalCuti::where('pengajuan_cuti_id', $pengajuan->id)
-                ->where('level', $currentLevel)
-                ->where('id', '!=', $approval->id)
-                ->where('status', 'Menunggu')
-                ->update(['status' => 'Lewati']);
-
-            // Cek apakah masih ada approval yang Menunggu atau Ditolak
-            $stillWaiting = $pengajuan->approvals->where('status', 'Menunggu')->count();
-            $rejected = $pengajuan->approvals->where('status', 'Ditolak')->count();
-
-            if ($stillWaiting == 0 && $rejected == 0) {
-                $pengajuan->update(['statusCuti' => 'Disetujui']);
-            }
-        }
-
-        return response()->json([
-            'message' => 'Approval berhasil diproses',
-            'data' => [
-                'approval_id' => $approval->id,
-                'status' => $approval->status,
-                'catatan' => $approval->catatan,
-            ]
+            'message' => 'Daftar pengajuan cuti yang perlu di-approve',
+            'data' => $result,
         ]);
     }
 }
