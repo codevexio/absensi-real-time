@@ -18,7 +18,7 @@ class ApprovalCutiController extends Controller
         $golongan = $user->golongan;
 
         // Cari pengajuan cuti dengan status 'Menunggu' yang masih ada approval 'Menunggu' di golongan user
-        $pengajuan = PengajuanCuti::where('status', 'Menunggu')
+        $pengajuan = PengajuanCuti::where('statusCuti', 'Diproses')
             ->whereHas('cutiApprovals', function ($query) use ($golongan) {
                 $query->where('golongan', $golongan)
                     ->where('status', 'Menunggu');
