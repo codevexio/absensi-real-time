@@ -73,7 +73,7 @@ class ApprovalCutiController extends Controller
         $pengajuan = PengajuanCuti::with('cutiApprovals')->findOrFail($id);
 
         $currentApproval = $pengajuan->cutiApprovals()
-            ->where('golongan', $golongan)
+            ->where('approver_golongan', $golongan) // <- Ganti dari 'golongan'
             ->where('status', 'Menunggu')
             ->first();
 
@@ -97,7 +97,7 @@ class ApprovalCutiController extends Controller
             if ($request->status === 'Ditolak') {
                 // Jika ditolak, langsung update pengajuan cuti jadi ditolak
                 $pengajuan->update([
-                    'status' => 'Ditolak',
+                    'statusCuti' => 'Ditolak',
                     'alasan_penolakan' => $request->catatan,
                 ]);
 
@@ -108,7 +108,7 @@ class ApprovalCutiController extends Controller
             } else {
                 // Jika disetujui, update approval lain yang masih menunggu di golongan yang sama jadi "Diabaikan"
                 $pengajuan->cutiApprovals()
-                    ->where('golongan', $golongan)
+                    ->where('approver_golongan', $golongan) // <- Ganti dari 'golongan'
                     ->where('status', 'Menunggu')
                     ->where('id', '!=', $currentApproval->id)
                     ->update(['status' => 'Diabaikan']);
@@ -121,7 +121,7 @@ class ApprovalCutiController extends Controller
 
                 if (!$nextApproval) {
                     // Kalau gak ada lagi, update pengajuan cuti jadi Disetujui
-                    $pengajuan->update(['status' => 'Disetujui']);
+                    $pengajuan->update(['statusCuti' => 'Disetujui']);
                 }
             }
 
@@ -133,4 +133,5 @@ class ApprovalCutiController extends Controller
             return response()->json(['message' => 'Gagal memproses approval', 'error' => $e->getMessage()], 500);
         }
     }
+
 }
