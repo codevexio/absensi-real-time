@@ -15,21 +15,34 @@ class ApprovalCutiController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $golongan = $user->golongan;
+        $golonganUrutan = ['Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
 
-        // Cari pengajuan cuti dengan status 'Diproses' yang masih ada approval 'Menunggu' di golongan user
+        $currentGolonganIndex = array_search($user->golongan, $golonganUrutan);
+
+        // Ambil pengajuan cuti yang statusnya Diproses
         $pengajuan = PengajuanCuti::where('statusCuti', 'Diproses')
-            ->whereHas('cutiApprovals', function ($query) use ($golongan) {
-                $query->where('approver_golongan', $golongan)
+            ->whereHas('cutiApprovals', function ($query) use ($user) {
+                $query->where('golongan', $user->golongan)
                     ->where('status', 'Menunggu');
             })
-            ->with(['cutiApprovals' => function ($query) use ($golongan) {
-                // Hanya ambil approval golongan ini yang status menunggu supaya bisa dilihat
-                $query->where('approver_golongan', $golongan);
-            }, 'karyawan'])
-            ->get();
+            ->get()
+            ->filter(function($item) use ($golonganUrutan, $currentGolonganIndex) {
+                // Cek semua golongan dibawahnya sudah approve
+                for ($i = 0; $i < $currentGolonganIndex; $i++) {
+                    $golonganBawah = $golonganUrutan[$i];
 
-        return response()->json($pengajuan);
+                    $approvalBawah = $item->cutiApprovals()
+                        ->where('golongan', $golonganBawah)
+                        ->first();
+
+                    if (!$approvalBawah || $approvalBawah->status != 'Disetujui') {
+                        return false; // belum selesai di bawah, gak tampil
+                    }
+                }
+                return true;
+            });
+
+        return response()->json($pengajuan->values());
     }
 
     /**
