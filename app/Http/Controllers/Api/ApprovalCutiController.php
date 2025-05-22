@@ -94,7 +94,7 @@ class ApprovalCutiController extends Controller
                 // Jika ditolak, langsung update pengajuan cuti jadi ditolak
                 $pengajuan->update([
                     'statusCuti' => 'Ditolak',
-                    'alasan_penolakan' => $request->catatan,
+                    'alasanPenolakan' => $request->catatan,
                 ]);
 
                 // Tandai semua approval yang masih menunggu sebagai "Diabaikan"

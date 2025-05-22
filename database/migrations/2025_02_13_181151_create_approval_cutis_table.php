@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('pengajuan_cuti_id'); // FK ke pengajuan cuti
             $table->unsignedBigInteger('approver_id'); // ID karyawan yang approve
             $table->string('approver_golongan'); // Golongan approver (Asisten, Kepala SubBagian, dll)
-            $table->enum('status', ['Menunggu', 'Disetujui', 'Ditolak']);
+            $table->enum('status', ['Menunggu', 'Disetujui', 'Ditolak', 'Diabaikan'])->default('Menunggu'); // Status approval
             $table->text('catatan')->nullable(); // Catatan jika ditolak / disetujui
             $table->timestamps();
 
