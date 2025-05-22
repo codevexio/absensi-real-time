@@ -127,10 +127,10 @@ class ApprovalCutiController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Approval berhasil']);
+            return response()->json(['message' => 'Pengajuan cuti berhasil direspon']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Gagal memproses approval', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Gagal memproses', 'error' => $e->getMessage()], 500);
         }
     }
 
