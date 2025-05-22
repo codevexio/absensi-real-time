@@ -20,7 +20,7 @@ class ApprovalCuti extends Model
     ];
 
     // Relasi ke pengajuan cuti
-    public function pengajuan()
+    public function pengajuanCuti()
     {
         return $this->belongsTo(PengajuanCuti::class, 'pengajuan_cuti_id');
     }
