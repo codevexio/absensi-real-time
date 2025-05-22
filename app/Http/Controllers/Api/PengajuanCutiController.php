@@ -172,6 +172,14 @@ class PengajuanCutiController extends Controller
             $pengajuan->update(['statusCuti' => 'Disetujui']);
         }
 
+        // Potong jatah cuti
+        if ($data['jenisCuti'] === 'Cuti Tahunan') {
+            $cuti->cutiTahun -= $jumlahHari;
+        } else {
+            $cuti->cutiPanjang -= $jumlahHari;
+        }
+        $cuti->save();
+
         return response()->json([
             'message' => 'Pengajuan cuti berhasil dikirim dan sedang diproses',
             'data' => $pengajuan

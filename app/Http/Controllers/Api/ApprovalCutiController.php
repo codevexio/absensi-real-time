@@ -69,69 +69,51 @@ class ApprovalCutiController extends Controller
         if ($request->status === 'Ditolak' && empty($request->catatan)) {
             return response()->json(['message' => 'Catatan wajib diisi saat menolak cuti'], 422);
         }
-
+ 
         $user = $request->user();
         $golongan = $user->golongan;
 
-        // Ambil pengajuan cuti dan relasi approval untuk golongan user yang statusnya menunggu
         $pengajuan = PengajuanCuti::with('cutiApprovals')->findOrFail($id);
 
         $currentApproval = $pengajuan->cutiApprovals()
-            ->where('approver_golongan', $golongan) // <- Ganti dari 'golongan'
+            ->where('approver_golongan', $golongan)
+            ->where('approver_id', $user->id)
             ->where('status', 'Menunggu')
             ->first();
 
-        // Validasi hak approve: harus ada approval menunggu di golongan user dan approver harus sama dengan user ini
         if (!$currentApproval) {
-            return response()->json(['message' => 'Tidak ada approval yang harus Anda proses'], 403);
+            return response()->json(['message' => 'Anda tidak memiliki hak untuk meng-approve pengajuan ini atau sudah diproses.'], 403);
         }
 
-        DB::beginTransaction();
-        try {
-            // Update status approval yang sedang diproses
-            $currentApproval->update([
-                'status' => $request->status,
-                'catatan' => $request->catatan,
-            ]);
+        // Update status dan catatan approval saat ini
+        $currentApproval->update([
+            'status' => $request->status,
+            'catatan' => $request->catatan,
+        ]);
 
-            if ($request->status === 'Ditolak') {
-                // Jika ditolak, langsung update pengajuan cuti jadi ditolak
-                $pengajuan->update([
-                    'statusCuti' => 'Ditolak',
-                    'alasanPenolakan' => $request->catatan,
-                ]);
-
-                // Tandai semua approval yang masih menunggu sebagai "Diabaikan"
-                $pengajuan->cutiApprovals()
-                    ->where('status', 'Menunggu')
-                    ->update(['status' => 'Diabaikan']);
-            } else {
-                // Jika disetujui, update approval lain yang masih menunggu di golongan yang sama jadi "Diabaikan"
-                $pengajuan->cutiApprovals()
-                    ->where('approver_golongan', $golongan) // <- Ganti dari 'golongan'
-                    ->where('status', 'Menunggu')
-                    ->where('id', '!=', $currentApproval->id)
-                    ->update(['status' => 'Diabaikan']);
-
-                // Cek ada approval menunggu selanjutnya?
-                $nextApproval = $pengajuan->cutiApprovals()
-                    ->where('status', 'Menunggu')
-                    ->orderBy('id')
-                    ->first();
-
-                if (!$nextApproval) {
-                    // Kalau gak ada lagi, update pengajuan cuti jadi Disetujui
-                    $pengajuan->update(['statusCuti' => 'Disetujui']);
-                }
-            }
-
-            DB::commit();
-
-            return response()->json(['message' => 'Pengajuan cuti berhasil direspon']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'Gagal memproses', 'error' => $e->getMessage()], 500);
+        // Jika ditolak, langsung set status pengajuan cuti menjadi "Ditolak"
+        if ($request->status === 'Ditolak') {
+            $pengajuan->update(['statusCuti' => 'Ditolak']);
+            return response()->json(['message' => 'Pengajuan cuti telah ditolak.']);
         }
+
+        // Cek apakah semua approval sudah disetujui
+        $semuaDisetujui = $pengajuan->cutiApprovals()->where('status', '!=', 'Disetujui')->count() === 0;
+
+        if ($semuaDisetujui) {
+            $pengajuan->update(['statusCuti' => 'Disetujui']);
+        }
+
+        // Potong jatah cuti
+        $cuti = \App\Models\Cuti::where('karyawan_id', $pengajuan->karyawan_id)->first();
+        if ($pengajuan->jenisCuti === 'Cuti Tahunan') {
+            $cuti->cutiTahun -= $pengajuan->jumlahHari;
+        } else {
+            $cuti->cutiPanjang -= $pengajuan->jumlahHari;
+        }
+        $cuti->save();
+
+        return response()->json(['message' => 'Approval berhasil diproses.']);
     }
 
 }
