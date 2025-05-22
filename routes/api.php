@@ -28,11 +28,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Approval Cuti
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('cuti/pengajuan/{id}', [ApprovalCutiController::class, 'detailPengajuanCuti']);
-    Route::post('cuti/pengajuan/{id}/approve', [ApprovalCutiController::class, 'approve']);
-    Route::post('cuti/pengajuan/{id}/tolak', [CApprovalCutiController::class, 'tolak']);
+    Route::get('approval-cuti', [ApprovalCutiController::class, 'index']);
+    Route::get('approval-cuti/{id}', [ApprovalCutiController::class, 'show']);
+    Route::post('approval-cuti/{id}/proses', [ApprovalCutiController::class, 'prosesApproval']);
 });
-
 
 // Jadwal Kerja
 Route::apiResource('jadwal-kerja', JadwalKerjaController::class);

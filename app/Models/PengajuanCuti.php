@@ -26,16 +26,9 @@ class PengajuanCuti extends Model
         return $this->belongsTo(Karyawan::class);
     }
 
-     public function approvals()
+    public function cutiApprovals()
     {
         return $this->hasMany(ApprovalCuti::class, 'pengajuan_cuti_id');
     }
-
-    public function latestApproval()
-    {
-        return $this->hasOne(ApprovalCuti::class, 'pengajuan_cuti_id')->latestOfMany();
-    }
-
-
 
 }

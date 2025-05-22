@@ -20,14 +20,13 @@ class ApprovalCuti extends Model
     ];
 
     // Relasi ke pengajuan cuti
-    public function pengajuanCuti()
+    public function user()
     {
-        return $this->belongsTo(PengajuanCuti::class, 'pengajuan_cuti_id');
+        return $this->belongsTo(Karyawan::class, 'karyawan_id');
     }
 
-    // Relasi ke karyawan yang menyetujui
-    public function approver()
+    public function pengajuan()
     {
-        return $this->belongsTo(Karyawan::class, 'approver_id');
+        return $this->belongsTo(PengajuanCuti::class, 'pengajuan_cuti_id');
     }
 }
