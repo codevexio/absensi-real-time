@@ -15,9 +15,10 @@ class ApprovalCutiController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        $golongan = $user->golongan; // <-- ini yang kurang
         $golonganUrutan = ['Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
 
-        $currentGolonganIndex = array_search($user->golongan, $golonganUrutan);
+        $currentGolonganIndex = array_search($golongan, $golonganUrutan);
 
         // Ambil pengajuan cuti yang statusnya Diproses
         $pengajuan = PengajuanCuti::where('statusCuti', 'Diproses')
@@ -32,7 +33,7 @@ class ApprovalCutiController extends Controller
                     $golonganBawah = $golonganUrutan[$i];
 
                     $approvalBawah = $item->cutiApprovals()
-                        ->where('golongan', $golonganBawah)
+                        ->where('approver_golongan', $golonganBawah)  // pastikan ganti juga di sini
                         ->first();
 
                     if (!$approvalBawah || $approvalBawah->status != 'Disetujui') {
