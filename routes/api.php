@@ -26,6 +26,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('cuti/detail/{id}', [PengajuanCutiController::class, 'detailPengajuanCuti']);
 });
 
+// Approval Cuti
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/approval-cuti', [ApprovalCuti::class, 'listPengajuanUntukDisetujui']);
+    Route::post('/approval-cuti/{id}', [ApprovalCuti::class, 'prosesApproval']);
+});
+
 // Jadwal Kerja
 Route::apiResource('jadwal-kerja', JadwalKerjaController::class);
 Route::post('/generate-presensi-harian', [JadwalKerjaController::class, 'generatePresensiHarian']);
