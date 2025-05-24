@@ -21,23 +21,22 @@ class ApprovalCutiController extends Controller
         $currentGolonganIndex = array_search($golongan, $golonganUrutan);
 
         // Ambil pengajuan cuti yang statusnya Diproses
-        $pengajuan = PengajuanCuti::where('statusCuti', 'Diproses')
+        $pengajuan = PengajuanCuti::with('karyawan') // tambahkan relasi
+            ->where('statusCuti', 'Diproses')
             ->whereHas('cutiApprovals', function ($query) use ($golongan) {
                 $query->where('approver_golongan', $golongan)
                     ->where('status', 'Menunggu');
             })
             ->get()
             ->filter(function($item) use ($golonganUrutan, $currentGolonganIndex) {
-                // Cek semua golongan dibawahnya sudah approve
                 for ($i = 0; $i < $currentGolonganIndex; $i++) {
                     $golonganBawah = $golonganUrutan[$i];
-
                     $approvalBawah = $item->cutiApprovals()
-                        ->where('approver_golongan', $golonganBawah)  // pastikan ganti juga di sini
+                        ->where('approver_golongan', $golonganBawah)
                         ->first();
 
                     if (!$approvalBawah || $approvalBawah->status != 'Disetujui') {
-                        return false; // belum selesai di bawah, gak tampil
+                        return false;
                     }
                 }
                 return true;
