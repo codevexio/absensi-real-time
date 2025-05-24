@@ -12,7 +12,6 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-lg font-semibold mb-4">Data Presensi Karyawan</h3>
 
-                    <!-- Search Bar -->
                     <div class="flex justify-between mb-4">
                         <!-- Export Buttons -->
                         <a href="{{route("export.pdf")}}"
@@ -64,16 +63,16 @@
                                         <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
                                         <td class="border px-4 py-2 text-center">{{ $employee->karyawan->nama ?? '-' }}</td>
                                         <td class="border px-4 py-2 text-center">
-                                            {{ $employee->tanggalPresensi->format("d-m-Y") ?? "-" }}</td>
+                                            {{ $employee->tanggalPresensi ?? "-" }}</td>
                                         <td class="border px-4 py-2 text-center">
                                             {{ $employee->jadwalKerja->shift->namaShift ?? '-' }}
                                         </td>
                                         <!-- Ambil nama shift -->
                                         <td class="border px-4 py-2 text-center">
-                                            {{ $employee->waktuMasuk->format("H:i") ?? '-' }}</td>
+                                            {{ $employee->waktuMasuk ?? '-' }}</td>
                                         <td class="border px-4 py-2 text-center">{{ $employee->statusMasuk }}</td>
                                         <td class="border px-4 py-2 text-center">
-                                            {{ $employee->waktuPulang->format("H:i") ?? '-' }}</td>
+                                            {{ $employee->waktuPulang ?? '-' }}</td>
                                         <td class="border px-4 py-2 text-center">{{ $employee->statusPulang }}</td>
                                     </tr>
                                 @empty

@@ -39,7 +39,8 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table id="data-table" class="w-full border-collapse border border-gray-300 dark:border-gray-700 rounded-lg">
+                    <table id="data-table"
+                        class="w-full border-collapse border border-gray-300 dark:border-gray-700 rounded-lg">
                         <thead class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                             <tr>
                                 <th class="border px-4 py-2">No</th>
@@ -69,25 +70,69 @@
                                                 <path d="m15 5 4 4" />
                                             </svg>
                                         </button>
-                                        <form action="{{ route('web/kelola-akun-del', $akuns->id) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg"
-                                                type="submit"
-                                                onclick="return confirm('Apakah Anda yakin ingin menghapus akun ini?')">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round"
-                                                    class="lucide lucide-trash-2">
-                                                    <path d="M3 6h18" />
-                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                    <line x1="10" x2="10" y1="11" y2="17" />
-                                                    <line x1="14" x2="14" y1="11" y2="17" />
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg"
+                                            type="submit" onclick="konfirmasiHapus({{ $akuns->id }})">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-trash-2">
+                                                <path d="M3 6h18" />
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                <line x1="14" x2="14" y1="11" y2="17" />
+                                            </svg>
+                                        </button>
+                                        <script>
+                                            function konfirmasiHapus(id) {
+                                                Swal.fire({
+                                                    title: "Yakin ingin menghapus akun?",
+                                                    text: "Aksi ini tidak bisa dibatalkan!",
+                                                    icon: "warning",
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: "#d33",
+                                                    cancelButtonColor: "#6c757d",
+                                                    confirmButtonText: "Ya, hapus!",
+                                                    cancelButtonText: "Batal"
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        fetch(`/kelola-akun/${id}`, {
+                                                            method: "POST", // HARUS POST karena Laravel hanya menerima spoofed method
+                                                            headers: {
+                                                                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                                                "Content-Type": "application/json",
+                                                                "Accept": "application/json"
+                                                            },
+                                                            body: JSON.stringify({
+                                                                _method: "DELETE"
+                                                            })
+                                                        }).then(response => {
+                                                            if (response.ok) {
+                                                                Swal.fire(
+                                                                    "Dihapus!",
+                                                                    "Akun berhasil dihapus.",
+                                                                    "success"
+                                                                ).then(() => {
+                                                                    location.reload();
+                                                                });
+                                                            } else {
+                                                                Swal.fire(
+                                                                    "Gagal!",
+                                                                    "Akun gagal dihapus.",
+                                                                    "error"
+                                                                );
+                                                            }
+                                                        }).catch(() => {
+                                                            Swal.fire(
+                                                                "Gagal!",
+                                                                "Terjadi kesalahan saat menghapus data.",
+                                                                "error"
+                                                            );
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        </script>
                                     </td>
                                 </tr>
                             @empty

@@ -8,6 +8,7 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Data Shift Karyawan</h3>
 
                 <div class="overflow-x-auto">
                     <table id="data-table"class="w-full border-collapse border border-gray-300 dark:border-gray-700 rounded-lg">
