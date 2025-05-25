@@ -15,13 +15,12 @@ class ApprovalCutiController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $golongan = $user->golongan; // <-- ini yang kurang
-        $golonganUrutan = ['Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
+        $golongan = $user->golongan;
 
+        $golonganUrutan = ['Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
         $currentGolonganIndex = array_search($golongan, $golonganUrutan);
 
-        // Ambil pengajuan cuti yang statusnya Diproses
-        $pengajuan = PengajuanCuti::with('karyawan') // tambahkan relasi
+        $pengajuan = PengajuanCuti::with(['karyawan', 'cutiApprovals'])
             ->where('statusCuti', 'Diproses')
             ->whereHas('cutiApprovals', function ($query) use ($golongan) {
                 $query->where('approver_golongan', $golongan)
@@ -31,18 +30,28 @@ class ApprovalCutiController extends Controller
             ->filter(function($item) use ($golonganUrutan, $currentGolonganIndex) {
                 for ($i = 0; $i < $currentGolonganIndex; $i++) {
                     $golonganBawah = $golonganUrutan[$i];
-                    $approvalBawah = $item->cutiApprovals()
-                        ->where('approver_golongan', $golonganBawah)
-                        ->first();
+                    $approvalBawah = $item->cutiApprovals
+                        ->firstWhere('approver_golongan', $golonganBawah);
 
                     if (!$approvalBawah || $approvalBawah->status != 'Disetujui') {
                         return false;
                     }
                 }
                 return true;
+            })
+            ->values()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'nama_karyawan' => $item->karyawan->nama,
+                    'tanggal_pengajuan' => $item->created_at->format('Y-m-d'),
+                ];
             });
 
-        return response()->json($pengajuan->values());
+        return response()->json([
+            'message' => 'Daftar pengajuan cuti yang menunggu approval Anda',
+            'data' => $pengajuan
+        ]);
     }
 
     /**
@@ -50,10 +59,17 @@ class ApprovalCutiController extends Controller
      */
     public function show($id)
     {
-        $pengajuan = PengajuanCuti::with(['cutiApprovals.user', 'karyawan'])->findOrFail($id);
+        $pengajuan = PengajuanCuti::with('karyawan')->findOrFail($id);
 
-        return response()->json($pengajuan);
+        return response()->json([
+            'nama_karyawan' => $pengajuan->karyawan->nama,
+            'tanggal_pengajuan' => $pengajuan->created_at->format('Y-m-d'),
+            'tanggal_mulai' => $pengajuan->tanggalMulai,
+            'tanggal_selesai' => $pengajuan->tanggalSelesai,
+            'file_surat_cuti' => $pengajuan->file_surat_cuti, // misal URL file bisa disesuaikan kalau disimpan di storage
+        ]);
     }
+
 
     /**
      * Proses approve atau tolak pengajuan cuti oleh user
