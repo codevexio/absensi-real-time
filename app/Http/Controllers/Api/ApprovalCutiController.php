@@ -17,9 +17,11 @@ class ApprovalCutiController extends Controller
         $user = $request->user();
         $golongan = $user->golongan;
 
+        // Urutan golongan dari bawah ke atas
         $golonganUrutan = ['Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
         $currentGolonganIndex = array_search($golongan, $golonganUrutan);
 
+        // Ambil semua pengajuan dengan status 'Diproses' dan ada approval untuk golongan ini yang masih 'Menunggu'
         $pengajuan = PengajuanCuti::with(['karyawan', 'cutiApprovals'])
             ->where('statusCuti', 'Diproses')
             ->whereHas('cutiApprovals', function ($query) use ($golongan) {
@@ -28,15 +30,24 @@ class ApprovalCutiController extends Controller
             })
             ->get()
             ->filter(function($item) use ($golonganUrutan, $currentGolonganIndex) {
+                // Ambil semua approval yang seharusnya dilakukan sebelum level sekarang
                 for ($i = 0; $i < $currentGolonganIndex; $i++) {
                     $golonganBawah = $golonganUrutan[$i];
                     $approvalBawah = $item->cutiApprovals
                         ->firstWhere('approver_golongan', $golonganBawah);
 
-                    if (!$approvalBawah || $approvalBawah->status != 'Disetujui') {
+                    // Jika approval golongan bawah ada dan belum disetujui, maka skip
+                    if ($approvalBawah && $approvalBawah->status != 'Disetujui') {
                         return false;
                     }
                 }
+
+                // Tambahan: Jangan approve cuti yang diajukan oleh sesama golongan atau yang lebih tinggi
+                $pengajuGolonganIndex = array_search($item->karyawan->golongan, $golonganUrutan);
+                if ($pengajuGolonganIndex >= $currentGolonganIndex) {
+                    return false;
+                }
+
                 return true;
             })
             ->values()
@@ -52,7 +63,8 @@ class ApprovalCutiController extends Controller
             'message' => 'Daftar pengajuan cuti yang menunggu approval Anda',
             'data' => $pengajuan
         ]);
-    }
+}
+
 
     /**
      * Detail pengajuan cuti lengkap dengan history approval
