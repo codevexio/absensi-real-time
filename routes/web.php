@@ -8,12 +8,15 @@ use App\Http\Controllers\Web\KelolaPresensiController;
 use App\Http\Controllers\Api\KaryawanController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Web\KelolaShiftController;
+use App\Http\Controllers\Web\AdminDashboardController;
 
 Route::view('/', 'login');
 
-Route::view('dashboard', 'dashboard')
+
+Route::get('/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
@@ -40,9 +43,7 @@ Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('<Api
 
 //Kelola Shift
 Route::get('/kelolashift', [KelolaShiftController::class,'index'])->name('web/kelola-shift');
-Route::put('/kelola-shift/{id}', [KelolaShiftController::class, 'update'])->name('kelola-shift.update');
 require __DIR__.'/auth.php';
 
-use App\Http\Controllers\Web\AdminDashboardController;
-
+Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
