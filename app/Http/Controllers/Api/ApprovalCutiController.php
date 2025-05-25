@@ -66,7 +66,7 @@ class ApprovalCutiController extends Controller
             'tanggal_pengajuan' => $pengajuan->created_at->format('Y-m-d'),
             'tanggal_mulai' => $pengajuan->tanggalMulai,
             'tanggal_selesai' => $pengajuan->tanggalSelesai,
-            'file_surat_cuti' => $pengajuan->file_surat_cuti, // misal URL file bisa disesuaikan kalau disimpan di storage
+            'file_surat_cuti' => asset('storage/' . $pengajuan->file_surat_cuti),
         ]);
     }
 
