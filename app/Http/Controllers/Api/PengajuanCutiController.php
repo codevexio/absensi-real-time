@@ -30,8 +30,8 @@ class PengajuanCutiController extends Controller
         }
 
         return response()->json([
-            'cutiTahun' => $cuti->cutiTahun,
-            'cutiPanjang' => $cuti->cutiPanjang,
+            'sisCutiTahun' => $cuti->cutiTahun,
+            'sisaCutiPanjang' => $cuti->cutiPanjang,
         ]);
     }
 
