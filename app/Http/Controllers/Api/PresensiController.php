@@ -176,7 +176,7 @@ class PresensiController extends Controller
             return response()->json(['message' => 'Lokasi di luar area kantor'], 400);
         }
 
-        $path = $request->file('imageMasuk')->store('uploads/presensi', 'public');
+        $path = $request->file('imageMasuk')->store('presensi', 'public');
 
         // Simpan atau update presensi
         $presensi = Presensi::updateOrCreate(
@@ -245,7 +245,7 @@ class PresensiController extends Controller
             return response()->json(['message' => 'Lokasi di luar area kantor'], 400);
         }
 
-        $path = $request->file('imagePulang')->store('uploads/presensi', 'public');
+        $path = $request->file('imagePulang')->store('presensi', 'public');
 
         $presensi->update([
             'waktuPulang' => Carbon::now('Asia/Jakarta'),
