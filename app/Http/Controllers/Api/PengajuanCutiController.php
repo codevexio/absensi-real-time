@@ -26,28 +26,12 @@ class PengajuanCutiController extends Controller
         $cuti = Cuti::where('karyawan_id', $user->id)->first();
 
         if (!$cuti) {
-            return response()->json(['message' => 'Cuti tidak ditemukan'], 404);
+            return response()->json(['message' => 'Data cuti tidak ditemukan'], 404);
         }
 
-        // Menghitung jumlah cuti tahunan yang sudah digunakan
-        $cutiTahunDipakai = PengajuanCuti::where('karyawan_id', $user->id)
-                                        ->where('jenisCuti', 'Cuti Tahunan')
-                                        ->where('statusCuti', 'Disetujui')
-                                        ->sum('jumlahHari');
-
-        // Menghitung jumlah cuti panjang yang sudah digunakan
-        $cutiPanjangDipakai = PengajuanCuti::where('karyawan_id', $user->id)
-                                          ->where('jenisCuti', 'Cuti Panjang')
-                                          ->where('statusCuti', 'Disetujui')
-                                          ->sum('jumlahHari');
-
-        // Menghitung sisa cuti tahunan dan panjang
-        $sisaCutiTahun = $cuti->cutiTahun - $cutiTahunDipakai;
-        $sisaCutiPanjang = $cuti->cutiPanjang - $cutiPanjangDipakai;
-
         return response()->json([
-            'sisaCutiTahun' => $sisaCutiTahun,
-            'sisaCutiPanjang' => $sisaCutiPanjang
+            'cutiTahun' => $cuti->cutiTahun,
+            'cutiPanjang' => $cuti->cutiPanjang,
         ]);
     }
 
