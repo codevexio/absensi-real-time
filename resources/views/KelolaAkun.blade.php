@@ -189,7 +189,6 @@
                     <option value="Keamanan">Keamanan</option>
                     <option value="Papam">Papam</option>
                     <option value="Bag.Percepetan Transformasi Teknologi">Bag.Percepetan Transformasi Teknologi</option>
-                    <option value="Bag.Teknik & Pengolahan">Bag.Teknik & Pengolahan</option>
                 </select>
             </div>
             <div class="mb-4">

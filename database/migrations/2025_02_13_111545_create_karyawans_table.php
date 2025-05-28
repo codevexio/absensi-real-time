@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('divisi', ['Bag.Sekper', 'Bag.SPI', 'Bag.SDM', 'Bag.Tanaman', 'Bag.Teknik & Pengolahan', 
                                     'Bag.Keuangan', 'Bag.Pemasaran & P.Baku', 'Bag.Perencana Strategis', 
                                     'Bag.Hukum', 'Bag.Pengadaan & TI', 'Keamanan', 'Papam', 
-                                    'Bag.Percepetan Transformasi Teknologi', 'Bag.Teknik & Pengolahan' ]); // Divisi
+                                    'Bag.Percepetan Transformasi Teknologi']); // Divisi
             $table->timestamps();
         });
     }
