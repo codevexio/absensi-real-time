@@ -66,6 +66,7 @@ class KeterlambatanController extends Controller
             return [
                 'nama_karyawan' => $item->presensi->karyawan->nama ?? '-',
                 'waktuMasuk' => $item->presensi->waktuMasuk ?? '-',
+                'divisi_karyawan' => $item->presensi->karyawan->divisi->nama ?? '-',
                 'imageMasuk' => $item->presensi->imageMasuk ?? '-',
             ];
         });
