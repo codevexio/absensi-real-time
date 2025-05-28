@@ -50,10 +50,16 @@ class KeterlambatanController extends Controller
 
     public function daftarTerlambat()
     {
-        // Ambil semua data keterlambatan lengkap dengan presensi dan karyawan
-        $keterlambatan = Keterlambatan::with(['presensi.karyawan'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Ambil tanggal hari ini
+        $today = Carbon::today();
+
+        // Ambil semua keterlambatan hari ini + relasi presensi dan karyawan
+        $keterlambatan = Keterlambatan::whereHas('presensi', function ($query) use ($today) {
+            $query->whereDate('tanggalPresensi', $today);
+        })
+        ->with(['presensi.karyawan'])
+        ->orderBy('created_at', 'desc')
+        ->get();
 
         // Transformasi output sesuai kebutuhan
         $data = $keterlambatan->map(function ($item) {
