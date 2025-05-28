@@ -54,6 +54,7 @@ Route::middleware('auth:sanctum')->post('/presensi/pulang', [PresensiController:
 Route::middleware('auth:sanctum')->get('/cek-waktu-presensi', [PresensiController::class, 'cekWaktuPresensi']);
 Route::middleware('auth:sanctum')->get('/list-rekap-presensi', [PresensiController::class, 'listRekapPresensi']);
 Route::middleware('auth:sanctum')->get('/rekap-presensi-pdf/{bulan}', [PresensiController::class, 'rekapPresensiPDF']);
+Route::middleware('auth:sanctum')->get('/detail-rekap/{bulan}', [PresensiController::class, 'getRekapDetail']);
 
 // Login Android
 Route::post('/login', [AuthController::class, 'login']);

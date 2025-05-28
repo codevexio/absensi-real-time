@@ -279,6 +279,42 @@ class PresensiController extends Controller
         ]);
     }
 
+    public function getRekapDetail($bulan)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Karyawan belum login'], 401);
+        }
+
+        try {
+            $start = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth();
+            $end = Carbon::createFromFormat('Y-m', $bulan)->endOfMonth();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Format bulan salah, gunakan YYYY-MM'], 400);
+        }
+
+        $presensi = Presensi::with(['jadwalKerja.shift'])
+            ->where('karyawan_id', $user->id)
+            ->whereBetween('tanggalPresensi', [$start, $end])
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'tanggal' => $item->tanggalPresensi,
+                    'jam_masuk' => $item->waktuMasuk,
+                    'status_masuk' => $item->statusMasuk,
+                    'jam_pulang' => $item->waktuPulang,
+                    'status_pulang' => $item->statusPulang,
+                    'shift' => $item->jadwalKerja->shift->namaShift ?? '-',
+                ];
+            });
+
+        return response()->json([
+            'karyawan_id' => $user->id,
+            'nama_karyawan' => $user->nama,
+            'bulan' => $bulan,
+            'rekap' => $presensi,
+        ]);
+    }
 
     public function rekapPresensiPDF($bulan)
     {
