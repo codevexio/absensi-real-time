@@ -176,7 +176,7 @@ class PresensiController extends Controller
             return response()->json(['message' => 'Lokasi di luar area kantor'], 400);
         }
 
-        $path = $request->file('imageMasuk')->storeAs('presensi', $filename, 'public');
+        $path = $request->file('imageMasuk')->store('presensi', 'public');
 
         // Simpan atau update presensi
         $presensi = Presensi::updateOrCreate(
