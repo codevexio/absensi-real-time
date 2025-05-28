@@ -48,4 +48,23 @@ class KeterlambatanController extends Controller
         ]);
     }
 
+    public function daftarTerlambat()
+    {
+        // Ambil semua data keterlambatan lengkap dengan presensi dan karyawan
+        $keterlambatan = Keterlambatan::with(['presensi.karyawan'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Transformasi output sesuai kebutuhan
+        $data = $keterlambatan->map(function ($item) {
+            return [
+                'nama_karyawan' => $item->presensi->karyawan->nama ?? '-',
+                'waktuMasuk' => $item->presensi->waktuMasuk ?? '-',
+                'imageMasuk' => $item->presensi->imageMasuk ?? '-',
+            ];
+        });
+
+        return response()->json($data);
+    }
+
 }

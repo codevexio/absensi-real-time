@@ -46,6 +46,7 @@ Route::apiResource('shift', ShiftController::class);
 
 // Keterlambatan
 Route::middleware('auth:sanctum')->get('keterlambatan/statistik-bulanan', [KeterlambatanController::class, 'statistikBulananOtomatis']);
+Route::middleware('auth:sanctum')->get('keterlambatan/daftar', [KeterlambatanController::class, 'daftarTerlambat']);
 
 // Presensi
 Route::middleware('auth:sanctum')->post('/presensi/masuk', [PresensiController::class, 'presensiMasuk']);
