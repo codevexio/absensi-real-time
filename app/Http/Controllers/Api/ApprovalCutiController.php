@@ -17,11 +17,15 @@ class ApprovalCutiController extends Controller
         $user = $request->user();
         $golongan = $user->golongan;
 
-        // Urutan golongan dari bawah ke atas
         $golonganUrutan = ['Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
         $currentGolonganIndex = array_search($golongan, $golonganUrutan);
+        if ($currentGolonganIndex === false) {
+            return response()->json([
+                'message' => 'Golongan user tidak valid',
+                'data' => []
+            ]);
+        }
 
-        // Ambil semua pengajuan dengan status 'Diproses' dan ada approval untuk golongan ini yang masih 'Menunggu'
         $pengajuan = PengajuanCuti::with(['karyawan', 'cutiApprovals'])
             ->where('statusCuti', 'Diproses')
             ->whereHas('cutiApprovals', function ($query) use ($golongan) {
@@ -30,20 +34,23 @@ class ApprovalCutiController extends Controller
             })
             ->get()
             ->filter(function($item) use ($golonganUrutan, $currentGolonganIndex) {
-                // Ambil semua approval yang seharusnya dilakukan sebelum level sekarang
+                // Periksa approval golongan bawah
                 for ($i = 0; $i < $currentGolonganIndex; $i++) {
                     $golonganBawah = $golonganUrutan[$i];
-                    $approvalBawah = $item->cutiApprovals
-                        ->firstWhere('approver_golongan', $golonganBawah);
+                    $approvalBawah = $item->cutiApprovals->firstWhere('approver_golongan', $golonganBawah);
 
-                    // Jika approval golongan bawah ada dan belum disetujui, maka skip
+                    // Jika approval golongan bawah ada dan belum disetujui, skip
                     if ($approvalBawah && $approvalBawah->status != 'Disetujui') {
                         return false;
                     }
                 }
 
-                // Tambahan: Jangan approve cuti yang diajukan oleh sesama golongan atau yang lebih tinggi
                 $pengajuGolonganIndex = array_search($item->karyawan->golongan, $golonganUrutan);
+                if ($pengajuGolonganIndex === false) {
+                    // Kalau golongan pengaju tidak ada di urutan, skip
+                    return false;
+                }
+
                 if ($pengajuGolonganIndex >= $currentGolonganIndex) {
                     return false;
                 }
@@ -63,7 +70,8 @@ class ApprovalCutiController extends Controller
             'message' => 'Daftar pengajuan cuti yang menunggu approval Anda',
             'data' => $pengajuan
         ]);
-}
+    }
+
 
 
     /**
