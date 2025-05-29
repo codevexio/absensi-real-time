@@ -174,7 +174,8 @@ class PengajuanCutiController extends Controller
     {
         $user = Auth::user();
 
-        $pengajuan = PengajuanCuti::with(['cutiApprovals.approver']) // <-- relasi sesuai model
+        // Ambil pengajuan cuti dengan relasi cutiApprovals dan user di ApprovalCuti
+        $pengajuan = PengajuanCuti::with(['cutiApprovals.user'])
             ->where('id', $id)
             ->where('karyawan_id', $user->id)
             ->first();
@@ -185,15 +186,16 @@ class PengajuanCutiController extends Controller
 
         $hasil = [];
 
-        foreach ($pengajuan->cutiApprovals as $approval) { // <-- sesuaikan sini juga
+        foreach ($pengajuan->cutiApprovals as $approval) {
             $hasil[] = [
                 'golongan' => $approval->approver_golongan,
-                'nama' => $approval->approver ? $approval->approver->nama : '-',
+                'nama' => $approval->user ? $approval->user->nama : '-',
                 'status' => $approval->status,
                 'catatan' => $approval->catatan,
             ];
         }
 
+        // Cari catatan penolakan jika ada approval yang statusnya Ditolak
         $catatanPenolakan = $pengajuan->cutiApprovals->where('status', 'Ditolak')->first()->catatan ?? null;
 
         return response()->json([
@@ -201,6 +203,7 @@ class PengajuanCutiController extends Controller
             'alasan_penolakan' => $catatanPenolakan,
         ]);
     }
+
 
 
     
