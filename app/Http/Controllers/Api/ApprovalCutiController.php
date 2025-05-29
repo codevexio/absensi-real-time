@@ -19,6 +19,7 @@ class ApprovalCutiController extends Controller
 
         $golonganUrutan = ['Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
         $currentGolonganIndex = array_search($golongan, $golonganUrutan);
+
         if ($currentGolonganIndex === false) {
             return response()->json([
                 'message' => 'Golongan user tidak valid',
@@ -26,49 +27,74 @@ class ApprovalCutiController extends Controller
             ]);
         }
 
+        \Log::info('User Golongan: ' . $golongan);
+        \Log::info('Golongan index: ' . $currentGolonganIndex);
+
+        // Ambil pengajuan dengan status Diproses yang ada approval golongan user menunggu
         $pengajuan = PengajuanCuti::with(['karyawan', 'cutiApprovals'])
             ->where('statusCuti', 'Diproses')
             ->whereHas('cutiApprovals', function ($query) use ($golongan) {
                 $query->where('approver_golongan', $golongan)
                     ->where('status', 'Menunggu');
             })
-            ->get()
-            ->filter(function($item) use ($golonganUrutan, $currentGolonganIndex) {
-                // Periksa approval golongan bawah
-                for ($i = 0; $i < $currentGolonganIndex; $i++) {
-                    $golonganBawah = $golonganUrutan[$i];
-                    $approvalBawah = $item->cutiApprovals->firstWhere('approver_golongan', $golonganBawah);
+            ->get();
 
-                    // Jika approval golongan bawah ada dan belum disetujui, skip
-                    if ($approvalBawah && $approvalBawah->status != 'Disetujui') {
-                        return false;
-                    }
+        \Log::info('Jumlah pengajuan sebelum filter: ' . $pengajuan->count());
+
+        $filtered = $pengajuan->filter(function($item) use ($golonganUrutan, $currentGolonganIndex) {
+            \Log::info("Memeriksa pengajuan ID {$item->id} oleh {$item->karyawan->nama} (golongan {$item->karyawan->golongan})");
+
+            // Cek approval golongan bawah sudah disetujui semua
+            for ($i = 0; $i < $currentGolonganIndex; $i++) {
+                $golonganBawah = $golonganUrutan[$i];
+                $approvalBawah = $item->cutiApprovals->firstWhere('approver_golongan', $golonganBawah);
+
+                if ($approvalBawah) {
+                    \Log::info("Approval golongan bawah {$golonganBawah} status: {$approvalBawah->status}");
+                } else {
+                    \Log::info("Approval golongan bawah {$golonganBawah} tidak ditemukan");
                 }
 
-                $pengajuGolonganIndex = array_search($item->karyawan->golongan, $golonganUrutan);
-                if ($pengajuGolonganIndex === false) {
-                    // Kalau golongan pengaju tidak ada di urutan, skip
+                if ($approvalBawah && $approvalBawah->status != 'Disetujui') {
                     return false;
                 }
+            }
 
-                if ($pengajuGolonganIndex >= $currentGolonganIndex) {
-                    return false;
-                }
+            $pengajuGolonganIndex = array_search($item->karyawan->golongan, $golonganUrutan);
+            if ($pengajuGolonganIndex === false) {
+                \Log::info("Golongan pengaju tidak valid: {$item->karyawan->golongan}");
+                return false;
+            }
 
-                return true;
-            })
-            ->values()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'nama_karyawan' => $item->karyawan->nama,
-                    'tanggal_pengajuan' => $item->created_at->format('Y-m-d'),
-                ];
-            });
+            if ($pengajuGolonganIndex >= $currentGolonganIndex) {
+                \Log::info("Pengaju golongan index {$pengajuGolonganIndex} >= current golongan index {$currentGolonganIndex}, skip");
+                return false;
+            }
+
+            return true;
+        });
+
+        \Log::info('Jumlah pengajuan setelah filter: ' . $filtered->count());
+
+        $result = $filtered->values()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'nama_karyawan' => $item->karyawan->nama,
+                'golongan_karyawan' => $item->karyawan->golongan,
+                'status_cuti' => $item->statusCuti,
+                'tanggal_pengajuan' => $item->created_at->format('Y-m-d'),
+                'approvals' => $item->cutiApprovals->map(function($app) {
+                    return [
+                        'approver_golongan' => $app->approver_golongan,
+                        'status' => $app->status,
+                    ];
+                }),
+            ];
+        });
 
         return response()->json([
             'message' => 'Daftar pengajuan cuti yang menunggu approval Anda',
-            'data' => $pengajuan
+            'data' => $result
         ]);
     }
 
