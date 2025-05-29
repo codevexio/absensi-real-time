@@ -259,24 +259,27 @@ class PresensiController extends Controller
 
     public function listRekapPresensi()
     {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['message' => 'Karyawan belum login'], 401);
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json(['message' => 'Karyawan belum login'], 401);
+            }
+
+            // Ganti TO_CHAR jika pakai MySQL
+            $rekap = Presensi::selectRaw("DATE_FORMAT(tanggalPresensi, '%Y-%m') as bulan")
+                ->where('karyawan_id', $user->id)
+                ->groupBy('bulan')
+                ->orderByDesc('bulan')
+                ->get();
+
+            return response()->json([
+                'karyawan_id' => $user->id,
+                'nama_karyawan' => $user->nama,
+                'rekap_presensi' => $rekap
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        // Menggunakan TO_CHAR untuk PostgreSQL
-        $rekap = Presensi::selectRaw("TO_CHAR(\"tanggalPresensi\", 'YYYY-MM') as bulan")
-            ->where('karyawan_id', $user->id)
-            ->groupBy('bulan')
-            ->orderByDesc('bulan')
-            ->get();
-
-
-        return response()->json([
-            'karyawan_id' => $user->id,
-            'nama_karyawan' => $user->nama,
-            'rekap_presensi' => $rekap
-        ]);
     }
 
     public function getRekapDetail($bulan)
