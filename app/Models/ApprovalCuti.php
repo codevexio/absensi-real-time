@@ -22,7 +22,7 @@ class ApprovalCuti extends Model
     // Relasi ke pengajuan cuti
     public function user()
     {
-        return $this->belongsTo(Karyawan::class, 'karyawan_id');
+        return $this->belongsTo(Karyawan::class, 'approver_id');
     }
 
     public function pengajuan()
