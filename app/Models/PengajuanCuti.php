@@ -31,9 +31,10 @@ class PengajuanCuti extends Model
         return $this->hasMany(ApprovalCuti::class, 'pengajuan_cuti_id');
     }
 
-    public function approvals()
+    public function approver()
     {
-        return $this->hasMany(ApprovalCuti::class, 'pengajuan_cuti_id');
+        return $this->belongsTo(Karyawan::class, 'approver_id'); // asumsikan kolom foreign key 'approver_id'
     }
+
 
 }
