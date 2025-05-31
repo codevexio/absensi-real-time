@@ -257,6 +257,50 @@ class PresensiController extends Controller
         return response()->json(['message' => 'Presensi pulang berhasil', 'data' => $presensi], 200);
     }
 
+    public function getPresensiHariIni()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Karyawan belum login'], 401);
+        }
+
+        $karyawanId = $user->id;
+        $tanggalHariIni = Carbon::now()->format('Y-m-d');
+
+        $presensi = Presensi::where('karyawan_id', $karyawanId)
+            ->whereDate('tanggalPresensi', $tanggalHariIni)
+            ->first();
+
+        if (!$presensi) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Belum Presensi Masuk',
+            ]);
+        }
+
+        $statusMasuk = $presensi->statusMasuk; // "Tepat Waktu", "Terlambat", "Cuti", "Tidak Presensi Masuk"
+
+        if (in_array($statusMasuk, ['Tepat Waktu', 'Terlambat'])) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Sudah Presensi Masuk',
+                'code' => 'SUDAH_PRESENSI',
+            ]);
+        } elseif ($statusMasuk === 'Cuti') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Anda sedang cuti',
+                'code' => 'CUTI',
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Belum Presensi Masuk',
+                'code' => 'BELUM_PRESENSI',
+            ]);
+        }
+    }
+
     public function listRekapPresensi()
     {
         try {
@@ -346,5 +390,4 @@ class PresensiController extends Controller
         $pdf = Pdf::loadView('pdf.rekap_presensi', $data);
         return $pdf->download("rekap-presensi-$bulan.pdf");
     }
-
 }

@@ -11,30 +11,34 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'username' => 'required|string',
+                'password' => 'required|string',
+            ]);
 
-        $karyawan = Karyawan::where('username', $request->username)->first();
+            $karyawan = Karyawan::where('username', $request->username)->first();
 
-        if (!$karyawan || !Hash::check($request->password, $karyawan->password)) {
-            return response()->json(['message' => 'Username atau password salah'], 401);
+            if (!$karyawan || !Hash::check($request->password, $karyawan->password)) {
+                return response()->json(['message' => 'Username atau password salah'], 401);
+            }
+
+            $token = $karyawan->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login berhasil',
+                'token' => $token,
+                'karyawan' => [
+                    'id' => $karyawan->id,
+                    'nama' => $karyawan->nama,
+                    'golongan' => $karyawan->golongan,
+                    'divisi' => $karyawan->divisi,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Login error: ' . $e->getMessage());
+            return response()->json(['message' => 'Terjadi kesalahan server'], 500);
         }
-
-        // Buat token login
-        $token = $karyawan->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login berhasil',
-            'token' => $token,
-            'karyawan' => [
-                'id' => $karyawan->id,
-                'nama' => $karyawan->nama,
-                'golongan' => $karyawan->golongan,
-                'divisi' => $karyawan->divisi,
-            ]
-        ]);
     }
 
     public function logout(Request $request)
