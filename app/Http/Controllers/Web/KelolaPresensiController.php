@@ -11,8 +11,17 @@ class KelolaPresensiController extends Controller
     /**
      * Tampilkan daftar presensi karyawan.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $month = $request->get('month');
+        $year = $request->get('year');
+
+        $query = Presensi::with(['karyawan', 'jadwalKerja.shift']);
+
+        if ($month && $year) {
+            $query->whereMonth('tanggalPresensi', $month)
+                  ->whereYear('tanggalPresensi', $year);
+        }
         // Ambil data presensi dengan relasi karyawan, jadwal kerja, dan shift
         $employees = Presensi::with(['karyawan', 'jadwalKerja.shift'])->orderBy('created_at','desc')->paginate(10);
         

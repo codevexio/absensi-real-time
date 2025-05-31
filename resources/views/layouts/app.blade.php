@@ -40,10 +40,10 @@
                     language: {
                         emptyTable: "Tidak ada data tersedia pada tabel"
                     },
-                    paging: true,
+                    paging: false,
                     searching: true,
                     info: true,
-                    lengthChange: true,
+                    lengthChange: false,
                     // dom: 'lfrtip'
                 });
             });

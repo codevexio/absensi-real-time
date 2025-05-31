@@ -26,6 +26,7 @@ Route::post('/login/store', [AuthController::class, 'login'])->name('login');
 
 //Kelola Presensi
 Route::get('/presensi', [KelolaPresensiController::class,'index'])->name('web/presensi');
+Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi.index');
 Route::get('/export/pdf', [ExportController::class, 'exportPDF'])->name('export.pdf');
 Route::get('/export/excel', [ExportController::class, 'exportExcel'])->name('export.excel');
 
