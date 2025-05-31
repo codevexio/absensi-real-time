@@ -170,41 +170,90 @@ class PengajuanCutiController extends Controller
         ], 201);
     }
 
-    public function detailPengajuanCuti($id)
+    public function riwayat(Request $request)
     {
         $user = Auth::user();
 
-        // Ambil pengajuan cuti dengan relasi cutiApprovals dan user di ApprovalCuti
-        $pengajuan = PengajuanCuti::with(['cutiApprovals.user'])
-            ->where('id', $id)
-            ->where('karyawan_id', $user->id)
-            ->first();
-
-        if (!$pengajuan) {
-            return response()->json(['message' => 'Pengajuan cuti tidak ditemukan'], 404);
+        if (!$user) {
+            return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
-        $hasil = [];
+        $riwayat = PengajuanCuti::where('karyawan_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id, // opsional, untuk klik detail
+                    'tanggal_pengajuan' => $item->created_at->format('Y-m-d'),
+                    'jenis_cuti' => $item->jenisCuti,
+                ];
+            });
 
-        foreach ($pengajuan->cutiApprovals as $approval) {
-            $hasil[] = [
-                'golongan' => $approval->approver_golongan,
-                'nama' => $approval->user ? $approval->user->nama : '-',
-                'status' => $approval->status,
-                'catatan' => $approval->catatan,
-            ];
+        return response()->json($riwayat);
+    }
+
+    public function riwayatDetail($id)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Karyawan belum login'], 401);
         }
 
-        // Cari catatan penolakan jika ada approval yang statusnya Ditolak
-        $catatanPenolakan = $pengajuan->cutiApprovals->where('status', 'Ditolak')->first()->catatan ?? null;
+        $cuti = PengajuanCuti::with(['karyawan', 'cutiApprovals.user'])->findOrFail($id);
+
+        if ($cuti->karyawan_id !== $user->id) {
+            return response()->json(['message' => 'Tidak diizinkan mengakses cuti ini'], 403);
+        }
+
+        // Filter dan susun data approval
+        $approvalData = [];
+
+        // Golongan-golongan tetap yang harus ditampilkan
+        $roles = ['Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
+
+        foreach ($roles as $role) {
+            // Ambil semua approval untuk role ini
+            $approvalsForRole = $cuti->cutiApprovals->where('approver_golongan', $role);
+
+            if ($role === 'Asisten') {
+                // Khusus Asisten, ambil hanya satu yang statusnya Disetujui / Ditolak
+                $asistenApproval = $approvalsForRole->firstWhere('status', 'Disetujui')
+                                    ?? $approvalsForRole->firstWhere('status', 'Ditolak');
+
+                if ($asistenApproval) {
+                    $approvalData[] = [
+                        'role' => $role,
+                        'nama' => $asistenApproval->user->nama,
+                        'status' => $asistenApproval->status,
+                    ];
+                } else {
+                    // Jika tidak ada yg menyetujui/menolak
+                    $approvalData[] = [
+                        'role' => $role,
+                        'nama' => '-',
+                        'status' => '-',
+                    ];
+                }
+            } else {
+                // Untuk role lain, tampilkan semua approval meskipun status Menunggu
+                foreach ($approvalsForRole as $approval) {
+                    $approvalData[] = [
+                        'role' => $role,
+                        'nama' => $approval->user->nama,
+                        'status' => $approval->status,
+                    ];
+                }
+            }
+        }
 
         return response()->json([
-            'approval' => $hasil,
-            'alasan_penolakan' => $catatanPenolakan,
+            'nama_pengaju' => $cuti->karyawan->nama,
+            'jenis_cuti' => $cuti->jenisCuti,
+            'jumlah_cuti_diambil' => $cuti->jumlahHari . ' hari',
+            'status_approval' => $approvalData,
+            'alasan_penolakan' => $cuti->alasanPenolakan,
         ]);
     }
 
-
-
-    
 }
