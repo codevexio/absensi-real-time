@@ -26,6 +26,7 @@ class AdminDashboardController extends Controller
             ->count('karyawan_id');
 
         $totalAbsenHariIni = Presensi::whereDate('tanggalPresensi', $today)
+            ->whereIn('statusMasuk', ['Tepat Waktu', 'Terlambat'])
             ->distinct('karyawan_id')
             ->count('karyawan_id');
 
@@ -34,16 +35,17 @@ class AdminDashboardController extends Controller
             ->distinct('karyawan_id')
             ->count('karyawan_id');
 
-        // Data 7 hari terakhir
+        // Data 7 hari terakhir (untuk line chart mingguan)
         $labels = [];
         $dataHadir = [];
         $dataTerlambat = [];
 
         for ($i = 6; $i >= 0; $i--) {
             $tanggal = Carbon::today()->subDays($i);
-            $labels[] = $tanggal->format('l'); // Nama hari (Senin, Selasa, dst)
+            $labels[] = $tanggal->format('l'); // Nama hari
 
             $jumlahHadir = Presensi::whereDate('tanggalPresensi', $tanggal)
+                ->whereIn('statusMasuk', ['Tepat Waktu', 'Terlambat'])
                 ->distinct('karyawan_id')
                 ->count('karyawan_id');
 
@@ -56,9 +58,28 @@ class AdminDashboardController extends Controller
             $dataTerlambat[] = $jumlahTerlambat;
         }
 
-        // Status Hari Ini untuk Pie Chart
-        $hadir = $totalAbsenHariIni;
-        $cuti = $totalCuti;
+        // Status Hari Ini (Pie Chart)
+        $hadirHariIni = $totalAbsenHariIni - $totalTerlambatHariIni;
+        $terlambatHariIni = $totalTerlambatHariIni;
+
+        // Statistik Bulanan (30 hari terakhir)
+        $tanggalAwal = Carbon::today()->subDays(29);
+
+        $totalCutiBulanan = PengajuanCuti::where('statusCuti', 'Disetujui')
+            ->whereDate('tanggalMulai', '<=', Carbon::today())
+            ->whereDate('tanggalSelesai', '>=', $tanggalAwal)
+            ->distinct('karyawan_id')
+            ->count('karyawan_id');
+
+        $totalHadirBulanan = Presensi::whereBetween('tanggalPresensi', [$tanggalAwal, Carbon::today()])
+            ->whereIn('statusMasuk', ['Tepat Waktu', 'Terlambat'])
+            ->distinct('karyawan_id')
+            ->count('karyawan_id');
+
+        $totalTerlambatBulanan = Presensi::whereBetween('tanggalPresensi', [$tanggalAwal, Carbon::today()])
+            ->where('statusMasuk', 'Terlambat')
+            ->distinct('karyawan_id')
+            ->count('karyawan_id');
 
         return view('dashboard', compact(
             'totalKaryawan',
@@ -68,8 +89,11 @@ class AdminDashboardController extends Controller
             'labels',
             'dataHadir',
             'dataTerlambat',
-            'hadir',
-            'cuti'
+            'hadirHariIni',
+            'terlambatHariIni',
+            'totalCutiBulanan',
+            'totalHadirBulanan',
+            'totalTerlambatBulanan'
         ));
     }
 }
