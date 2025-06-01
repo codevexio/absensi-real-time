@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('cuti/sisa', [PengajuanCutiController::class, 'getSisaCuti']);
     Route::post('cuti/ajukan', [PengajuanCutiController::class, 'ajukanCuti']);
     Route::get('cuti/riwayat', [PengajuanCutiController::class, 'riwayat']);
-    Route::get('/cuti/riwayat/{id}', [PengajuanCutiController::class, 'riwayatDetail']);
+    Route::get('cuti/riwayat/{id}', [PengajuanCutiController::class, 'riwayatDetail']);
 });
 
 // Approval Cuti
