@@ -9,6 +9,7 @@ use App\Models\JadwalKerja;
 use Illuminate\Support\Facades\Log;
 use App\Models\Keterlambatan;
 use Illuminate\Support\Facades\Auth;
+use App\Models\PengajuanCuti;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -46,6 +47,21 @@ class PresensiController extends Controller
         $karyawan_id = $user->id;
         $tanggalHariIni = Carbon::today('Asia/Jakarta')->toDateString();
 
+        // Cek apakah karyawan sedang cuti hari ini
+        $sedangCuti = PengajuanCuti::where('karyawan_id', $karyawan_id)
+            ->where('statusCuti', 'Disetujui')
+            ->whereDate('tanggalMulai', '<=', $tanggalHariIni)
+            ->whereDate('tanggalSelesai', '>=', $tanggalHariIni)
+            ->exists();
+
+        if ($sedangCuti) {
+            return response()->json([
+                'bisaPresensiMasuk' => false,
+                'bisaPresensiPulang' => false,
+                'message' => 'Anda sedang cuti hari ini'
+            ], 200);
+        }
+
         $jadwalKerja = JadwalKerja::with('shift')
             ->where('karyawan_id', $karyawan_id)
             ->whereDate('tanggalKerja', $tanggalHariIni)
@@ -78,35 +94,33 @@ class PresensiController extends Controller
         $sudahPresensiMasuk = $presensi && $presensi->waktuMasuk;
         $sudahPresensiPulang = $presensi && $presensi->waktuPulang;
 
-        $bisaPresensiMasuk = $waktuSekarang->between(
-                $waktuMasuk->copy()->subMinutes(60),
-                $waktuMasuk->copy()->addMinutes(30)
-            ) && !$sudahPresensiMasuk;
+        $windowMasukStart = $waktuMasuk->copy()->subMinutes(60);
+        $windowMasukEnd = $waktuMasuk->copy()->addMinutes(30);
+        $windowPulangStart = $waktuPulang;
+        $windowPulangEnd = $waktuPulang->copy()->addHours(5);
 
-        $bisaPresensiPulang = $sudahPresensiMasuk &&
-            !$sudahPresensiPulang &&
-            $waktuSekarang->between(
-                $waktuPulang,
-                $waktuPulang->copy()->addHours(5)
-            );
+        $bisaPresensiMasuk = $waktuSekarang->between($windowMasukStart, $windowMasukEnd) && !$sudahPresensiMasuk;
+        $bisaPresensiPulang = $sudahPresensiMasuk && !$sudahPresensiPulang && $waktuSekarang->between($windowPulangStart, $windowPulangEnd);
 
-        // Jika belum presensi masuk, cek jika waktu untuk presensi pulang masih valid
+        // Jika belum presensi masuk, pulang tidak boleh
         if (!$sudahPresensiMasuk) {
-            $bisaPresensiPulang = $waktuSekarang->between($waktuPulang, $waktuPulang->copy()->addHours(5));
+            $bisaPresensiPulang = false;
         }
 
         // Tentukan pesan
         $message = 'Status presensi berhasil diambil';
         if ($bisaPresensiMasuk) {
             $message = 'Silakan presensi masuk';
-        } elseif ($sudahPresensiMasuk && !$sudahPresensiPulang) {
-            $message = 'Presensi masuk sudah diterima';
-        }
-
-        if ($bisaPresensiPulang) {
+        } elseif (!$bisaPresensiMasuk && !$sudahPresensiMasuk && $waktuSekarang->gt($windowMasukEnd)) {
+            $message = 'Presensi masuk sudah tutup, hubungi admin';
+        } elseif ($sudahPresensiMasuk && !$sudahPresensiPulang && $bisaPresensiPulang) {
             $message = 'Silakan presensi pulang';
+        } elseif (!$bisaPresensiPulang && !$sudahPresensiPulang && $waktuSekarang->gt($windowPulangEnd)) {
+            $message = 'Presensi pulang sudah tutup, hubungi admin';
         } elseif ($sudahPresensiPulang) {
             $message = 'Presensi pulang sudah diterima';
+        } elseif ($sudahPresensiMasuk) {
+            $message = 'Presensi masuk sudah diterima';
         }
 
         return response()->json([
@@ -119,10 +133,10 @@ class PresensiController extends Controller
                 'waktuPulang' => $waktuPulang->toDateTimeString(),
                 'presensiMasuk' => $sudahPresensiMasuk ? $presensi->waktuMasuk : null,
                 'presensiPulang' => $sudahPresensiPulang ? $presensi->waktuPulang : null,
-                'windowPresensiMasuk_start' => $waktuMasuk->copy()->subMinutes(60)->toDateTimeString(),
-                'windowPresensiMasuk_end' => $waktuMasuk->copy()->addMinutes(30)->toDateTimeString(),
-                'windowPresensiPulang_start' => $waktuPulang->toDateTimeString(),
-                'windowPresensiPulang_end' => $waktuPulang->copy()->addHours(6)->toDateTimeString(),
+                'windowPresensiMasuk_start' => $windowMasukStart->toDateTimeString(),
+                'windowPresensiMasuk_end' => $windowMasukEnd->toDateTimeString(),
+                'windowPresensiPulang_start' => $windowPulangStart->toDateTimeString(),
+                'windowPresensiPulang_end' => $windowPulangEnd->toDateTimeString(),
             ]
         ]);
     }
