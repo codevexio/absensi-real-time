@@ -29,6 +29,8 @@ Route::get('/presensi', [KelolaPresensiController::class,'index'])->name('web/pr
 Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi.index');
 Route::get('/export/pdf', [ExportController::class, 'exportPDF'])->name('export.pdf');
 Route::get('/export/excel', [ExportController::class, 'exportExcel'])->name('export.excel');
+Route::put('/kelola-presensi/{id}/update-status', [KelolaPresensiController::class, 'updateStatus'])->name('web/kelola-presensi-updateStatus');
+
 
 //Kelola Akun 
 Route::get('/kelola-akun', [KelolaAkunController::class,'index'])->name('web/kelola-akun');

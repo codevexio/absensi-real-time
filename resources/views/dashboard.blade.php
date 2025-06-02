@@ -45,6 +45,7 @@
                 <h3 class="text-md font-semibold mb-3">Statistik Bulanan: Cuti, Hadir, Terlambat</h3>
                 <canvas id="monthlySummaryChart" height="100"></canvas>
             </div>
+
         </div>
     </div>
 
@@ -115,33 +116,36 @@
             }
         });
 
-        // Line Chart - Cuti, Hadir, Terlambat Bulanan
-        const ctx = document.getElementById('monthlySummaryChart').getContext('2d');
-        new Chart(ctx, {
+        const monthlyLabels = @json($bulananLabels);
+        const monthlyHadir = @json($bulananHadir);
+        const monthlyCuti = @json($bulananCuti);
+        const monthlyTerlambat = @json($bulananTerlambat);
+
+        new Chart(document.getElementById('monthlySummaryChart').getContext('2d'), {
             type: 'line',
             data: {
-                labels: ['Total Karyawan (30 Hari)'],
+                labels: monthlyLabels,
                 datasets: [
                     {
-                        label: 'Cuti',
-                        data: [{{ $totalCutiBulanan }}],
-                        borderColor: 'rgba(251, 191, 36, 1)',
-                        backgroundColor: 'rgba(251, 191, 36, 0.2)',
-                        fill: true,
-                        tension: 0.4
-                    },
-                    {
                         label: 'Hadir',
-                        data: [{{ $totalHadirBulanan }}],
-                        borderColor: 'rgba(16, 185, 129, 1)',
+                        data: monthlyHadir,
+                        borderColor: '#10B981',
                         backgroundColor: 'rgba(16, 185, 129, 0.2)',
                         fill: true,
                         tension: 0.4
                     },
                     {
+                        label: 'Cuti',
+                        data: monthlyCuti,
+                        borderColor: '#FBBF24',
+                        backgroundColor: 'rgba(251, 191, 36, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
                         label: 'Terlambat',
-                        data: [{{ $totalTerlambatBulanan }}],
-                        borderColor: 'rgba(239, 68, 68, 1)',
+                        data: monthlyTerlambat,
+                        borderColor: '#EF4444',
                         backgroundColor: 'rgba(239, 68, 68, 0.2)',
                         fill: true,
                         tension: 0.4
@@ -151,9 +155,7 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'top'
-                    },
+                    legend: { position: 'top' },
                     tooltip: {
                         callbacks: {
                             label: function (context) {
@@ -163,9 +165,7 @@
                     }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                    y: { beginAtZero: true }
                 }
             }
         });

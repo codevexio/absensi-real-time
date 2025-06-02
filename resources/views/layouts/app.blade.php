@@ -20,12 +20,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen flex bg-gray-100 ">
+<body class="font-sans antialiased overflow-hidden">
+    <div class="h-dvh grid grid-cols-[auto_1fr] bg-gray-100 overflow-hidden">
 
         <x-sidebar />
 
-        <div class="min-h-screen flex-auto bg-gray-100">
+        <div class="min-h-screen overflow-x-hidden overflow-y-auto flex-auto bg-gray-100">
             <!-- Navbar/Header -->
             <livewire:layout.navigation />
             <!-- Main Content -->
@@ -33,6 +33,7 @@
                 {{ $slot }}
             </main>
         </div>
+    </div>
 
         <script>
             $(document).ready(function () {

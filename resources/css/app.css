@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 nav.sidebar a.active {
-    @apply bg-green-600 text-white;
+    @apply bg-green-600/90 text-white;
 }
 
 /* customize data table library */

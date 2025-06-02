@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +21,11 @@ class Presensi extends Model
         'lokasiMasuk' => 'array',  // Mengonversi lokasiMasuk ke array (untuk format JSON)
         'lokasiPulang' => 'array', // Mengonversi lokasiPulang ke array (untuk format JSON)
     ];
+
+    public function getTanggalPresensiAttribute($value)
+    {
+        return Carbon::parse($value)->translatedFormat("l, j F Y");
+    }
 
     public function karyawan()
     {
