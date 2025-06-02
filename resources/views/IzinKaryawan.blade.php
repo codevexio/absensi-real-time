@@ -30,14 +30,22 @@
                             @forelse ($employees as $employee)
                             <tr class="hover:bg-gray-200 dark:hover:bg-gray-700">
                                 <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
-                                <td class="border px-4 py-2 text-center">{{ $employee->nama }}</td>
+                                <td class="border px-4 py-2 text-center">{{ $employee->karyawan->nama ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">
                                     {{ $employee->jenisCuti ?? '-' }}
                                 </td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->tanggalMulai ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->tanggalSelesai ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->jumlahHari ?? '-' }}</td>
-                                <td class="border px-4 py-2 text-center">{{ $employee->dokumen ?? '-' }}</td>
+                                <td class="border px-4 py-2 text-center">
+                                    @if ($employee->file_surat_cuti)
+                                        <a href="{{ asset($employee->file_surat_cuti) }}" target="_blank" class="text-blue-600 hover:underline">
+                                            Lihat Dokumen
+                                        </a>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->statusCuti ?? '-' }}</td>
                             </tr>
                             @empty

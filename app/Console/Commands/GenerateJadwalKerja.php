@@ -22,7 +22,7 @@ class GenerateJadwalKerja extends Command
         DB::reconnect();
 
         $tanggalHariIni = Carbon::now()->toDateString();
-        $defaultShift = Shift::first();
+        $defaultShift = Shift::first(); // Bisa diganti logika custom per karyawan jika perlu
 
         if (!$defaultShift) {
             $this->error('Shift belum ada di database!');
@@ -32,8 +32,9 @@ class GenerateJadwalKerja extends Command
         $karyawanList = Karyawan::all();
 
         foreach ($karyawanList as $karyawan) {
-            DB::disconnect(); // force reconnect to prevent invalid prepared statement
+            DB::disconnect();
             DB::reconnect();
+
             // Cek apakah karyawan sedang cuti
             $sedangCuti = DB::table('pengajuan_cuti')
                 ->where('karyawan_id', $karyawan->id)
@@ -53,28 +54,20 @@ class GenerateJadwalKerja extends Command
                 $statusPulang = 'Tidak Presensi Pulang';
             }
 
-            // Cek apakah sudah ada jadwal kerja untuk hari ini
-            $jadwal = JadwalKerja::where('karyawan_id', $karyawan->id)
-                ->whereDate('tanggalKerja', $tanggalHariIni)
-                ->first();
-
-            if ($jadwal) {
-                // Jika sudah ada, update status kerja
-                $jadwal->update([
-                    'statusKerja' => $statusKerja,
-                    'updated_at' => now(),
-                ]);
-            } else {
-                // Jika belum ada, buat baru
-                $jadwal = JadwalKerja::create([
+            // Buat atau update jadwal kerja (update juga shift jika berubah)
+            $jadwal = JadwalKerja::updateOrCreate(
+                [
                     'karyawan_id' => $karyawan->id,
                     'tanggalKerja' => $tanggalHariIni,
+                ],
+                [
                     'shift_id' => $defaultShift->id,
                     'statusKerja' => $statusKerja,
-                ]);
-            }
+                    'updated_at' => now(),
+                ]
+            );
 
-            // *** Generate Data Presensi Default ***
+            // Buat atau update data presensi default
             Presensi::updateOrCreate(
                 [
                     'karyawan_id' => $karyawan->id,
@@ -84,6 +77,7 @@ class GenerateJadwalKerja extends Command
                 [
                     'statusMasuk' => $statusMasuk,
                     'statusPulang' => $statusPulang,
+                    'updated_at' => now(),
                 ]
             );
         }
