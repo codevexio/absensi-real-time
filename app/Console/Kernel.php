@@ -36,8 +36,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Menjadwalkan command untuk dijalankan setiap hari
-        $schedule->command('cuti:reset')->daily(); // Menyesuaikan dengan kebutuhanmu
-        $schedule->command('jadwal:generate')->daily();
+        $schedule->command('jadwal:generate')->dailyAt('05:00'); // Jam 5 pagi
     }
 }

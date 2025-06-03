@@ -7,43 +7,63 @@ use App\Models\JadwalKerja;
 use App\Models\Karyawan;
 use App\Models\Shift;
 use App\Models\Presensi;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
 
 class GenerateJadwalKerja extends Command
 {
     protected $signature = 'jadwal:generate';
-    protected $description = 'Generate jadwal kerja harian dan data presensi default untuk semua karyawan';
+    protected $description = 'Generate jadwal kerja harian dan data presensi default untuk semua karyawan, kecuali hari libur dan weekend';
 
     public function handle()
     {
-        // Reconnect untuk menghindari error prepared statement PostgreSQL
-        DB::disconnect(); 
-        DB::reconnect();
+        $tanggalHariIni = Carbon::now();
+        $hariIni = $tanggalHariIni->format('l'); // Saturday, Sunday, etc
+        $tanggalString = $tanggalHariIni->toDateString(); // Y-m-d
 
-        $tanggalHariIni = Carbon::now()->toDateString();
-        $defaultShift = Shift::first(); 
+        // ✅ 1. Skip weekend
+        if ($hariIni === 'Saturday' || $hariIni === 'Sunday') {
+            $this->info("Hari ini ($hariIni) adalah weekend. Jadwal tidak dibuat.");
+            return;
+        }
 
+        // ✅ 2. Cek tanggal merah via API
+        try {
+            $response = Http::get("https://api-harilibur.vercel.app/api");
+            if ($response->successful()) {
+                $liburNasional = collect($response->json());
+                $isTanggalMerah = $liburNasional->contains('holiday_date', $tanggalString);
+
+                if ($isTanggalMerah) {
+                    $this->info("Hari ini ($tanggalString) adalah tanggal merah. Jadwal tidak dibuat.");
+                    return;
+                }
+            } else {
+                $this->warn("Gagal memeriksa tanggal merah. Lanjutkan proses.");
+            }
+        } catch (\Exception $e) {
+            $this->warn("Terjadi error saat cek tanggal merah: " . $e->getMessage());
+        }
+
+        // ✅ 3. Ambil shift default
+        $defaultShift = Shift::first();
         if (!$defaultShift) {
-            $this->error('Shift belum ada di database!');
+            $this->error('Shift belum tersedia di database!');
             return;
         }
 
         $karyawanList = Karyawan::all();
 
         foreach ($karyawanList as $karyawan) {
-            DB::disconnect();
-            DB::reconnect();
-
-            // Cek apakah karyawan sedang cuti
+            // ✅ 4. Cek apakah karyawan sedang cuti hari ini
             $sedangCuti = DB::table('pengajuan_cuti')
                 ->where('karyawan_id', $karyawan->id)
                 ->where('statusCuti', 'Disetujui')
-                ->whereDate('tanggalMulai', '<=', $tanggalHariIni)
-                ->whereDate('tanggalSelesai', '>=', $tanggalHariIni)
+                ->whereDate('tanggalMulai', '<=', $tanggalString)
+                ->whereDate('tanggalSelesai', '>=', $tanggalString)
                 ->exists();
 
-            // Tentukan status kerja dan presensi
             if ($sedangCuti) {
                 $statusKerja = 'Cuti';
                 $statusMasuk = 'Cuti';
@@ -54,25 +74,26 @@ class GenerateJadwalKerja extends Command
                 $statusPulang = 'Tidak Presensi Pulang';
             }
 
-            // Buat atau update jadwal kerja (update juga shift jika berubah)
-            $jadwal = JadwalKerja::updateOrCreate(
+            // ✅ 5. Cek apakah jadwal kerja hari ini sudah ada
+            $jadwal = JadwalKerja::firstOrCreate(
                 [
                     'karyawan_id' => $karyawan->id,
-                    'tanggalKerja' => $tanggalHariIni,
+                    'tanggalKerja' => $tanggalString,
                 ],
                 [
                     'shift_id' => $defaultShift->id,
                     'statusKerja' => $statusKerja,
+                    'created_at' => now(),
                     'updated_at' => now(),
                 ]
             );
 
-            // Buat atau update data presensi default
+            // ✅ 6. Buat / update presensi default
             Presensi::updateOrCreate(
                 [
                     'karyawan_id' => $karyawan->id,
                     'jadwal_kerja_id' => $jadwal->id,
-                    'tanggalPresensi' => $tanggalHariIni,
+                    'tanggalPresensi' => $tanggalString,
                 ],
                 [
                     'statusMasuk' => $statusMasuk,
@@ -82,6 +103,6 @@ class GenerateJadwalKerja extends Command
             );
         }
 
-        $this->info('Jadwal kerja dan presensi berhasil diperbarui atau dibuat!');
+        $this->info("✅ Jadwal kerja dan presensi berhasil dibuat untuk tanggal $tanggalString.");
     }
 }
