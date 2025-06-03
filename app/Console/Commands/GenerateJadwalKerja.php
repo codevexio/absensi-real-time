@@ -22,7 +22,7 @@ class GenerateJadwalKerja extends Command
         DB::reconnect();
 
         $tanggalHariIni = Carbon::now()->toDateString();
-        $defaultShift = Shift::first(); // Bisa diganti logika custom per karyawan jika perlu
+        $defaultShift = Shift::first(); 
 
         if (!$defaultShift) {
             $this->error('Shift belum ada di database!');
