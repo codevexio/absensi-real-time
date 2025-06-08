@@ -18,9 +18,48 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        /* Spinner CSS */
+        #loading-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 6px solid #ccc;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
 
 <body class="font-sans antialiased overflow-hidden">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="spinner"></div>
+    </div>
+
     <div class="h-dvh grid grid-cols-[auto_1fr] bg-gray-100 overflow-hidden">
 
         <x-sidebar />
@@ -35,21 +74,25 @@
         </div>
     </div>
 
-        <script>
-            $(document).ready(function () {
-                new DataTable('#data-table', {
-                    language: {
-                        emptyTable: "Tidak ada data tersedia pada tabel"
-                    },
-                    paging: false,
-                    searching: true,
-                    info: true,
-                    lengthChange: false,
-                    // dom: 'lfrtip'
-                });
-            });
+    <script>
+        // Sembunyikan loading screen saat halaman sudah selesai dimuat
+        window.addEventListener('load', function () {
+            const loader = document.getElementById('loading-screen');
+            if (loader) loader.style.display = 'none';
+        });
 
-        </script>
+        $(document).ready(function () {
+            new DataTable('#data-table', {
+                language: {
+                    emptyTable: "Tidak ada data tersedia pada tabel"
+                },
+                paging: false,
+                searching: true,
+                info: true,
+                lengthChange: false,
+            });
+        });
+    </script>
 
 </body>
 
