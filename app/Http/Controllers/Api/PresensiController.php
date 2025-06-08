@@ -94,50 +94,54 @@ class PresensiController extends Controller
         $sudahPresensiMasuk = $presensi && $presensi->waktuMasuk;
         $sudahPresensiPulang = $presensi && $presensi->waktuPulang;
 
-        $windowMasukStart = $waktuMasuk->copy()->subMinutes(60);
-        $windowMasukEnd = $waktuMasuk->copy()->addMinutes(30);
-        $windowPulangStart = $waktuPulang;
-        $windowPulangEnd = $waktuPulang->copy()->addHours(5);
+        $windowMasukStart = $waktuMasuk->copy()->subMinutes(60); // 1 jam sebelum masuk
+        $windowMasukEnd = $waktuMasuk->copy()->addMinutes(30);   // 30 menit setelah masuk
+        $windowPulangStart = $waktuPulang;                        // mulai jam pulang
+        $windowPulangEnd = $waktuPulang->copy()->addHours(5);     // maksimal 5 jam setelahnya
 
         $bisaPresensiMasuk = $waktuSekarang->between($windowMasukStart, $windowMasukEnd) && !$sudahPresensiMasuk;
         $bisaPresensiPulang = $sudahPresensiMasuk && !$sudahPresensiPulang && $waktuSekarang->between($windowPulangStart, $windowPulangEnd);
 
-        // Jika belum presensi masuk, pulang tidak boleh
+        // Jika belum presensi masuk, maka presensi pulang tidak diizinkan
         if (!$sudahPresensiMasuk) {
             $bisaPresensiPulang = false;
         }
 
-        // Tentukan pesan
-        $message = 'Status presensi berhasil diambil';
-        if ($bisaPresensiMasuk) {
-            $message = 'Silakan presensi masuk';
-        } elseif (!$bisaPresensiMasuk && !$sudahPresensiMasuk && $waktuSekarang->gt($windowMasukEnd)) {
-            $message = 'Presensi masuk sudah tutup, hubungi admin';
-        } elseif ($sudahPresensiMasuk && !$sudahPresensiPulang && $bisaPresensiPulang) {
-            $message = 'Silakan presensi pulang';
-        } elseif (!$bisaPresensiPulang && !$sudahPresensiPulang && $waktuSekarang->gt($windowPulangEnd)) {
-            $message = 'Presensi pulang sudah tutup, hubungi admin';
-        } elseif ($sudahPresensiPulang) {
+        // Logging untuk debugging
+        \Log::info('Cek presensi:', [
+            'karyawan_id' => $karyawan_id,
+            'waktuSekarang' => $waktuSekarang->toDateTimeString(),
+            'windowMasukStart' => $windowMasukStart->toDateTimeString(),
+            'windowMasukEnd' => $windowMasukEnd->toDateTimeString(),
+            'windowPulangStart' => $windowPulangStart->toDateTimeString(),
+            'windowPulangEnd' => $windowPulangEnd->toDateTimeString(),
+            'sudahPresensiMasuk' => $sudahPresensiMasuk,
+            'sudahPresensiPulang' => $sudahPresensiPulang,
+            'bisaPresensiMasuk' => $bisaPresensiMasuk,
+            'bisaPresensiPulang' => $bisaPresensiPulang,
+        ]);
+
+        // Tentukan pesan status
+        if ($sudahPresensiPulang) {
             $message = 'Presensi pulang sudah diterima';
+        } elseif ($sudahPresensiMasuk && !$sudahPresensiPulang && $waktuSekarang->between($windowPulangStart, $windowPulangEnd)) {
+            $message = 'Silakan presensi pulang';
+        } elseif ($sudahPresensiMasuk && !$sudahPresensiPulang && $waktuSekarang->gt($windowPulangEnd)) {
+            $message = 'Presensi pulang sudah tutup, hubungi admin';
+        } elseif ($bisaPresensiMasuk) {
+            $message = 'Silakan presensi masuk';
+        } elseif (!$sudahPresensiMasuk && $waktuSekarang->gt($windowMasukEnd)) {
+            $message = 'Presensi masuk sudah tutup, hubungi admin';
         } elseif ($sudahPresensiMasuk) {
             $message = 'Presensi masuk sudah diterima';
+        } else {
+            $message = 'Status presensi berhasil diambil';
         }
 
         return response()->json([
             'bisaPresensiMasuk' => $bisaPresensiMasuk,
             'bisaPresensiPulang' => $bisaPresensiPulang,
             'message' => $message,
-            'debug' => [
-                'waktuSekarang' => $waktuSekarang->toDateTimeString(),
-                'waktuMasuk' => $waktuMasuk->toDateTimeString(),
-                'waktuPulang' => $waktuPulang->toDateTimeString(),
-                'presensiMasuk' => $sudahPresensiMasuk ? $presensi->waktuMasuk : null,
-                'presensiPulang' => $sudahPresensiPulang ? $presensi->waktuPulang : null,
-                'windowPresensiMasuk_start' => $windowMasukStart->toDateTimeString(),
-                'windowPresensiMasuk_end' => $windowMasukEnd->toDateTimeString(),
-                'windowPresensiPulang_start' => $windowPulangStart->toDateTimeString(),
-                'windowPresensiPulang_end' => $windowPulangEnd->toDateTimeString(),
-            ]
         ]);
     }
 
