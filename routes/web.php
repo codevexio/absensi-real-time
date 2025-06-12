@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\KaryawanController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Web\KelolaShiftController;
 use App\Http\Controllers\Web\AdminDashboardController;
+use App\Http\Controllers\Web\KelolaTableShiftController;
 
 Route::view('/', 'login');
 
@@ -48,5 +49,10 @@ Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('<Api
 Route::get('/kelolashift', [KelolaShiftController::class,'index'])->name('web/kelola-shift');
 require __DIR__.'/auth.php';
 
+//Kelola Tabel Shift
+Route::get('/kelola-table-shift', [KelolaTableShift::class, 'index'])->name('shift.index');
+Route::put('/kelola-table-shift/{id}', [KelolaTableShift::class, 'update'])->name('shift.update');
+
+// Dashboard
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');

@@ -159,7 +159,8 @@ class ApprovalCutiController extends Controller
 
         // 🔴 Jika ditolak → update status cuti menjadi "Ditolak"
         if ($request->status === 'Ditolak') {
-            $pengajuan->update(['statusCuti' => 'Ditolak']);
+            $pengajuan->update(['statusCuti' => 'Ditolak',
+                                'alasanPenolakan' => $request->catatan]);
             return response()->json(['message' => 'Pengajuan cuti telah ditolak.']);
         }
 

@@ -95,7 +95,7 @@ class PresensiController extends Controller
         $sudahPresensiPulang = $presensi && $presensi->waktuPulang;
 
         $windowMasukStart = $waktuMasuk->copy()->subMinutes(60); // 1 jam sebelum masuk
-        $windowMasukEnd = $waktuMasuk->copy()->addMinutes(30);   // 30 menit setelah masuk
+        $windowMasukEnd = $waktuMasuk->copy()->addMinutes(70);   // 1 jam 10 menit setelah masuk
         $windowPulangStart = $waktuPulang;                        // mulai jam pulang
         $windowPulangEnd = $waktuPulang->copy()->addHours(5);     // maksimal 5 jam setelahnya
 
