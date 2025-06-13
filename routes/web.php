@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\KaryawanController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Web\KelolaShiftController;
 use App\Http\Controllers\Web\AdminDashboardController;
-use App\Http\Controllers\Web\KelolaTableShiftController;
+use App\Http\Controllers\Web\KelolaTableShift;
 
 Route::view('/', 'login');
 

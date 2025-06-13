@@ -16,7 +16,7 @@ class KelolaTableShift extends Controller
         return view('KelolaTableShift', compact('shifts'));
     }
 
-    public function store(Request $requests)
+    public function store(Request $request)
     {
         $request->validate([
             'namaShift' => 'required|string|max:255',
