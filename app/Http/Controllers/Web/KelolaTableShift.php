@@ -16,6 +16,19 @@ class KelolaTableShift extends Controller
         return view('KelolaTableShift', compact('shifts'));
     }
 
+    public function store(Request $requests)
+    {
+        $request->validate([
+            'namaShift' => 'required|string|max:255',
+            'waktuMulai' => 'required|date_format:H:i',
+            'waktuSelesai' => 'required|date_format:H:i',
+        ]);
+
+        $shift = Shift::create($request->all());
+
+        return redirect()->back()->with('success', 'Shift berhasil ditambahkan.');
+    }
+    
     public function update(Request $request, $id)
     {
         $request->validate([

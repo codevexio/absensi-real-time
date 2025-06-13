@@ -52,6 +52,7 @@ require __DIR__.'/auth.php';
 //Kelola Tabel Shift
 Route::get('/kelola-table-shift', [KelolaTableShift::class, 'index'])->name('shift.index');
 Route::put('/kelola-table-shift/{id}', [KelolaTableShift::class, 'update'])->name('shift.update');
+Route::post('/kelola-table-shift', [KelolaTableShift::class, 'store'])->name('shift.store');
 
 // Dashboard
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
