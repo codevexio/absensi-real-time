@@ -87,12 +87,12 @@
     </dialog>
 
     <script>
-        // Modal Edit Akun
+        // Modal Edit Shift
         const dialogEdit = document.getElementById("edit-shift");
         const btnEdits = document.querySelectorAll(".tombol-edit-shift");
         const closeEdit = document.querySelector("#close-edit-shift");
 
-        // Form Edit Akun
+        // Form Edit Shift
         const formEditShit = document.getElementById("form-edit-shift");
 
         btnEdits.forEach(button => {
@@ -124,32 +124,31 @@
 
         closeEdit.addEventListener("click", () => dialogEdit.close());
 
-        // Pencarian Akun
-        const searchInput = document.querySelector('input[type="text"]');
-        const tableRows = document.querySelectorAll('tbody tr');
+        // // Pencarian Akun
+        // const searchInput = document.querySelector('input[type="text"]');
+        // const tableRows = document.querySelectorAll('tbody tr');
 
-        searchInput.addEventListener('input', function () {
-            const query = searchInput.value.toLowerCase();
+        // searchInput.addEventListener('input', function () {
+        //     const query = searchInput.value.toLowerCase();
 
-            tableRows.forEach(function (row) {
-                const cells = row.getElementsByTagName('td');
-                let found = false;
+        //     tableRows.forEach(function (row) {
+        //         const cells = row.getElementsByTagName('td');
+        //         let found = false;
 
-                for (let i = 0; i < cells.length; i++) {
-                    const cell = cells[i];
-                    if (cell.textContent.toLowerCase().includes(query)) {
-                        found = true;
-                        break;
-                    }
-                }
+        //         for (let i = 0; i < cells.length; i++) {
+        //             const cell = cells[i];
+        //             if (cell.textContent.toLowerCase().includes(query)) {
+        //                 found = true;
+        //                 break;
+        //             }
+        //         }
 
-                if (found) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+        //         if (found) {
+        //             row.style.display = '';
+        //         } else {
+        //             row.style.display = 'none';
+        //         }
+        //     });
         });
     </script>
-
 </x-app-layout>
