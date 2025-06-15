@@ -37,7 +37,7 @@
             <!-- Line Chart - Gabungan Kehadiran dan Terlambat -->
             <div class="bg-white p-4 shadow rounded-lg">
                 <h3 class="text-md font-semibold mb-3">Statistik Kehadiran & Keterlambatan Mingguan</h3>
-                <canvas id="combinedLineChart" height="90"></canvas>
+                <canvas id="combinedLineChart" height="280"></canvas>
             </div>
 
             <!-- Bar Chart - Statistik Bulanan -->

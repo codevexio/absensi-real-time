@@ -46,8 +46,9 @@ Route::get('/izinkaryawan/search', [IzinKaryawanController::class, 'search'])->n
 Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('<Api>karyawan.store');
 
 //Kelola Shift
+// Kelola Shift
 Route::get('/kelolashift', [KelolaShiftController::class,'index'])->name('web/kelola-shift');
-require __DIR__.'/auth.php';
+Route::put('/kelolashift/{id}', [KelolaShiftController::class, 'update'])->name('web/kelola-shift-update');
 
 //Kelola Tabel Shift
 Route::get('/kelola-table-shift', [KelolaTableShift::class, 'index'])->name('shift.index');

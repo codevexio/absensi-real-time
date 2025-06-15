@@ -4,6 +4,28 @@
     </x-slot>
 
     <div class="py-6">
+        @if (session('success'))
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            </script>
+        @endif
+        @if (session('error'))
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            </script>
+        @endif
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-6">
                 <h3 class="text-lg font-semibold mb-4">Data Shift Karyawan</h3>
@@ -59,6 +81,56 @@
                                                     <line x1="14" x2="14" y1="11" y2="17" />
                                                 </svg>
                                             </button>
+                                            <script>
+                                                function konfirmasiHapus(id) {
+                                                    Swal.fire({
+                                                        title: "Yakin ingin menghapus akun?",
+                                                        text: "Aksi ini tidak bisa dibatalkan!",
+                                                        icon: "warning",
+                                                        showCancelButton: true,
+                                                        confirmButtonColor: "#d33",
+                                                        cancelButtonColor: "#6c757d",
+                                                        confirmButtonText: "Ya, hapus!",
+                                                        cancelButtonText: "Batal"
+                                                    }).then((result) => {
+                                                        if (result.isConfirmed) {
+                                                            fetch(`/kelola-akun/${id}`, {
+                                                                method: "POST", // HARUS POST karena Laravel hanya menerima spoofed method
+                                                                headers: {
+                                                                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                                                    "Content-Type": "application/json",
+                                                                    "Accept": "application/json"
+                                                                },
+                                                                body: JSON.stringify({
+                                                                    _method: "DELETE"
+                                                                })
+                                                            }).then(response => {
+                                                                if (response.ok) {
+                                                                    Swal.fire(
+                                                                        "Dihapus!",
+                                                                        "Akun berhasil dihapus.",
+                                                                        "success"
+                                                                    ).then(() => {
+                                                                        location.reload();
+                                                                    });
+                                                                } else {
+                                                                    Swal.fire(
+                                                                        "Gagal!",
+                                                                        "Akun gagal dihapus.",
+                                                                        "error"
+                                                                    );
+                                                                }
+                                                            }).catch(() => {
+                                                                Swal.fire(
+                                                                    "Gagal!",
+                                                                    "Terjadi kesalahan saat menghapus data.",
+                                                                    "error"
+                                                                );
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            </script>
                                         </td>
                                     </tr>
                                 @empty
