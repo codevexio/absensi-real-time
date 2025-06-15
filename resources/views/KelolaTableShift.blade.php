@@ -84,7 +84,7 @@
                                             <script>
                                                 function konfirmasiHapus(id) {
                                                     Swal.fire({
-                                                        title: "Yakin ingin menghapus akun?",
+                                                        title: "Yakin ingin menghapus Shift?",
                                                         text: "Aksi ini tidak bisa dibatalkan!",
                                                         icon: "warning",
                                                         showCancelButton: true,
@@ -94,10 +94,10 @@
                                                         cancelButtonText: "Batal"
                                                     }).then((result) => {
                                                         if (result.isConfirmed) {
-                                                            fetch(`/kelola-akun/${id}`, {
-                                                                method: "POST", // HARUS POST karena Laravel hanya menerima spoofed method
+                                                            fetch(`/kelola-table-shift/${id}`, {
+                                                                method: "POST", // menggunakan method POST + spoof DELETE
                                                                 headers: {
-                                                                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
                                                                     "Content-Type": "application/json",
                                                                     "Accept": "application/json"
                                                                 },
@@ -108,7 +108,7 @@
                                                                 if (response.ok) {
                                                                     Swal.fire(
                                                                         "Dihapus!",
-                                                                        "Akun berhasil dihapus.",
+                                                                        "Shift berhasil dihapus.",
                                                                         "success"
                                                                     ).then(() => {
                                                                         location.reload();
@@ -116,7 +116,7 @@
                                                                 } else {
                                                                     Swal.fire(
                                                                         "Gagal!",
-                                                                        "Akun gagal dihapus.",
+                                                                        "Shift gagal dihapus.",
                                                                         "error"
                                                                     );
                                                                 }
@@ -130,6 +130,7 @@
                                                         }
                                                     });
                                                 }
+
                                             </script>
                                         </td>
                                     </tr>

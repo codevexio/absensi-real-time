@@ -52,6 +52,6 @@ class KelolaTableShift extends Controller
         $shift = Shift::findOrFail($id);
         $shift->delete();
 
-        return redirect()->back()->with('success', 'Shift berhasil dihapus.');
+       return response()->json(['message' => 'Berhasil dihapus']);
     }
 }

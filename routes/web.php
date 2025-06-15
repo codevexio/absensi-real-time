@@ -45,7 +45,6 @@ Route::get('/izinkaryawan', [IzinKaryawanController::class,'index'])->name('web/
 Route::get('/izinkaryawan/search', [IzinKaryawanController::class, 'search'])->name('web/izinkaryawan-search');
 Route::post('/karyawan/store', [KaryawanController::class, 'store'])->name('<Api>karyawan.store');
 
-//Kelola Shift
 // Kelola Shift
 Route::get('/kelolashift', [KelolaShiftController::class,'index'])->name('web/kelola-shift');
 Route::put('/kelolashift/{id}', [KelolaShiftController::class, 'update'])->name('web/kelola-shift-update');
