@@ -59,9 +59,9 @@ class PengajuanCutiController extends Controller
             ], 422);
         }
 
-        $data = $validated->validated(); // Using validated() to get the data
+        $data = $validated->validated();
 
-        // Cek cuti yang masih diproses
+        // Cek apakah masih ada cuti diproses
         $pengajuanCutiDiproses = PengajuanCuti::where('karyawan_id', $user->id)
                                                 ->where('statusCuti', 'Diproses')
                                                 ->exists();
@@ -74,6 +74,24 @@ class PengajuanCutiController extends Controller
         $tanggalMulai = Carbon::parse($data['tanggalMulai']);
         $tanggalSelesai = Carbon::parse($data['tanggalSelesai']);
         $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
+
+        // Validasi tanggal cuti
+        $tanggalMulai = Carbon::parse($data['tanggalMulai']);
+        $tanggalSelesai = Carbon::parse($data['tanggalSelesai']);
+        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
+
+        // ⬇️ Tambahkan di sini
+        if ($tanggalMulai->isBefore(Carbon::today())) {
+            return response()->json([
+                'message' => 'Tanggal mulai cuti tidak boleh lebih kecil dari hari ini.'
+            ], 400);
+        }
+
+        if (Carbon::today()->diffInDays($tanggalMulai, false) < 10) {
+            return response()->json([
+                'message' => 'Anda harus mengajukan cuti minimal 10 hari sebelum tanggal mulai cuti.'
+            ], 400);
+        }
 
         // Ambil jatah cuti
         $cuti = Cuti::where('karyawan_id', $user->id)->first();
@@ -103,10 +121,10 @@ class PengajuanCutiController extends Controller
             Log::warning('Tidak ada file surat cuti');
         }
 
-        // Simpan ke DB
+        // Simpan pengajuan cuti ke DB
         $pengajuan = PengajuanCuti::create([
             'karyawan_id' => $user->id,
-            'jenisCuti' => $data['jenisCuti'], // Use $data to access validated values
+            'jenisCuti' => $data['jenisCuti'],
             'tanggalMulai' => $data['tanggalMulai'],
             'tanggalSelesai' => $data['tanggalSelesai'],
             'jumlahHari' => $jumlahHari,
@@ -114,54 +132,61 @@ class PengajuanCutiController extends Controller
             'file_surat_cuti' => $path,
         ]);
 
-        // Urutan golongan approver dari yang lebih rendah ke tinggi
+        // Urutan golongan approver dari bawah ke atas
         $urutanGolongan = ['Staff', 'Asisten', 'Kepala SubBagian', 'Kepala Bagian', 'Direksi'];
-
-        // Golongan karyawan yang mengajukan cuti
         $golonganUser = $user->golongan;
-
-        // Cari posisi golongan karyawan di array
         $posisiUser = array_search($golonganUser, $urutanGolongan);
 
         if ($posisiUser === false) {
             return response()->json(['message' => 'Golongan tidak valid'], 400);
         }
 
-        // Loop dari posisi golongan setelah user sampai golongan tertinggi
-        for ($i = $posisiUser + 1; $i < count($urutanGolongan); $i++) {
-            $golonganApprover = $urutanGolongan[$i];
-
-            // Ambil semua approver di golongan ini (bisa lebih dari 1 orang)
-            $approvers = \App\Models\Karyawan::where('golongan', $golonganApprover)->get();
-
-            if ($approvers->isEmpty()) {
-                // Jika tidak ada approver, skip dan lanjut ke golongan berikutnya
-                Log::warning("Tidak ada approver ditemukan untuk golongan: $golonganApprover, proses approval di golongan ini di-skip.");
-                continue;
-            }
-
-            foreach ($approvers as $approver) {
-                ApprovalCuti::create([
-                    'pengajuan_cuti_id' => $pengajuan->id,
-                    'approver_id' => $approver->id,
-                    'approver_golongan' => $golonganApprover,
-                    'status' => 'Menunggu',
-                    'catatan' => null,
-                ]);
-            }
-        }
-
-        // Jika pengaju adalah Direksi langsung setujui
-        if ($golonganUser == 'Direksi') {
+        // Jika Direksi, langsung disetujui dan potong cuti
+        if ($golonganUser === 'Direksi') {
             $pengajuan->update(['statusCuti' => 'Disetujui']);
 
-            // Potong jatah cuti
             if ($data['jenisCuti'] === 'Cuti Tahunan') {
                 $cuti->cutiTahun -= $jumlahHari;
             } else {
                 $cuti->cutiPanjang -= $jumlahHari;
             }
+
             $cuti->save();
+        } else {
+            // Tentukan batas maksimal approval
+            $batasApproval = ($golonganUser === 'Kepala Bagian') ? 'Direksi' : 'Kepala Bagian';
+
+            for ($i = $posisiUser + 1; $i < count($urutanGolongan); $i++) {
+                $golonganApprover = $urutanGolongan[$i];
+
+                // Stop jika sudah melebihi batas approval
+                if ($golonganApprover === 'Direksi' && $batasApproval !== 'Direksi') {
+                    break;
+                }
+
+                // Ambil approver dari golongan ini
+                $approvers = \App\Models\Karyawan::where('golongan', $golonganApprover)->get();
+
+                if ($approvers->isEmpty()) {
+                    Log::warning("Tidak ada approver ditemukan untuk golongan: $golonganApprover, proses approval di-skip.");
+                    continue;
+                }
+
+                foreach ($approvers as $approver) {
+                    ApprovalCuti::create([
+                        'pengajuan_cuti_id' => $pengajuan->id,
+                        'approver_id' => $approver->id,
+                        'approver_golongan' => $golonganApprover,
+                        'status' => 'Menunggu',
+                        'catatan' => null,
+                    ]);
+                }
+
+                // Kalau sudah capai batas approval, berhenti
+                if ($golonganApprover === $batasApproval) {
+                    break;
+                }
+            }
         }
 
         return response()->json([
