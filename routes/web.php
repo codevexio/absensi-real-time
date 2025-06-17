@@ -57,4 +57,3 @@ Route::delete('/kelola-table-shift/{id}', [KelolaTableShift::class, 'destroy'])-
 
 // Dashboard
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
