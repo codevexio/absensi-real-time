@@ -19,7 +19,7 @@
         <p><span class="label">Nama Karyawan</span>: {{ $user->nama }}</p>
         <p><span class="label">Golongan</span>: {{ $user->golongan }}</p>
         <p><span class="label">Divisi</span>: {{ $user->divisi }}</p>
-        <p><span class="label">Bulan</span>: {{ \Carbon\Carbon::createFromFormat('Y-m', $bulan)->locale('id')->translatedFormat('F Y') }}</p>
+        <p><span class="label">Bulan</span>: {{ $bulan }}</p>
         <p><span class="label">Total Data</span>: {{ count($presensi) }}</p>
     </div>
 
