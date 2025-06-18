@@ -397,7 +397,8 @@ class PresensiController extends Controller
         }
 
         $presensi = Presensi::where('karyawan_id', $user->id)
-            ->whereBetween('tanggalPresensi', [$start, $end])
+            ->whereDate('tanggalPresensi', '>=', $start->format('Y-m-d'))
+            ->whereDate('tanggalPresensi', '<=', $end->format('Y-m-d'))
             ->get();
 
         $namaBulan = [
