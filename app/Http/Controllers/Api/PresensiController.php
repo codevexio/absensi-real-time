@@ -397,9 +397,10 @@ class PresensiController extends Controller
         }
 
         $presensi = Presensi::where('karyawan_id', $user->id)
-            ->whereDate('tanggalPresensi', '>=', $start->format('Y-m-d'))
-            ->whereDate('tanggalPresensi', '<=', $end->format('Y-m-d'))
+            ->whereBetween('tanggalPresensi', [$start->toDateString(), $end->toDateString()])
             ->get();
+
+        \Log::info("PDF Rekap untuk {$user->nama} ({$user->id}) bulan $bulan - Data ditemukan: " . $presensi->count());
 
         $namaBulan = [
             '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
