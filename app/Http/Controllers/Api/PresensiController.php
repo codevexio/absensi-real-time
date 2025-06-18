@@ -389,8 +389,9 @@ class PresensiController extends Controller
         }
 
         try {
-            $start = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth();
-            $end = Carbon::createFromFormat('Y-m', $bulan)->endOfMonth();
+            $carbon = Carbon::createFromFormat('Y-m', $bulan);
+            $start = $carbon->startOfMonth();
+            $end = $carbon->endOfMonth();
         } catch (\Exception $e) {
             return response()->json(['message' => 'Format bulan salah, gunakan YYYY-MM'], 400);
         }
@@ -399,9 +400,18 @@ class PresensiController extends Controller
             ->whereBetween('tanggalPresensi', [$start, $end])
             ->get();
 
+        $namaBulan = [
+            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
+            '04' => 'April', '05' => 'Mei', '06' => 'Juni',
+            '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
+            '10' => 'Oktober', '11' => 'November', '12' => 'Desember',
+        ];
+
+        $bulanIndo = $namaBulan[$carbon->format('m')] . ' ' . $carbon->format('Y');
+
         $data = [
             'user' => $user,
-            'bulan' => $bulan,
+            'bulan' => $bulanIndo,
             'presensi' => $presensi,
         ];
 

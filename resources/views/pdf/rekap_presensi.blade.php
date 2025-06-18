@@ -19,7 +19,7 @@
         <p><span class="label">Nama Karyawan</span>: {{ $user->nama }}</p>
         <p><span class="label">Golongan</span>: {{ $user->golongan }}</p>
         <p><span class="label">Divisi</span>: {{ $user->divisi }}</p>
-        <p><span class="label">Bulan</span>: {{ \Carbon\Carbon::createFromFormat('Y-m', $bulan)->locale('id')->translatedFormat('F Y') }}</p>
+        <p><span class="label">Bulan</span>: {{ $bulan }}</p>
     </div>
 
     <table>
@@ -37,7 +37,7 @@
             @foreach ($presensi as $index => $p)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ \Carbon\Carbon::parse($p->tanggalPresensi)->locale('id')->translatedFormat('d F Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($p->tanggalPresensi)->format('d-m-Y') }}</td>
                     <td>{{ $p->waktuMasuk ?? '-' }}</td>
                     <td>{{ $p->statusMasuk ?? '-' }}</td>
                     <td>{{ $p->waktuPulang ?? '-' }}</td>
