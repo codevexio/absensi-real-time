@@ -389,6 +389,7 @@ class PresensiController extends Controller
         }
 
         try {
+            // Format: "2025-06"
             $start = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth();
             $end = Carbon::createFromFormat('Y-m', $bulan)->endOfMonth();
         } catch (\Exception $e) {
@@ -405,7 +406,7 @@ class PresensiController extends Controller
             'employees' => $dataPresensi,
             'karyawan' => $user,
             'bulan' => $bulan,
-        ]);
+        ])->setPaper('A4', 'portrait');
 
         $filename = 'presensi_' . $user->nama . '_' . $bulan . '.pdf';
         return $pdf->download($filename);
