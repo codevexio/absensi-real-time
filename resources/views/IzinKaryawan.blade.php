@@ -18,12 +18,11 @@
                                 <th class="border px-4 py-2">No</th>
                                 <th class="border px-4 py-2">Nama</th>
                                 <th class="border px-4 py-2">Jenis Cuti</th>
-                                <th class="border px-4 py-2">Tangal Mulai</th>
+                                <th class="border px-4 py-2">Tanggal Mulai</th>
                                 <th class="border px-4 py-2">Tanggal Selesai</th>
                                 <th class="border px-4 py-2">Jumlah Hari</th>
                                 <th class="border px-4 py-2">Dokumen Pengajuan</th>
                                 <th class="border px-4 py-2">Status</th>
-                                {{-- <th class="border px-4 py-2">Alasan Penolakan</th> --}}
                             </tr>
                         </thead>
                         <tbody class="text-gray-800 dark:text-gray-200">
@@ -31,15 +30,16 @@
                             <tr class="hover:bg-gray-200 dark:hover:bg-gray-700">
                                 <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->karyawan->nama ?? '-' }}</td>
-                                <td class="border px-4 py-2 text-center">
-                                    {{ $employee->jenisCuti ?? '-' }}
-                                </td>
+                                <td class="border px-4 py-2 text-center">{{ $employee->jenisCuti ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->tanggalMulai ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->tanggalSelesai ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $employee->jumlahHari ?? '-' }}</td>
                                 <td class="border px-4 py-2 text-center">
                                     @if ($employee->file_surat_cuti)
-                                        <a href="{{ asset($employee->file_surat_cuti) }}" target="_blank" class="text-blue-600 hover:underline">
+                                        @php
+                                            $fileUrl = asset('storage/' . $employee->file_surat_cuti);
+                                        @endphp
+                                        <a href="{{ $fileUrl }}" target="_blank" class="text-blue-600 hover:underline">
                                             Lihat Dokumen
                                         </a>
                                     @else
@@ -67,7 +67,7 @@
         const searchInput = document.querySelector('input[type="text"]');
         const tableRows = document.querySelectorAll('tbody tr');
 
-        searchInput.addEventListener('input', function () {
+        searchInput?.addEventListener('input', function () {
             const query = searchInput.value.toLowerCase();
 
             tableRows.forEach(function (row) {
@@ -82,11 +82,7 @@
                     }
                 }
 
-                if (found) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+                row.style.display = found ? '' : 'none';
             });
         });
     </script>
