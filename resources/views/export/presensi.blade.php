@@ -8,36 +8,30 @@
             font-family: Arial, sans-serif;
             font-size: 12px;
         }
-
         .title {
             text-align: center;
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 20px;
         }
-
         .info-table {
             width: 100%;
             margin-bottom: 20px;
         }
-
         .info-table td {
             padding: 4px 8px;
         }
-
         .data-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
-
         .data-table th,
         .data-table td {
             border: 1px solid #000;
             padding: 6px;
             text-align: center;
         }
-
         .data-table th {
             background-color: #f2f2f2;
         }

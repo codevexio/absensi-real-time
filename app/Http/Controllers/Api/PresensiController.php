@@ -410,5 +410,4 @@ class PresensiController extends Controller
         $filename = 'presensi_' . $user->nama . '_' . $bulan . '.pdf';
         return $pdf->download($filename);
     }
-
 }
