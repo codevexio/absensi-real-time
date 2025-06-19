@@ -58,7 +58,7 @@
             <td><strong>Golongan</strong></td>
             <td>: {{ $karyawan->golongan ?? '-' }}</td>
             <td><strong>Bulan</strong></td>
-            <td>: {{ \Carbon\Carbon::createFromFormat('Y-m', $bulan)->translatedFormat('F Y') }}</td>
+            <td>: {{ \Carbon\Carbon::createFromFormat('Y-m', $bulan)->format('m-Y') }}</td>
         </tr>
     </table>
 
@@ -78,7 +78,7 @@
             @foreach ($employees as $index => $employee)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ \Carbon\Carbon::parse($employee->tanggalPresensi)->translatedFormat('d M Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($employee->tanggalPresensi)->format('d-m-Y') }}</td>
                     <td>{{ $employee->jadwalKerja->shift->namaShift ?? '-' }}</td>
                     <td>{{ $employee->waktuMasuk ?? '-' }}</td>
                     <td>{{ $employee->statusMasuk ?? '-' }}</td>
