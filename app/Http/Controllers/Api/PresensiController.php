@@ -401,7 +401,7 @@ class PresensiController extends Controller
             ->orderBy('tanggalPresensi', 'asc')
             ->get();
 
-        $pdf = PDF::loadView('pdf.presensi', [
+        $pdf = PDF::loadView('export.presensi', [
             'employees' => $dataPresensi,
         ]);
 
