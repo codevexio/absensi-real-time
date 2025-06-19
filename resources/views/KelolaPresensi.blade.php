@@ -175,7 +175,7 @@
 
                 <label>Status Pulang:</label>
                 <select name="statusPulang" id="edit-statusPulang" class="mb-4 w-full rounded border px-2 py-1">
-                    <option value="Tepat Waktu">Tepat Waktu</option>
+                    <option value="Sudah Presensi Pulang">Sudah Presensi Pulang</option>
                     <option value="Tidak Presensi Pulang">Tidak Presensi Pulang</option>
                 </select>
 

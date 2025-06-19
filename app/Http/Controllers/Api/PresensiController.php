@@ -267,7 +267,7 @@ class PresensiController extends Controller
 
         $presensi->update([
             'waktuPulang' => Carbon::now('Asia/Jakarta'),
-            'statusPulang' => 'Tepat Waktu',
+            'statusPulang' => 'Sudah Presensi Pulang',
             'imagePulang' => $path,
             'lokasiPulang' => json_encode(['latitude' => $latitude, 'longitude' => $longitude]),
         ]);
