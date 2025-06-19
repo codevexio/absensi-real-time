@@ -389,35 +389,24 @@ class PresensiController extends Controller
         }
 
         try {
-            $carbon = Carbon::createFromFormat('Y-m', $bulan);
-            $start = $carbon->startOfMonth();
-            $end = $carbon->endOfMonth();
+            $start = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth();
+            $end = Carbon::createFromFormat('Y-m', $bulan)->endOfMonth();
         } catch (\Exception $e) {
             return response()->json(['message' => 'Format bulan salah, gunakan YYYY-MM'], 400);
         }
 
-        $presensi = Presensi::where('karyawan_id', $user->id)
-            ->whereBetween('tanggalPresensi', [$start->toDateString(), $end->toDateString()])
+        $dataPresensi = Presensi::with(['jadwalKerja.shift', 'karyawan'])
+            ->where('karyawan_id', $user->id)
+            ->whereBetween('tanggalPresensi', [$start, $end])
+            ->orderBy('tanggalPresensi', 'asc')
             ->get();
 
-        \Log::info("PDF Rekap untuk {$user->nama} ({$user->id}) bulan $bulan - Data ditemukan: " . $presensi->count());
+        $pdf = PDF::loadView('pdf.presensi', [
+            'employees' => $dataPresensi,
+        ]);
 
-        $namaBulan = [
-            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
-            '04' => 'April', '05' => 'Mei', '06' => 'Juni',
-            '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
-            '10' => 'Oktober', '11' => 'November', '12' => 'Desember',
-        ];
+        $filename = 'presensi_' . $user->nama . '_' . $bulan . '.pdf';
 
-        $bulanIndo = $namaBulan[$carbon->format('m')] . ' ' . $carbon->format('Y');
-
-        $data = [
-            'user' => $user,
-            'bulan' => $bulanIndo,
-            'presensi' => $presensi,
-        ];
-
-        $pdf = Pdf::loadView('pdf.rekap_presensi', $data);
-        return $pdf->download("rekap-presensi-$bulan.pdf");
+        return $pdf->download($filename);
     }
 }
