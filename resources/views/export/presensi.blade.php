@@ -78,7 +78,7 @@
             @foreach ($employees as $index => $employee)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ \Carbon\Carbon::parse($employee->tanggalPresensi)->format('d-m-Y') }}</td>
+                    <td>{{ $employee->tanggalPresensi ?? '-' }}</td>
                     <td>{{ $employee->jadwalKerja->shift->namaShift ?? '-' }}</td>
                     <td>{{ $employee->waktuMasuk ?? '-' }}</td>
                     <td>{{ $employee->statusMasuk ?? '-' }}</td>
