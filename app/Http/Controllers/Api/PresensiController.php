@@ -403,7 +403,10 @@ class PresensiController extends Controller
 
         $pdf = PDF::loadView('export.presensi', [
             'employees' => $dataPresensi,
+            'karyawan' => $user,
+            'bulan' => $bulan,
         ]);
+
 
         $filename = 'presensi_' . $user->nama . '_' . $bulan . '.pdf';
 
