@@ -10,16 +10,22 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ExportController extends Controller
 {
-    public function exportPDF()
+    public function exportPDF(Request $request)
     {
-        // Ambil data presensi karyawan
-        $employees = Presensi::with(['karyawan', 'jadwalKerja.shift'])->get();
+        $bulan = (int) $request->input('month', date('m'));
+        $tahun = (int) $request->input('year', date('Y'));
 
-        // Load view untuk PDF
-        $pdf = Pdf::loadView('export.presensiPDF', compact('employees'))
-          ->setPaper('a4', 'landscape');
+        $employees = Presensi::with(['karyawan', 'jadwalKerja.shift'])
+            ->whereMonth('tanggalPresensi', $bulan)
+            ->whereYear('tanggalPresensi', $tahun)
+            ->get();
 
-        // Download PDF
+        $pdf = Pdf::loadView('export.presensiPDF', [
+            'employees' => $employees,
+            'bulan' => $bulan, // pastikan ini angka
+            'tahun' => $tahun,
+        ])->setPaper('a4', 'landscape');
+
         return $pdf->download('data_presensi.pdf');
     }
 

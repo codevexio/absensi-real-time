@@ -14,7 +14,12 @@
             margin: 0;
         }
         .title {
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
             margin-bottom: 20px;
+            font-size: 13px;
         }
         table {
             width: 100%;
@@ -27,7 +32,7 @@
             text-align: center;
         }
         th {
-            background-color: #ddd;
+            background-color: #f0f0f0;
         }
         .text-left {
             text-align: left;
@@ -38,7 +43,9 @@
 
     <div class="title">
         <h2>Rekap Presensi Karyawan</h2>
-        <h4>Bulan: {{ \Carbon\Carbon::create()->month($bulan)->translatedFormat('F') }} {{ $tahun }}</h4>
+    </div>
+    <div class="subtitle">
+        Bulan: {{ \Carbon\Carbon::create()->month($bulan)->translatedFormat('F') }} {{ $tahun }}
     </div>
 
     <table>
