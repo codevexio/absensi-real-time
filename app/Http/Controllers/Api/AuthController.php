@@ -37,6 +37,7 @@ class AuthController extends Controller
                 'karyawan' => [
                     'id' => $karyawan->id,
                     'nama' => $karyawan->nama,
+                    'username' => $karyawan->username,
                     'golongan' => $karyawan->golongan,
                     'divisi' => $karyawan->divisi,
                 ]

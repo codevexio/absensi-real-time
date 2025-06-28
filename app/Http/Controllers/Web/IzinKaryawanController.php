@@ -17,6 +17,12 @@ class IzinKaryawanController extends Controller
         return view('IzinKaryawan', compact('employees'));
     }
 
+    public function show($id)
+    {
+        $employee = PengajuanCuti::with('karyawan')->findOrFail($id);
+        return view('IzinKaryawanDetail', compact('employee'));             
+    }
+
     public function search(Request $request)
     {
         $query = $request->get('query', ''); // Ambil query pencarian dari request
