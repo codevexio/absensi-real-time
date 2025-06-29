@@ -22,11 +22,11 @@ class GenerateJadwalKerja extends Command
         $hariIni = $tanggalHariIni->format('l'); // Saturday, Sunday, etc
         $tanggalString = $tanggalHariIni->toDateString(); // Y-m-d
 
-        // // ✅ 1. Skip weekend
-        // if ($hariIni === 'Saturday' || $hariIni === 'Sunday') {
-        //     $this->info("Hari ini ($hariIni) adalah weekend. Jadwal tidak dibuat.");
-        //     return;
-        // }
+        // ✅ 1. Skip weekend
+        if ($hariIni === 'Saturday' || $hariIni === 'Sunday') {
+            $this->info("Hari ini ($hariIni) adalah weekend. Jadwal tidak dibuat.");
+            return;
+        }
 
         // ✅ 2. Cek tanggal merah via API
         try {
