@@ -63,34 +63,50 @@ class PengajuanCutiController extends Controller
 
         // Cek apakah masih ada cuti diproses
         $pengajuanCutiDiproses = PengajuanCuti::where('karyawan_id', $user->id)
-                                                ->where('statusCuti', 'Diproses')
-                                                ->exists();
+            ->where('statusCuti', 'Diproses')
+            ->exists();
 
         if ($pengajuanCutiDiproses) {
             return response()->json(['message' => 'Anda masih memiliki pengajuan cuti yang sedang diproses'], 400);
         }
 
-        // Hitung jumlah hari cuti
+        // Validasi tanggal mulai tidak boleh sebelum hari ini
         $tanggalMulai = Carbon::parse($data['tanggalMulai']);
         $tanggalSelesai = Carbon::parse($data['tanggalSelesai']);
-        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
 
-        // Validasi tanggal cuti
-        $tanggalMulai = Carbon::parse($data['tanggalMulai']);
-        $tanggalSelesai = Carbon::parse($data['tanggalSelesai']);
-        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
-
-        // ⬇️ Tambahkan di sini
         if ($tanggalMulai->isBefore(Carbon::today())) {
             return response()->json([
                 'message' => 'Tanggal mulai cuti tidak boleh lebih kecil dari hari ini.'
             ], 400);
         }
 
-        if (Carbon::today()->diffInDays($tanggalMulai, false) < 10) {
-            return response()->json([
-                'message' => 'Anda harus mengajukan cuti minimal 10 hari sebelum tanggal mulai cuti.'
-            ], 400);
+        // Ambil tanggal merah dari API
+        $liburNasional = [];
+        try {
+            $response = Http::get("https://api-harilibur.vercel.app/api");
+            if ($response->successful()) {
+                $liburNasional = collect($response->json())->pluck('holiday_date')->toArray();
+            }
+        } catch (\Exception $e) {
+            Log::warning("Gagal mengambil data tanggal merah: " . $e->getMessage());
+        }
+
+        // Hitung jumlah hari kerja (tanpa weekend & tanggal merah)
+        $jumlahHari = 0;
+        $periode = $tanggalMulai->daysUntil($tanggalSelesai);
+
+        foreach ($periode as $tanggal) {
+            $tglStr = $tanggal->toDateString();
+
+            if ($tanggal->isWeekend() || in_array($tglStr, $liburNasional)) {
+                continue;
+            }
+
+            $jumlahHari++;
+        }
+
+        if ($jumlahHari <= 0) {
+            return response()->json(['message' => 'Tidak ada hari kerja dalam rentang tanggal cuti yang dipilih'], 400);
         }
 
         // Ambil jatah cuti
@@ -182,7 +198,6 @@ class PengajuanCutiController extends Controller
                     ]);
                 }
 
-                // Kalau sudah capai batas approval, berhenti
                 if ($golonganApprover === $batasApproval) {
                     break;
                 }
