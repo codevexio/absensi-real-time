@@ -37,6 +37,9 @@ class ApprovalCutiController extends Controller
                 $query->where('approver_golongan', $golongan)
                     ->where('status', 'Menunggu');
             })
+            ->whereHas('karyawan', function ($q) use ($user) {
+                $q->where('divisi', $user->divisi);
+            })
             ->get();
 
         \Log::info('Jumlah pengajuan sebelum filter: ' . $pengajuan->count());

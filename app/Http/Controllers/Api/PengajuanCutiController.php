@@ -182,7 +182,9 @@ class PengajuanCutiController extends Controller
                 }
 
                 // Ambil approver dari golongan ini
-                $approvers = \App\Models\Karyawan::where('golongan', $golonganApprover)->get();
+                $approvers = \App\Models\Karyawan::where('golongan', $golonganApprover)
+                    ->where('divisi', $user->divisi)
+                    ->get();
 
                 if ($approvers->isEmpty()) {
                     Log::warning("Tidak ada approver ditemukan untuk golongan: $golonganApprover, proses approval di-skip.");
