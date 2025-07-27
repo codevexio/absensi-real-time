@@ -69,10 +69,8 @@ class PresensiController extends Controller
 
         if (!$jadwalKerja || !$jadwalKerja->shift) {
             return response()->json([
-                'bisaPresensiMasuk' => false,
-                'bisaPresensiPulang' => false,
-                'message' => 'Jadwal kerja tidak ditemukan'
-            ], 404);
+                'Jadwal kerja tidak ditemukan'
+            ]);
         }
 
         if (!$jadwalKerja->shift->waktuMulai || !$jadwalKerja->shift->waktuSelesai) {
