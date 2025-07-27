@@ -72,7 +72,7 @@ class PresensiController extends Controller
                 'bisaPresensiMasuk' => false,
                 'bisaPresensiPulang' => false,
                 'message' => 'Jadwal kerja tidak ditemukan'
-            ]);
+            ], 404);
         }
 
         if (!$jadwalKerja->shift->waktuMulai || !$jadwalKerja->shift->waktuSelesai) {
@@ -327,8 +327,11 @@ class PresensiController extends Controller
                 return response()->json(['message' => 'Karyawan belum login'], 401);
             }
 
-            // Ganti TO_CHAR jika pakai MySQL
-            $rekap = Presensi::selectRaw("DATE_FORMAT(tanggalPresensi, '%Y-%m') as bulan")
+            // MySQL
+            // $rekap = Presensi::selectRaw("DATE_FORMAT(tanggalPresensi, '%Y-%m') as bulan")
+
+            // PostgreSQL
+            $rekap = Presensi::selectRaw("TO_CHAR(tanggalPresensi, 'YYYY-MM') as bulan")
                 ->where('karyawan_id', $user->id)
                 ->groupBy('bulan')
                 ->orderByDesc('bulan')
