@@ -327,11 +327,14 @@ class PresensiController extends Controller
                 return response()->json(['message' => 'Karyawan belum login'], 401);
             }
 
-            // TO_CHAR digunakan untuk PostgreSQL
+            // MySQL
+            // $rekap = Presensi::selectRaw("DATE_FORMAT(tanggalPresensi, '%Y-%m') as bulan")
+
+            // PostgreSQL
             $rekap = Presensi::selectRaw("TO_CHAR(tanggalPresensi, 'YYYY-MM') as bulan")
                 ->where('karyawan_id', $user->id)
-                ->groupByRaw("TO_CHAR(tanggalPresensi, 'YYYY-MM')")
-                ->orderByRaw("TO_CHAR(tanggalPresensi, 'YYYY-MM') DESC")
+                ->groupBy('bulan')
+                ->orderByDesc('bulan')
                 ->get();
 
             return response()->json([
