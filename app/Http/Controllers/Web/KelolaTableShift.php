@@ -26,7 +26,7 @@ class KelolaTableShift extends Controller
 
         $shift = Shift::create($request->all());
 
-        return redirect()->route('web/kelola-table-shift')->with('success', 'Shift berhasil ditambahkan.');
+        return redirect()->back()->with('success', 'Shift berhasil ditambahkan.');
     }
     
     public function update(Request $request, $id)
@@ -44,7 +44,7 @@ class KelolaTableShift extends Controller
             'waktuSelesai' => $request->waktuSelesai,
         ]);
 
-        return redirect()->route('web/kelola-table-shift')->with('success', 'Shift berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Shift berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -52,6 +52,6 @@ class KelolaTableShift extends Controller
         $shift = Shift::findOrFail($id);
         $shift->delete();
 
-       return redirect()->route('web/kelola-table-shift')->with('success', 'Shift berhasil dihapus.');
+       return redirect()->back()->with('success', 'Shift berhasil dihapus.');
     }
 }
